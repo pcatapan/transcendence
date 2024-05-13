@@ -1,0 +1,2 @@
+comandi utili :
+	python3 manage.py makemigrations api.authuser - da lanciare dopo avere avviato composer per la prima volta
