@@ -24,7 +24,7 @@ django_venv/
 # Ignore files created by IDEs/editors
 .vscode/
 *.pyc
-
+compose-dev.yaml
 .DS_Store
 
 # Ignore secrets and sensitive information
