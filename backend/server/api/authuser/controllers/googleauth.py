@@ -86,9 +86,9 @@ def disable_2fa(request):
 def verify_totp_code(request):
 
 	try:
-        data = json.loads(request.body)
-    except json.JSONDecodeError:
-        return JsonResponse({'message': "Invalid JSON"}, status=400)
+		data = json.loads(request.body)
+	except json.JSONDecodeError:
+		return JsonResponse({'message': "Invalid JSON"}, status=400)
 
 	try:
 		user_id = data.get('user_id')

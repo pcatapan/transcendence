@@ -15,9 +15,9 @@ from api.jwt_utils import create_jwt_token
 @require_POST
 def signup(request):
 	try:
-        data = json.loads(request.body)
-    except json.JSONDecodeError:
-        return JsonResponse({'message': "Invalid JSON"}, status=400)
+		data = json.loads(request.body)
+	except json.JSONDecodeError:
+		return JsonResponse({'message': "Invalid JSON"}, status=400)
 
 	input_errors = UserStoreValidator(data).validate()
 	if input_errors:
@@ -36,9 +36,9 @@ def signup(request):
 @require_POST
 def login(request):
 	try:
-        data = json.loads(request.body)
-    except json.JSONDecodeError:
-        return JsonResponse({'message': "Invalid JSON"}, status=400)
+		data = json.loads(request.body)
+	except json.JSONDecodeError:
+		return JsonResponse({'message': "Invalid JSON"}, status=400)
 
 	username = data.get('username')
 	password = data.get('password')
@@ -72,9 +72,9 @@ def oauth_start(request):
 def oauth_login(request):
 
 	try:
-        data = json.loads(request.body)
-    except json.JSONDecodeError:
-        return JsonResponse({'message': "Invalid JSON"}, status=400)
+		data = json.loads(request.body)
+	except json.JSONDecodeError:
+		return JsonResponse({'message': "Invalid JSON"}, status=400)
 	
 	code = data.get("code")
 	if not code:

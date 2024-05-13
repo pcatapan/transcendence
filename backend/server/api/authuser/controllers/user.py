@@ -58,10 +58,10 @@ def update(request):
     if input_errors:
         return JsonResponse({"message": "Something went wrong", "details": input_errors}, status=403)
 
-	user.username = data.get("username")
-	user.email = data.get("email")
-	user.fullname = data.get("fullname")
-	
+    user.username = data.get("username")
+    user.email = data.get("email")
+    user.fullname = data.get("fullname")
+
     user.save()
 
     return JsonResponse({"message": "User updated successfully"}, status=200)
