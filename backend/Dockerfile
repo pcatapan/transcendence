@@ -1,5 +1,9 @@
 FROM python:3.8.2-alpine AS builder
 
+# Crea un utente non root e passa ad esso
+RUN adduser -D myuser
+USER myuser
+
 # porta sulla quale sarà in ascolto il back
 EXPOSE 8000
 # imposto directory di lavoro

@@ -19,12 +19,15 @@ cd server
 # Run makemigrations and migrate
 python3 manage.py makemigrations api
 python3 manage.py makemigrations tournament
-python3 manage.py makemigrations userauth
-python3 manage.py makemigrations ws_api
+python3 manage.py makemigrations authuser
+python3 manage.py makemigrations ws
 python3 manage.py migrate
 
 # Create superuser if it doesn't exist
-python manage.py createsuperuser --username="$POSTGRES_USER" --email=admin@example.com --noinput
+if ! python manage.py shell -c "from django.contrib.auth import get_user_model; User = get_user_model(); print(User.objects.filter(username='$POSTGRES_USER').exists())" | grep True; then    python manage.py createsuperuser --username="$POSTGRES_USER" --email=admin@example.com --noinput
+else
+    echo "Superuser $POSTGRES_USER already exists. Skipping creation."
+fi
 
 # Define a function for graceful shutdown
 function graceful_shutdown() {
