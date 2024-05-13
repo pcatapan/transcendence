@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+	django:
+		build:
+    	context: ./backend/
+    	dockerfile: Dockerfile
+		container_name: 'django'
+		volumes:
+			- ./backend:/app/
+		ports:
+			- "8000:8000"
+		depends_on:
+			- transcendence_pg
+		env_file:
+			- .env
+		networks:
+    		- transcendence
+		restart:
+			on-failure
+
+	transcendence_nginx:
+		image: nginx
+	ports:
+		- "80:80"
+		- "443:443"
+	volumes:
+		- /root/transcendence/nginx:/etc/nginx/conf.d
+	networks:
+		- transcendence
+
+	transcendence_pg:
+		image: postgres
+		container_name: 'transcendence_pg'
+		environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+		ports:
+      - "5432:5432"
+		volumes:
+			- postgres_data:/var/lib/postgresql/data
+		networks:
+			- transcendence
+
+networks:
+	transcendence:
+
+volumes:
+	postgres_data:
