@@ -3,17 +3,23 @@ import json
 import pyotp
 import qrcode
 import requests
+from django.urls import reverse
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET, require_POST
 from django.shortcuts import get_object_or_404
 
 from .validation.user_validator import UserStoreValidator
 from api.authuser.oauth.user import get_user_info, get_or_create_user_oauth
+from api.authuser.models.friendship import Friendship
 from api.authuser.models.custom_user import CustomUser
 from api.jwt_utils import create_jwt_token
 
 @require_POST
 def signup(request):
+
+	if not request.body:
+		return JsonResponse({'message': 'Empty payload'}, status=400)
+
 	try:
 		data = json.loads(request.body)
 	except json.JSONDecodeError:
@@ -23,18 +29,27 @@ def signup(request):
 	if input_errors:
 		return JsonResponse({"message": "Something went wrong", "details": input_errors}, status=403)
 
-	user = CustomUser(username=username, fullname=fullname, email=email)
-	user.set_password(password)
+	user = CustomUser(username=data['username'], fullname=data['fullname'], email=data['email'])
+	user.set_password(data['password'])
 	
 	user.save()
+	Friendship.objects.create(user=user)
 	jwt_token = create_jwt_token(user.id, user.username)
-	response = JsonResponse({'message': 'User created successfully', 'token': jwt_token})
+	response = JsonResponse({
+		'message': 'User created successfully',
+		'token': jwt_token,
+		'data' : user.to_json()
+	}, status=201)
 
 	return response
 
 
 @require_POST
 def login(request):
+
+	if not request.body:
+		return JsonResponse({'message': 'Empty payload'}, status=400)
+
 	try:
 		data = json.loads(request.body)
 	except json.JSONDecodeError:
@@ -47,10 +62,18 @@ def login(request):
 	
 	if user.check_password(password):
 		if user.is_2fa_enabled and user.is_2fa_setup_complete:
-			response = JsonResponse({'status': '2FA', 'message': 'Login successful', 'user_id': user.id}, status=200)
+			response = JsonResponse({
+				'callback': reverse('verify_totp_code'),
+				'message': 'Login successful',
+				'data': user.id}
+			, status=206)
 		else:
 			jwt_token = create_jwt_token(user.id, user.username)
-			response = JsonResponse({'message': 'Login successful', 'token': jwt_token}, status=200)
+			response = JsonResponse({
+				'message': 'Login successful',
+				'token': jwt_token,
+				'data' : user.to_json()
+			}, status=200)
 
 		return response
 	else:

@@ -1,4 +1,4 @@
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseNotAllowed, HttpResponseNotFound
 from .jwt_utils import validate_and_get_user_from_token
 import logging
 
@@ -30,24 +30,43 @@ def get_token_from_header(request):
     logger.warning('JWT token not found in the Authorization header')
     return None
 
-# Middleware di verifica del JWT
-def jwt_verification_middleware(get_response):
+def error_response(response):
+    return JsonResponse({
+        'message': str(response.reason_phrase)
+    }, status=response.status_code)
 
-    def middleware(request):
+# Middleware di verifica del JWT
+class JWTVerificationMiddleware:
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+
         if should_exclude_path(request.path):
-            return get_response(request)
+            response = self.get_response(request)
+            if isinstance(response, HttpResponseNotAllowed):
+                return error_response(response)
+            
+            return response
 
         token = get_token_from_header(request)
         if token is None:
-            return JsonResponse({'error': 'JWT token required'}, status=401)
+            return JsonResponse({
+                'error': 'JWT token required'
+            }, status=401)
 
         user = validate_and_get_user_from_token(token)
         if not user:
             logger.warning('Invalid or expired JWT token')
-            return JsonResponse({'error': 'Invalid or expired token'}, status=401)
+            return JsonResponse({
+                'error': 'Invalid or expired token'
+            }, status=401)
 
         request.user = user
-        response = get_response(request)
-        return response
 
-    return middleware
+        response = self.get_response(request)
+        if isinstance(response, HttpResponseNotFound) or isinstance(response, HttpResponseNotAllowed):
+            return error_response(response)
+        
+        return response

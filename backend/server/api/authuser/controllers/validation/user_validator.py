@@ -5,6 +5,11 @@ from ..user import CustomUser
 class BaseUserValidator:
     def __init__(self, data):
         self.raw_data = data
+
+        self.update = False
+        if 'id' in data:
+            self.update = True
+
         self.valid = True
         self.errors = {}
 
@@ -12,22 +17,38 @@ class BaseUserValidator:
         self.valid = False
         self.errors[key] = reason
 
+    def validate_payload(self):
+        if not (self.raw_data.get('username') and self.raw_data.get('fullname')
+                and self.raw_data.get('email')
+            ):
+            self.set_error("form", "Missing username, fullname or email")
+
     def validate_username(self):
         username = self.raw_data.get('username')
+
+        query = CustomUser.objects.filter(username=username)
+        if self.update:
+            query = query.exclude(id=self.raw_data.get('id'))
+
         if not username:
             return
         if len(username) > 20:
             self.set_error(key='username', reason='Username too long')
-        elif CustomUser.objects.filter(username=username).exists():
+        elif query.exists():
             self.set_error(key='username', reason='Duplicate username')
 
     def validate_email(self):
         email = self.raw_data.get('email')
+
+        query = CustomUser.objects.filter(email=email)
+        if self.update:
+            query = query.exclude(id=self.raw_data.get('id'))
+
         if not email:
             return
         if len(email) > 100:
             self.set_error(key='email', reason='Email too long')
-        elif CustomUser.objects.filter(email=email).exists():
+        elif query.exists():
             self.set_error(key='email', reason='Duplicate email')
         elif email and email.endswith('student.42roma.it'):
             self.set_error(key='email', reason='Email cannot be from 42roma.')
@@ -40,6 +61,7 @@ class BaseUserValidator:
             self.set_error(key='full_name', reason='Name too long')
 
     def validate(self):
+        self.validate_payload()
         self.validate_username()
         self.validate_email()
         self.validate_full_name()
@@ -50,9 +72,8 @@ class UserUpdateValidator(BaseUserValidator):
 
 class UserStoreValidator(BaseUserValidator):
     def start(self):
-        if not (self.raw_data.get('username') and self.raw_data.get('password') and
-                self.raw_data.get('fullname') and self.raw_data.get('email')):
-            self.set_error("form", "Username, password, email or fullname is missing")
+        if not (self.raw_data.get('password')):
+            self.set_error("form", "Password is missing")
 
     def validate(self):
         self.start()

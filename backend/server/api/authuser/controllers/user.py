@@ -22,7 +22,7 @@ def show(request, user_id) :
 
 @require_POST
 def update_avatar(request):
-    user = get_object_or_404(CustomUser, pk=request.user.id)
+    user = get_object_or_404(CustomUser, pk=request.user['id'])
     
     if 'avatar' in request.FILES:
         avatar = request.FILES['avatar']
@@ -47,10 +47,16 @@ def update_avatar(request):
 
 @require_POST
 def update(request):
-    user = get_object_or_404(CustomUser, pk=request.user.id)
+
+    if not request.body:
+        return JsonResponse({'message': 'Empty payload'}, status=400)
+
+    user = get_object_or_404(CustomUser, pk=request.user['id'])
 
     try:
         data = json.loads(request.body)
+        data['id'] = request.user['id']
+
     except json.JSONDecodeError:
         return JsonResponse({'message': "Invalid JSON"}, status=400)
 
@@ -64,12 +70,15 @@ def update(request):
 
     user.save()
 
-    return JsonResponse({"message": "User updated successfully"}, status=200)
+    return JsonResponse({
+        "message": "User updated successfully",
+        "data": user.to_json()
+    }, status=200)
 
 @require_GET
 def user_friends_list(request):
 
-    user = get_object_or_404(CustomUser, pk=request.user.id)
+    user = get_object_or_404(CustomUser, pk=request.user['id'])
 
     try:
         friendship = Friendship.objects.get(user=user)
@@ -87,9 +96,176 @@ def user_friends_list(request):
                     'fullnmae': friendship.fullname
                 })
 
-        return JsonResponse({'data': friend_list}, status=200)
+        return JsonResponse({
+            'data': friend_list
+        }, status=200)
 
     except Friendship.DoesNotExist:
-        return JsonResponse({'message': 'User not found or has no friends'}, status=404)
+        return JsonResponse({
+            'message': 'User has no friends',
+            'data': []
+        }, status=200)
     except Exception as e:
-        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+        return JsonResponse({
+            'message': str(e)
+        }, status=500)
+    
+@require_POST
+def user_friends_add(request):
+
+    user_id = request.GET.get('user_id')
+    if not user_id:
+        return JsonResponse({
+            'message': 'Missing user_id in request'
+        }, status=400)
+    
+    user = get_object_or_404(CustomUser, pk=request.user['id'])
+    friend = get_object_or_404(CustomUser, pk=user_id)
+
+    try:
+        friendship, created = Friendship.objects.get_or_create(user=user)
+        if user in friendship.blocked_users.all() or friend in friendship.blocked_users.all():
+            return JsonResponse({
+                'message': 'User is blocked'
+            }, status=403)
+    except Exception as e:
+        return JsonResponse({
+            'message': str(e)
+        }, status=500)
+
+    try:
+        friendship = Friendship.objects.get(user=user)
+        friendship.friends.add(friend)
+        return JsonResponse({
+            'message': 'Friend added successfully',
+            'data': friendship.to_json()
+        }, status=200)
+    except Friendship.DoesNotExist:
+        return JsonResponse({
+            'message': 'User not found'
+        }, status=404)
+    except Exception as e:
+        return JsonResponse({
+            'message': str(e)
+        }, status=500)
+    
+@require_POST
+def user_friends_remove(request):
+
+    user_id = request.GET.get('user_id')
+    if not user_id:
+        return JsonResponse({
+            'message': 'Missing user_id in request'
+        }, status=400)
+
+    user = get_object_or_404(CustomUser, pk=request.user['id'])
+    friend = get_object_or_404(CustomUser, pk=user_id)
+
+    try:
+        friendship = Friendship.objects.get(user=user)
+        if friend in friendship.friends.all():
+            friendship.friends.remove(friend)
+            friendship.save()
+            return JsonResponse({
+                'message': 'Friend removed successfully',
+                'data': friendship.to_json()
+            }, status=200)
+        else:
+            return JsonResponse({
+                'message': 'User is not a friend'
+            }, status=403)
+    except Friendship.DoesNotExist:
+        return JsonResponse({
+            'message': 'User has no friends'
+        }, status=404)
+    except Exception as e:
+        return JsonResponse({
+            'message': str(e)
+        }, status=500)
+    
+@require_GET
+def user_blocked_list(request):
+    
+        user = get_object_or_404(CustomUser, pk=request.user['id'])
+    
+        try:
+            friendship = Friendship.objects.get(user=user)
+            blocked_users = friendship.blocked_users.all()
+            
+            blocked_users_list = []
+    
+            for blocked_user in blocked_users:
+                blocked_users_list.append({
+                    'id': blocked_user.id,
+                    'username': blocked_user.username,
+                    'fullnmae': blocked_user.fullname
+                })
+    
+            return JsonResponse({
+                'data': blocked_users_list
+            }, status=200)
+    
+        except Friendship.DoesNotExist:
+            return JsonResponse({
+                'message': 'User has no blocked users',
+                'data': []
+            }, status=200)
+        except Exception as e:
+            return JsonResponse({
+                'message': str(e)
+            }, status=500)
+
+@require_POST
+def user_blocked_add(request):
+
+    user_id = request.GET.get('user_id')
+    if not user_id:
+        return JsonResponse({
+            'message': 'Missing user_id in request'
+        }, status=400)
+
+    user = get_object_or_404(CustomUser, pk=request.user['id'])
+    blocked_user = get_object_or_404(CustomUser, pk=user_id)
+
+    try:
+        friendship = Friendship.objects.get(user=user)
+        friendship.blocked_users.add(blocked_user)
+        return JsonResponse({
+            'message': 'User blocked successfully',
+            'data': friendship.to_json()
+        }, status=200)
+    except Friendship.DoesNotExist:
+        return JsonResponse({
+            'message': 'User not found'
+        }, status=404)
+    except Exception as e:
+        return JsonResponse({
+            'message': str(e)
+        }, status=500)
+    
+@require_POST
+def user_blocked_remove(request):
+    user_id = request.GET.get('user_id')
+    if not user_id:
+        return JsonResponse({
+            'message': 'Missing user_id in request'
+        }, status=400)
+
+    user = get_object_or_404(CustomUser, pk=request.user['id'])
+    blocked_user = get_object_or_404(CustomUser, pk=user_id)
+
+    try:
+        friendship = Friendship.objects.get(user=user)
+        friendship.blocked_users.remove(blocked_user)
+        return JsonResponse({
+            'message': 'User unblocked successfully',
+            'data': friendship.to_json()
+        }, status=200)
+    except Friendship.DoesNotExist:
+        return JsonResponse({
+            'message': 'User has no blocked users'
+        }, status=403)
+    except Exception as e:
+        return JsonResponse({
+            'message': str(e)
+        }, status=500)

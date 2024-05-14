@@ -9,9 +9,12 @@ def base64_urlsafe_encode(data):
 #Create the JWT signature
 def create_signature(encoded_header, encoded_payload, secret):
     data = f"{encoded_header}.{encoded_payload}".encode('utf-8')
+    
+    # Crea l'oggetto HMAC direttamente
+    h = hmac.new(secret.encode('utf-8'), data, hashlib.sha256)
 
-    with hmac.new(secret.encode('utf-8'), data, hashlib.sha256) as h:
-        return base64_urlsafe_encode(h.digest())
+    # Calcola il digest e codificalo in base64 URL-safe
+    return base64_urlsafe_encode(h.digest())
 
 #Create a signed JWT from the payload and secret
 def sign(payload, secret):
