@@ -21,17 +21,16 @@ def validate_and_get_user_from_token(token):
 		expiration_time = datetime.fromisoformat(expiration_time_str)
 		
 		if expiration_time < datetime.utcnow():
-			raise Exception('Token has expired')
+			raise Exception('Token has expired', 401)
 
 		user_id = payload.get('user_id')
-		username = payload.get('username')
 		
 		from api.authuser.models.custom_user import CustomUser
 
 		try:
 			user = CustomUser.objects.get(id=user_id)
 		except CustomUser.DoesNotExist:
-			raise Exception('CustomUser not found')
+			raise Exception('CustomUser not found', 404)
 		
 		return {
 			'id'        : user.id,
@@ -40,7 +39,7 @@ def validate_and_get_user_from_token(token):
 		}
 
 	except Exception as e:
-		raise Exception(f'Token validation failed: {str(e)}')
+		raise Exception(e.args[0], e.args[1])
     
 def get_user_id_from_jwt_token(token):
 	try:

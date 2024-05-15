@@ -13,7 +13,6 @@ from api.authuser.models.friendship import Friendship
 from .validation.user_validator import UserUpdateValidator
 from .utils.image import is_valid_image, get_unique_filename, save_avatar_from_url
 
-#@requires_csrf_token
 @require_GET
 def show(request, user_id) :
 	user = get_object_or_404(CustomUser, pk=user_id)
@@ -28,28 +27,41 @@ def update_avatar(request):
         avatar = request.FILES['avatar']
         valid, error_message = is_valid_image(avatar)
         if not valid:
-            return JsonResponse({'message': error_message}, status=400)
+            return JsonResponse({
+                'message': error_message
+            }, status=400)
 
-        unique_filename = get_unique_filename(avatar.name)
+        #unique_filename = get_unique_filename(avatar.name)
         user.update_avatar(avatar)
-        return JsonResponse({'message': 'Avatar updated successfully'}, status=200)
+        return JsonResponse({
+            'message': 'Avatar updated successfully',
+            'data': user.to_json()
+        }, status=200)
 
     elif 'avatar_url' in request.POST:
         avatar_url = request.POST['avatar_url']
         filename, error_message = save_avatar_from_url(avatar_url)
         if not filename:
-            return JsonResponse({'message': error_message}, status=400)
+            return JsonResponse({
+                'message': error_message
+            }, status=400)
         
         user.avatar.save(filename, ContentFile(filename))
-        return JsonResponse({'message': 'Avatar updated successfully'}, status=200)
+        return JsonResponse({
+            'message': 'Avatar updated successfully'
+        }, status=200)
 
-    return JsonResponse({'message': 'Missing avatar or avatar_url in request'}, status=400)
+    return JsonResponse({
+        'message': 'Missing avatar or avatar_url in request'
+    }, status=400)
 
 @require_POST
 def update(request):
 
     if not request.body:
-        return JsonResponse({'message': 'Empty payload'}, status=400)
+        return JsonResponse({
+            'message': 'Empty payload'
+        }, status=400)
 
     user = get_object_or_404(CustomUser, pk=request.user['id'])
 
@@ -58,11 +70,16 @@ def update(request):
         data['id'] = request.user['id']
 
     except json.JSONDecodeError:
-        return JsonResponse({'message': "Invalid JSON"}, status=400)
+        return JsonResponse({
+            'message': "Invalid JSON"
+        }, status=400)
 
     input_errors = UserUpdateValidator(data).validate()
     if input_errors:
-        return JsonResponse({"message": "Something went wrong", "details": input_errors}, status=403)
+        return JsonResponse({
+            "message": "Something went wrong",
+            "data": input_errors
+        }, status=403)
 
     user.username = data.get("username")
     user.email = data.get("email")

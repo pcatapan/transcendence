@@ -53,20 +53,25 @@ class JWTVerificationMiddleware:
         token = get_token_from_header(request)
         if token is None:
             return JsonResponse({
-                'error': 'JWT token required'
+                'message': 'JWT token required'
             }, status=401)
 
-        user = validate_and_get_user_from_token(token)
-        if not user:
-            logger.warning('Invalid or expired JWT token')
+        try :
+            request.user = validate_and_get_user_from_token(token)
+        except Exception as e:
+            logger.warning(f'Error validating token: {str(e)}')
+            logger.warning(e)
+
             return JsonResponse({
-                'error': 'Invalid or expired token'
-            }, status=401)
+                'message': str(e.args[0])
+            }, status=e.args[1] if len(e.args) > 1 else 401)
+        
 
-        request.user = user
 
         response = self.get_response(request)
         if isinstance(response, HttpResponseNotFound) or isinstance(response, HttpResponseNotAllowed):
             return error_response(response)
+        
+        print(response)
         
         return response

@@ -1,7 +1,5 @@
 import os
 import json
-import pyotp
-import qrcode
 import requests
 from django.urls import reverse
 from django.http import JsonResponse
@@ -18,16 +16,23 @@ from api.jwt_utils import create_jwt_token
 def signup(request):
 
 	if not request.body:
-		return JsonResponse({'message': 'Empty payload'}, status=400)
+		return JsonResponse({
+			'message': 'Empty payload'
+		}, status=400)
 
 	try:
 		data = json.loads(request.body)
 	except json.JSONDecodeError:
-		return JsonResponse({'message': "Invalid JSON"}, status=400)
+		return JsonResponse({
+			'message': "Invalid JSON"
+		}, status=400)
 
 	input_errors = UserStoreValidator(data).validate()
 	if input_errors:
-		return JsonResponse({"message": "Something went wrong", "details": input_errors}, status=403)
+		return JsonResponse({
+			"message": "Something went wrong",
+			"details": input_errors
+		}, status=403)
 
 	user = CustomUser(username=data['username'], fullname=data['fullname'], email=data['email'])
 	user.set_password(data['password'])
@@ -48,12 +53,16 @@ def signup(request):
 def login(request):
 
 	if not request.body:
-		return JsonResponse({'message': 'Empty payload'}, status=400)
+		return JsonResponse({
+			'message': 'Empty payload'
+		}, status=400)
 
 	try:
 		data = json.loads(request.body)
 	except json.JSONDecodeError:
-		return JsonResponse({'message': "Invalid JSON"}, status=400)
+		return JsonResponse({
+			'message': "Invalid JSON"
+		}, status=400)
 
 	username = data.get('username')
 	password = data.get('password')
