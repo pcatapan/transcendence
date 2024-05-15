@@ -1,6 +1,5 @@
 import os
 import json
-import magic
 from django.http import JsonResponse
 from django.core.files.base import ContentFile
 from django.views.decorators.http import require_GET, require_POST
