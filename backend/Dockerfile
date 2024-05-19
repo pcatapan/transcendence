@@ -1,9 +1,11 @@
-FROM python:3.8.2-alpine AS builder
+FROM python:3.10-alpine AS builder
 
 # porta sulla quale sarà in ascolto il back
 EXPOSE 8000
 # imposto directory di lavoro
 WORKDIR /app
+
+RUN python --version
 
 # installo le dipendenze necessarie nel sistema operativo Alpine
 RUN apk add --no-cache bash \

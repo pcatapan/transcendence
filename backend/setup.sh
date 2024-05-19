@@ -2,6 +2,8 @@
 
 PROJECT_DIR="/app/server/server"
 
+python3 --version
+
 ./wait-it.sh transcendence_pg:5432
 
 pip install --upgrade pip
