@@ -19,7 +19,7 @@ services:
   transcendence_nginx:
     image: nginx
     ports:
-      - "80:80"
+      - "${NGINX_PORT}:${NGINX_PORT}"
       - "443:443"
     volumes:
       - ./nginx:/etc/nginx/conf.d
