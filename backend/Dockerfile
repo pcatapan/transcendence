@@ -1,9 +1,5 @@
 FROM python:3.8.2-alpine AS builder
 
-# Crea un utente non root e passa ad esso
-RUN adduser -D myuser
-USER myuser
-
 # porta sulla quale sarà in ascolto il back
 EXPOSE 8000
 # imposto directory di lavoro
@@ -15,6 +11,10 @@ RUN apk add --no-cache bash \
         build-base \
         jpeg-dev \
         zlib-dev
+
+# Crea un utente non root e passa ad esso
+RUN adduser -D myuser
+USER myuser
 
 # copio file del progetto nel container
 COPY server .
