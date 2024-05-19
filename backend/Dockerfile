@@ -13,8 +13,8 @@ RUN apk add --no-cache bash \
         zlib-dev
 
 # Crea un utente non root e passa ad esso
-RUN adduser -D myuser
-USER myuser
+#RUN adduser -D myuser
+#USER myuser
 
 # copio file del progetto nel container
 COPY server .
