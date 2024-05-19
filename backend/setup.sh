@@ -18,8 +18,8 @@ cd server
 
 # Run makemigrations and migrate
 python3 manage.py makemigrations api
-python3 manage.py makemigrations api.tournament
-python3 manage.py makemigrations api.authuser
+python3 manage.py makemigrations tournament
+python3 manage.py makemigrations authuser
 python3 manage.py makemigrations ws
 python3 manage.py migrate
 
