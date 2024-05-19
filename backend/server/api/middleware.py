@@ -12,7 +12,6 @@ EXCLUDED_PREFIXES = [
 	'/api/oauth/login/'
 	'/api/user/exists/',
 	'/media/',
-	'/media/avatars',
 	'/pong/',
 	'/admin/',
 ]
