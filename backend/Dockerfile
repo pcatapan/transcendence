@@ -25,8 +25,8 @@ COPY setup.sh /app/setup.sh
 COPY wait-it.sh /app/wait-it.sh
 
 # rendo gli script eseguibili
-RUN chmod +x /app/setup.sh
-RUN chmod +x /app/wait-it.sh
+#RUN chmod +x /app/setup.sh
+#RUN chmod +x /app/wait-it.sh
 
 # comando che verra eseguito all'avvio del container
 ENTRYPOINT [ "/app/setup.sh" ]

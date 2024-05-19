@@ -2,7 +2,7 @@
 
 PROJECT_DIR="/app/server/server"
 
-./wait-for-it.sh transcendence_pg:5432
+./wait-it.sh transcendence_pg:5432
 
 pip install --upgrade pip
 pip install -r requirements.txt
