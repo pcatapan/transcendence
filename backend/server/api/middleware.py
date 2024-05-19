@@ -12,6 +12,7 @@ EXCLUDED_PREFIXES = [
 	'/api/oauth/login/'
 	'/api/user/exists/',
 	'/media/',
+	'/media/avatars',
 	'/pong/',
 	'/admin/',
 ]
@@ -20,6 +21,7 @@ logger = logging.getLogger(__name__)
 
 # Determina se il path da cui arriva la richiesta debba essere escluso
 def should_exclude_path(request_path):
+    print(request_path, EXCLUDED_PREFIXES, any(request_path.startswith(prefix) for prefix in EXCLUDED_PREFIXES))
     return any(request_path.startswith(prefix) for prefix in EXCLUDED_PREFIXES)
 
 # Estrae il JWT dall'header
@@ -43,13 +45,14 @@ class JWTVerificationMiddleware:
 
     def __call__(self, request):
 
+        print("AAAAAAAAAAAA")
         if should_exclude_path(request.path):
             response = self.get_response(request)
-            if isinstance(response, HttpResponseNotAllowed):
+            if isinstance(response, HttpResponseNotAllowed) or isinstance(response, HttpResponseNotFound):
                 return error_response(response)
             
             return response
-
+        
         token = get_token_from_header(request)
         if token is None:
             return JsonResponse({
@@ -63,7 +66,7 @@ class JWTVerificationMiddleware:
             logger.warning(e)
 
             return JsonResponse({
-                'message': str(e.args[0])
+                'message': (f'Error invalid token: {str(e)}')
             }, status=e.args[1] if len(e.args) > 1 else 401)
         
 

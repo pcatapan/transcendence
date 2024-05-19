@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 secret_key = os.environ["JWT_SEED"]
 
 def create_jwt_token(user_id, username, expiration_time_minutes=240):
-	now = datetime.utcnow()
+	now = datetime.now()
 	expiration_time = now + timedelta(minutes=expiration_time_minutes)
 
 	jwt_payload = {'user_id': user_id, 'username': username, 'exp': expiration_time.isoformat()}
@@ -20,7 +20,7 @@ def validate_and_get_user_from_token(token):
 		expiration_time_str = payload.get('exp')
 		expiration_time = datetime.fromisoformat(expiration_time_str)
 		
-		if expiration_time < datetime.utcnow():
+		if expiration_time < datetime.now():
 			raise Exception('Token has expired', 401)
 
 		user_id = payload.get('user_id')

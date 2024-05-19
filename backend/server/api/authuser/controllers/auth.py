@@ -67,7 +67,7 @@ def login(request):
 	username = data.get('username')
 	password = data.get('password')
 
-	user = CustomUser.objects.get(username=username)
+	user = get_object_or_404(CustomUser, username=username)
 	
 	if user.check_password(password):
 		if user.is_2fa_enabled and user.is_2fa_setup_complete:
