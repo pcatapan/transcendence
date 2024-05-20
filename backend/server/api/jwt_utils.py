@@ -41,20 +41,19 @@ def validate_and_get_user_from_token(token):
 	except Exception as e:
 		raise Exception(e.args[0], e.args[1])
     
-def get_user_id_from_jwt_token(token):
+def get_user_id_from_jwt(token):
 	try:
 		payload = verify(token, secret_key)
 
 		expiration_time_str = payload.get('exp')
 		expiration_time = datetime.fromisoformat(expiration_time_str)
 
-		if expiration_time < datetime.utcnow():
-			raise Exception('Token has expired')
+		if expiration_time < datetime.now():
+			raise Exception('Token has expired', 401)
 
 		user_id = payload.get('user_id')
 
 		return user_id
 
 	except Exception as e:
-		print(f'Token validation failed: {str(e)}')
-		raise Exception(f'Token validation failed: {str(e)}')
+		raise Exception(e.args[0], e.args[1])

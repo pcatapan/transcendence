@@ -8,7 +8,7 @@ from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_GET, require_POST
 
 from api.authuser.models.custom_user import CustomUser
-from api.jwt_utils import create_jwt_token, get_user_id_from_jwt_token
+from api.jwt_utils import create_jwt_token
 
 def generate_secret_key():
 	return pyotp.random_base32()

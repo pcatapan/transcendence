@@ -64,10 +64,10 @@ def login(request):
 			'message': "Invalid JSON"
 		}, status=400)
 
-	username = data.get('username')
+	email = data.get('email')
 	password = data.get('password')
 
-	user = get_object_or_404(CustomUser, username=username)
+	user = get_object_or_404(CustomUser, email=email)
 	
 	if user.check_password(password):
 		if user.is_2fa_enabled and user.is_2fa_setup_complete:

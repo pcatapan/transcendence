@@ -14,13 +14,13 @@ EXCLUDED_PREFIXES = [
 	'/media/',
 	'/pong/',
 	'/admin/',
+    '/ws/',
 ]
 
 logger = logging.getLogger(__name__)
 
 # Determina se il path da cui arriva la richiesta debba essere escluso
 def should_exclude_path(request_path):
-    print(request_path, EXCLUDED_PREFIXES, any(request_path.startswith(prefix) for prefix in EXCLUDED_PREFIXES))
     return any(request_path.startswith(prefix) for prefix in EXCLUDED_PREFIXES)
 
 # Estrae il JWT dall'header
@@ -44,7 +44,6 @@ class JWTVerificationMiddleware:
 
     def __call__(self, request):
 
-        print("AAAAAAAAAAAA")
         if should_exclude_path(request.path):
             response = self.get_response(request)
             if isinstance(response, HttpResponseNotAllowed) or isinstance(response, HttpResponseNotFound):

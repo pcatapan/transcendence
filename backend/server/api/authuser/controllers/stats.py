@@ -6,7 +6,6 @@ from django.views.decorators.http import require_GET, require_POST
 from api.authuser.models.custom_user import CustomUser
 from api.tournament.models.match import Match
 from api.tournament.models.tournament import Tournament
-from api.jwt_utils import get_user_id_from_jwt_token
 
 @require_GET
 def get_kpi(request):
