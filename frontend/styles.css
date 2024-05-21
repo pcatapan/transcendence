@@ -1,0 +1,45 @@
+html,
+body {
+    font-family: sans-serif;
+    margin: 0;
+    height: 100%;
+}
+
+
+/* SNACKBAR */
+.snackbar {
+    visibility: hidden;
+    min-width: 150px;
+    background-color: #333;
+    color: #fff;
+    text-align: center;
+    border-radius: 2px;
+    padding: 20px;
+    position: fixed;
+    z-index: 9999;
+    right: 0px;
+    top: 20px;
+    font-size: 17px;
+    transition: visibility 0s, opacity 0.5s linear;
+}
+
+.snackbar.show {
+    visibility: visible;
+    opacity: 1;
+}
+
+.snackbar.success {
+    background-color: #28a745;
+}
+
+.snackbar.error {
+    background-color: #dc3545;
+}
+
+.snackbar.warning {
+    background-color: #ffc107;
+}
+
+.snackbar.info {
+    background-color: #17a2b8;
+}
