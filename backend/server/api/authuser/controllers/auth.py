@@ -80,9 +80,19 @@ def login(request):
 			jwt_token = create_jwt_token(user.id, user.username)
 			response = JsonResponse({
 				'message': 'Login successful',
-				'token': jwt_token,
 				'data' : user.to_json()
 			}, status=200)
+
+			secure = True if os.getenv('ENVIRONMENT', True) == 'production' else False
+
+			response.set_cookie(
+                key='Authorization',
+                value=jwt_token,
+                httponly=True,
+                secure=secure,
+                samesite='Strict',
+                max_age=os.getenv('JWT_EXPIRATION_TIME', 14400)
+            )
 
 		return response
 	else:

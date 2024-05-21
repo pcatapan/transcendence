@@ -26,7 +26,11 @@ class UserManager:
         User = import_string('api.authuser.models.CustomUser')
         user = get_object_or_404(User, pk=user_id)
         
-        self.online_users[user_id] = user.username
+        self.online_users[user_id] = {
+            'id': user.id,
+            'username': user.username,
+            'email': user.email,
+        }
 
     async def remove_user_from_lobby(self, user_id):
         if user_id in self.online_users:

@@ -7,7 +7,6 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 from django.utils import timezone
 from urllib.parse import parse_qs                           # Used to parse the query string
 
-import asyncio
 import json                                                 # Used to encode and decode JSON data
 import logging                                              # Used to log errors
 
@@ -38,19 +37,18 @@ class Lobby(AsyncWebsocketConsumer):
 			
 			#check if user is already connected
 			if self.client_id in self.user_manager.online_users:
-				await self.inform({
+				await self.send_layer({
 					'message': 'User already connected',
 				}, status='400')
-				await asyncio.sleep(1)
 				await self.close(code=4001)
 				return
 
 			await self.user_manager.add_user_to_lobby(self.client_id)
 			await self.channel_layer.group_add(constants.LOBBY_NAME, self.channel_name)
 
-			await self.inform("Correctly connected to the lobby")
+			await self.send_layer("Correctly connected to the lobby")
 
-			await self.broadcast({
+			await self.broadcast_layer({
 				'message': f"User {self.client_id} connected to the lobby",
 				'users': self.user_manager.list_online_users()
 			})
@@ -68,24 +66,31 @@ class Lobby(AsyncWebsocketConsumer):
 
 		try:
 			await self.user_manager.remove_user_from_lobby(self.client_id)
+			await self.broadcast_layer({
+				'message': f"User {self.client_id} disconnected from the lobby",
+				'users': self.user_manager.list_online_users()
+			})
 			await self.channel_layer.group_discard(constants.LOBBY_NAME, self.channel_name)
 		except Exception as e:
 			logger.error(f"Error in disconnect method: {e}")
 
 	async def receive(self, text_data):
 		logger.info('receive')
+		logger.info(f"Text data: {text_data}")
 		try:
 			data = json.loads(text_data)
 			command = data.get('command')
+
 			handlers = {
-				self.LIST_OF_USERS: self.handle_list_of_users,
-				self.SEND_PRV_MSG: self.handle_send_prv_msg,
-				self.JOIN_QUEUE: self.handle_join_queue,
-				self.LEAVE_QUEUE: self.handle_leave_queue,
-				self.CREATE_3v3: self.handle_create_tournament,
-				self.JOIN_3v3: self.handle_join_tournament,
-				self.START_3v3: self.handle_start_tournament,
+				constants.LIST_OF_USERS: self.handle_list_of_users,
+				constants.SEND_PRV_MSG: self.handle_send_prv_msg,
+				constants.JOIN_QUEUE: self.handle_join_queue,
+				constants.LEAVE_QUEUE: self.handle_leave_queue,
+				constants.CREATE_3v3: self.handle_create_tournament,
+				constants.JOIN_3v3: self.handle_join_tournament,
+				constants.START_3v3: self.handle_start_tournament,
 			}
+
 			handler = handlers.get(command, self.handle_unknown_command)
 			await handler(data)
 		except json.JSONDecodeError as e:
@@ -100,31 +105,33 @@ class Lobby(AsyncWebsocketConsumer):
 
 # ---------------------------------Messaging methods-----------------------------------
 
-	async def broadcast(self, content, type='broadcast', priority='normal', status='200'):
+	async def broadcast_layer(self, content, type='broadcast', priority='normal', status='200'):
+
+		message = {
+			'status': status,
+			'type' : type,
+			'content': content,
+			'timestamp': timezone.now().isoformat(),
+			'meta': {
+				"channel": "lobby",
+				"priority": priority,
+			}
+		}
+
 		try:
-			await self.send_json({
-				'type' : type,
-				'timestamp': timezone.now().isoformat(),
-				'sender': self.client_id,
-				'content': content,
-				'status': status,
-				'meta': {
-					"channel": "lobby",
-					"priority": priority,
-				}
-			})
+			await self.channel_layer.group_send(constants.LOBBY_NAME, message)
 		except Exception as e:
-			logging.error(f"Error in broadcast method: {e}")
+			logging.error(f"Error in broadcast_layer method: {e}")
 	
 	async def unicast(self, recipient_id, type, content, priority='normal', status='200'):
 		try:
 			await self.send_json({
+				'status': status,
 				'type': type,
-				'timestamp': timezone.now().isoformat(),
+				'content': content,
 				'sender': self.client_id,
 				'recipient': recipient_id,
-				'content': content,
-				'status': status,
+				'timestamp': timezone.now().isoformat(),
 				'meta': {
 					"channel": "lobby",
 					"priority": priority,
@@ -133,13 +140,13 @@ class Lobby(AsyncWebsocketConsumer):
 		except Exception as e:
 			logging.error(f"Error in unicast method: {e}")
 	
-	async def inform(self, content, priority='normal', status='200'):
+	async def send_layer(self, content, type="inform", priority='normal', status='200'):
 		try:
 			await self.send_json({
-				'type': 'inform',
-				'timestamp': timezone.now().isoformat(),
-				'content': content,
 				'status': status,
+				'type': type,
+				'content': content,
+				'timestamp': timezone.now().isoformat(),
 				'meta': {
 					"channel": "lobby",
 					"priority": priority,
@@ -148,13 +155,28 @@ class Lobby(AsyncWebsocketConsumer):
 		except Exception as e:
 			logging.error(f"Error in inform method: {e}")
 
+	async def broadcast(self, event):
+		try:
+			await self.send_json({
+				'status': event['status'],
+				'type': 'broadcast',
+				'content': event['content'],
+				'timestamp': timezone.now().isoformat(),
+				'meta': event['meta']
+			})
+		except Exception as e:
+			logging.error(f"Error in broadcast method: {e}")
+
+	async def send_json(self, message):
+		await self.send(text_data=json.dumps(message))
+
 # -------------------------------------------------------------------------------------
 
 	async def handle_list_of_users(self, data):
-		await self.send_json({
-			'command': self.LIST_OF_USERS,
-			'data': self.user_manager.list_online_users()
-		})
+		await self.send_layer(
+			self.user_manager.list_online_users(),
+			type=constants.LIST_OF_USERS
+		)
 
 	async def handle_send_prv_msg(self, data):
 		await self.user_manager.send_private_message(data['client_id'], data['message'])
@@ -176,9 +198,6 @@ class Lobby(AsyncWebsocketConsumer):
 
 	async def handle_unknown_command(self, data):
 		await self.send_json({'error': 'Unknown command'})
-
-	async def send_json(self, message):
-		await self.send(text_data=json.dumps(message))
 
 # ---------------------------------------
 
