@@ -1,0 +1,39 @@
+FROM python:3.10-alpine
+
+# Esponi la porta 8001
+EXPOSE 8001
+
+# Imposta la directory di lavoro
+WORKDIR /app
+
+# Aggiorna apk e installa le dipendenze necessarie in un unico RUN per ridurre il numero di layer
+RUN apk update && apk add --no-cache \
+    gcc \
+    bash \
+    musl-dev \
+    jpeg-dev \
+    zlib-dev \
+    libffi-dev \
+    cairo-dev \
+    pango-dev \
+    gdk-pixbuf-dev && \
+    pip install --upgrade pip && \
+    pip install daphne watchdog && \
+    # Rimuovi la cache di apk per risparmiare spazio
+    rm -rf /var/cache/apk/*
+
+# Copia i file necessari per l'installazione delle dipendenze
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+
+# Copia il resto dell'applicazione
+COPY server .
+COPY wait-it.sh .
+
+# Imposta la directory di lavoro per il server
+WORKDIR /app/server
+
+# Usa ENTRYPOINT per lo script di attesa e CMD per il comando daphne
+ENTRYPOINT ["../wait-it.sh", "transcendence_pg:5432", "--"]
+
+CMD ["daphne", "-b", "0.0.0.0", "-p", "8001", "server.asgi:application"]

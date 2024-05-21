@@ -72,6 +72,7 @@ class UserUpdateValidator(BaseUserValidator):
 
 class UserStoreValidator(BaseUserValidator):
     def start(self):
+        #TODO : CHECK THAT PASSWOWRD CONTAINS AT LEAST 1 NUMBER, 1 UPPERCASE LETTER, 1 LOWERCASE LETTER AND 1 SPECIAL CHARACTER
         if not (self.raw_data.get('password')):
             self.set_error("form", "Password is missing")
 

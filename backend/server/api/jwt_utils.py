@@ -3,6 +3,10 @@ from .authuser.jwt.sign import sign
 from .authuser.jwt.verify import verify
 from .authuser.jwt.decode import decode
 from datetime import datetime, timedelta
+
+import logging
+
+logger = logging.getLogger(__name__)
     
 secret_key = os.environ["JWT_SEED"]
 

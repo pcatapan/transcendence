@@ -81,8 +81,8 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'server.wsgi.application'
 
-# Per la parte asincrona
-#ASGI_APPLICATION = "server.routing.application"
+# websocket
+ASGI_APPLICATION = "server.asgi.application"
 
 # Uso redis
 CHANNEL_LAYERS = {
