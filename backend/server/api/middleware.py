@@ -4,13 +4,11 @@ import logging
 
 # List of paths that should be excluded from token verification
 EXCLUDED_PREFIXES = [
-	'/api/user/login/',
-	'/api/user/signup/',
-	'/api/user/validate-jwt/',
-	'/api/verify_totp_code/',
-	'/api/oauth-init/',
-	'/api/oauth/login/'
-	'/api/user/exists/',
+	'/api/user/login',
+	'/api/user/signup',
+	'/api/verify_totp_code',
+	'/api/oauth-init',
+	'/api/oauth/login'
 	'/media/',
 	'/pong/',
 	'/admin/',
