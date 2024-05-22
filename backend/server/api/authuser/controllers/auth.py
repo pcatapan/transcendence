@@ -11,7 +11,7 @@ from api.authuser.oauth.user import get_user_info, get_or_create_user_oauth
 from api.authuser.models.friendship import Friendship
 from api.authuser.models.custom_user import CustomUser
 from api.jwt_utils import create_jwt_token
-from utils.utils import set_token
+from .utils.general import set_token
 
 @require_POST
 def signup(request):

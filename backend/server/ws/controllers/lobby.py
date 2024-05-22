@@ -43,8 +43,9 @@ class Lobby(AsyncWebsocketConsumer):
 				await self.close(code=4001)
 				return
 
-			await self.user_manager.add_user_to_lobby(self.client_id)
+			await self.user_manager.add_user_to_lobby(self.client_id, self.channel_name)
 			await self.channel_layer.group_add(constants.LOBBY_NAME, self.channel_name)
+			logger.info(f"Online users: {self.user_manager.list_online_users()}")
 
 			await self.send_layer("Correctly connected to the lobby")
 
