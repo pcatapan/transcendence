@@ -10,10 +10,19 @@ export const authService = {
 				'Content-Type': 'application/json',
 				'Accept': '*/*'
 			},
-			body: JSON.stringify({ email, password })
+			body: JSON.stringify({ email, password }),
 		});
-
-		const data = await response.json();
-		return data;
+		return {status : response.status, body: await response.json()};
     },
+	signUp: async (email, password, username, fullname) => {
+		const response = await fetch(`${BASE_URL}/user/signup`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				'Accept': '*/*'
+			},
+			body: JSON.stringify({ email, password, username, fullname }),
+		});
+		return {status : response.status, body: await response.json()};
+	}
 };
