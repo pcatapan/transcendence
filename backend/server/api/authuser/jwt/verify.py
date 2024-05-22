@@ -2,6 +2,9 @@ import hashlib
 import json
 import hmac
 import base64
+import logging
+
+logger = logging.getLogger(__name__)
 
 # Controlla se la firma del JWT è corretta o meno
 def verify_signature(encoded_header, encoded_payload, signature, secret):

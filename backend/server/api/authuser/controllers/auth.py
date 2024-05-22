@@ -1,5 +1,6 @@
 import os
 import json
+import logging
 import requests
 from django.urls import reverse
 from django.http import JsonResponse
@@ -10,8 +11,10 @@ from .validation.user_validator import UserStoreValidator
 from api.authuser.oauth.user import get_user_info, get_or_create_user_oauth
 from api.authuser.models.friendship import Friendship
 from api.authuser.models.custom_user import CustomUser
-from api.jwt_utils import create_jwt_token
+from api.jwt_utils import create_jwt_token, get_token, validate_and_get_user_from_token
 from .utils.general import set_token
+
+logger = logging.getLogger(__name__)
 
 @require_POST
 def signup(request):
@@ -128,3 +131,19 @@ def oauth_login(request):
 	jwt_token = create_jwt_token(user.id, user.username)
 
 	return set_token(user, jwt_token, 'Login successful')
+
+@require_GET
+def authenticate(request):
+	token = get_token(request)
+	if token is None:
+		return JsonResponse({}, status=401)
+	
+	try :
+		request.user = validate_and_get_user_from_token(token)
+	except Exception as e:
+		logger.warning(f'Error validating token: {str(e)}')
+		logger.warning(e)
+
+		return JsonResponse({}, status=e.args[1] if len(e.args) > 1 else 401)
+	
+	return JsonResponse({},status=201)

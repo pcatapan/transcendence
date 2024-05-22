@@ -10,6 +10,15 @@ logger = logging.getLogger(__name__)
     
 secret_key = os.environ["JWT_SEED"]
 
+# Estrae il JWT dall'header
+def get_token(request):
+    token = request.COOKIES.get('Authorization')
+    if token:
+        return token.strip()
+    logger.warning('JWT token not found in request')
+
+    return None
+
 def create_jwt_token(user_id, username):
 	now = datetime.now()
 	jwt_expiration_time = int(os.getenv('JWT_EXPIRATION_TIME', 14400))

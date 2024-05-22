@@ -1,10 +1,11 @@
 from django.http import JsonResponse, HttpResponseNotAllowed, HttpResponseNotFound
-from .jwt_utils import validate_and_get_user_from_token
+from .jwt_utils import validate_and_get_user_from_token, get_token
 import logging
 
 # List of paths that should be excluded from token verification
 EXCLUDED_PREFIXES = [
 	'/api/user/login',
+    '/api/authenticate',
 	'/api/user/signup',
 	'/api/verify_totp_code',
 	'/api/oauth-init',
@@ -20,15 +21,6 @@ logger = logging.getLogger(__name__)
 # Determina se il path da cui arriva la richiesta debba essere escluso
 def should_exclude_path(request_path):
     return any(request_path.startswith(prefix) for prefix in EXCLUDED_PREFIXES)
-
-# Estrae il JWT dall'header
-def get_token(request):
-    token = request.COOKIES.get('Authorization')
-    if token:
-        return token.strip()
-    logger.warning('JWT token not found in request')
-
-    return None
 
 def error_response(response):
     return JsonResponse({

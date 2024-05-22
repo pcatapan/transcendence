@@ -4,12 +4,14 @@ from django.conf.urls.static import static
 
 from .controllers.user import show, update_avatar, update, user_friends_list, \
 	user_friends_add, user_friends_remove, user_blocked_list, user_blocked_add, user_blocked_remove
-from .controllers.auth import signup, login
+from .controllers.auth import signup, login, authenticate
 from .controllers.googleauth import enable_2fa, disable_2fa, display_qr_code, verify_totp_code, user_2fa_setup_complete
 from .controllers.auth import oauth_start, oauth_login
 from .controllers.stats import get_kpi
 
 urlpatterns = [
+
+	path('authenticate', authenticate, name="authenticate"),
 
 	path('user/signup', signup, name="signup"),
 	path('user/show/<int:user_id>', show, name="user-show"),
