@@ -13,11 +13,18 @@ const Login = () => {
         const email = document.getElementById('email').value;
         const password = document.getElementById('password').value;
 
-        console.log('Email:', email);
-        console.log('Password:', password);
-
         authService.loginIn(email, password).then((response) => {
-            console.log(response);
+            if (response.status === 200) {
+                showSnackbar(`${response.body['message']}`, 'success');
+                setTimeout(() =>{
+                    window.location.href = '/';
+                }, 500)
+                localStorage.setItem('token', response.body['token']);
+            }
+            else{
+                showSnackbar(`${response.body['message']}`, 'error');
+            
+            }
         })
         
     };
