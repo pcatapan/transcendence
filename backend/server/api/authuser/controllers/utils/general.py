@@ -10,6 +10,7 @@ def set_token(user, jwt_token, message):
 	}, status=200)
 
 	secure = True if os.getenv('ENVIRONMENT', True) == 'production' else False
+	max_age = os.getenv('JWT_EXPIRATION_TIME', 14400)
 
 	response.set_cookie(
 		key='Authorization',
@@ -17,7 +18,7 @@ def set_token(user, jwt_token, message):
 		httponly=True,
 		secure=secure,
 		samesite='Strict',
-		max_age=os.getenv('JWT_EXPIRATION_TIME', 14400)
+		max_age=int(os.getenv('JWT_EXPIRATION_TIME', 14400))
 	)
 
 	return response
