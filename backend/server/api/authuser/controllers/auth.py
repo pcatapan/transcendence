@@ -11,6 +11,7 @@ from api.authuser.oauth.user import get_user_info, get_or_create_user_oauth
 from api.authuser.models.friendship import Friendship
 from api.authuser.models.custom_user import CustomUser
 from api.jwt_utils import create_jwt_token
+from .utils.general import set_token
 
 @require_POST
 def signup(request):
@@ -30,9 +31,9 @@ def signup(request):
 	input_errors = UserStoreValidator(data).validate()
 	if input_errors:
 		return JsonResponse({
-			"message": "Something went wrong",
+			"message": [f"{field}: {error}" for field, error in input_errors.items()],
 			"details": input_errors
-		}, status=403)
+		}, status=400)
 
 	user = CustomUser(username=data['username'], fullname=data['fullname'], email=data['email'])
 	user.set_password(data['password'])
@@ -40,13 +41,8 @@ def signup(request):
 	user.save()
 	Friendship.objects.create(user=user)
 	jwt_token = create_jwt_token(user.id, user.username)
-	response = JsonResponse({
-		'message': 'User created successfully',
-		'token': jwt_token,
-		'data' : user.to_json()
-	}, status=201)
 
-	return response
+	return set_token(user, jwt_token, 'User created successfully')
 
 
 @require_POST
@@ -78,11 +74,8 @@ def login(request):
 			, status=206)
 		else:
 			jwt_token = create_jwt_token(user.id, user.username)
-			response = JsonResponse({
-				'message': 'Login successful',
-				'token': jwt_token,
-				'data' : user.to_json()
-			}, status=200)
+
+			response = set_token(user, jwt_token, 'Login successful')
 
 		return response
 	else:
@@ -106,7 +99,9 @@ def oauth_login(request):
 	try:
 		data = json.loads(request.body)
 	except json.JSONDecodeError:
-		return JsonResponse({'message': "Invalid JSON"}, status=400)
+		return JsonResponse({
+			'message': "Invalid JSON"
+		}, status=400)
 	
 	code = data.get("code")
 	if not code:
@@ -132,4 +127,4 @@ def oauth_login(request):
 	user = get_or_create_user_oauth(user_info)
 	jwt_token = create_jwt_token(user.id, user.username)
 
-	return JsonResponse({"token": jwt_token})
+	return set_token(user, jwt_token, 'Login successful')

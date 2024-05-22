@@ -5,6 +5,7 @@ LOBBY_NAME = 'lobby'                                # Name of the lobby
 
 # Endpoints and commands (Client -> Server)
 LIST_OF_USERS = 'list_of_users'                     # Command to send the list of online users (Connected to the socket)
+
 LIST_SENT_INVITES = 'list_sent_invites'             # Command to send the list of invites sent
 LIST_RECEIVED_INVITES = 'list_received_invites'     # Command to send the list of invites received
 SEND_PRV_MSG = 'send_prv_msg'                       # Command to send a private message arguments: pass the values as of 'client_id' and 'message' eg: {'command': 'send_prv_msg', 'data': {'client_id': '1', 'message': 'Hello'}}

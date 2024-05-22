@@ -10,18 +10,24 @@ logger = logging.getLogger(__name__)
     
 secret_key = os.environ["JWT_SEED"]
 
-def create_jwt_token(user_id, username, expiration_time_minutes=240):
+def create_jwt_token(user_id, username):
 	now = datetime.now()
-	expiration_time = now + timedelta(minutes=expiration_time_minutes)
+	jwt_expiration_time = int(os.getenv('JWT_EXPIRATION_TIME', 14400))
+	expiration_time = now + timedelta(seconds=jwt_expiration_time)
 
-	jwt_payload = {'user_id': user_id, 'username': username, 'exp': expiration_time.isoformat()}
+	jwt_payload = {
+		'user_id': user_id,
+		'username': username,
+		'expiration': expiration_time.isoformat()
+	}
+
 	return sign(jwt_payload, secret_key)
 
 def validate_and_get_user_from_token(token):
 	try:
 		payload = verify(token, secret_key)
 		
-		expiration_time_str = payload.get('exp')
+		expiration_time_str = payload.get('expiration')
 		expiration_time = datetime.fromisoformat(expiration_time_str)
 		
 		if expiration_time < datetime.now():
@@ -49,7 +55,7 @@ def get_user_id_from_jwt(token):
 	try:
 		payload = verify(token, secret_key)
 
-		expiration_time_str = payload.get('exp')
+		expiration_time_str = payload.get('expiration')
 		expiration_time = datetime.fromisoformat(expiration_time_str)
 
 		if expiration_time < datetime.now():

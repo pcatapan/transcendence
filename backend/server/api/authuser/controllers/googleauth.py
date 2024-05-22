@@ -9,6 +9,7 @@ from django.views.decorators.http import require_GET, require_POST
 
 from api.authuser.models.custom_user import CustomUser
 from api.jwt_utils import create_jwt_token
+from .utils.general import set_token
 
 def generate_secret_key():
 	return pyotp.random_base32()
@@ -122,11 +123,7 @@ def verify_totp_code(request):
 			user.save()
 
 			jwt_token = create_jwt_token(user.id, user.username)
-			return JsonResponse({
-				'message': 'TOTP is valid',
-				'token': jwt_token,
-				'data' : user.to_json()
-			}, status=200)
+			return set_token(user, jwt_token, 'TOTP is valid')
 		else:
 			return JsonResponse({
 				'message': 'Invalid TOTP'

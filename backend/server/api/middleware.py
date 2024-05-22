@@ -22,11 +22,12 @@ def should_exclude_path(request_path):
     return any(request_path.startswith(prefix) for prefix in EXCLUDED_PREFIXES)
 
 # Estrae il JWT dall'header
-def get_token_from_header(request):
-    authorization_header = request.headers.get('Authorization', '')
-    if authorization_header.startswith('Bearer '):
-        return authorization_header[len('Bearer '):].strip()
-    logger.warning('JWT token not found in the Authorization header')
+def get_token(request):
+    token = request.COOKIES.get('Authorization')
+    if token:
+        return token.strip()
+    logger.warning('JWT token not found in request')
+
     return None
 
 def error_response(response):
@@ -49,7 +50,7 @@ class JWTVerificationMiddleware:
             
             return response
         
-        token = get_token_from_header(request)
+        token = get_token(request)
         if token is None:
             return JsonResponse({
                 'message': 'JWT token required'
