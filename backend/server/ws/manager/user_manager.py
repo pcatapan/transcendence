@@ -30,7 +30,7 @@ class UserManager:
             del self.online_users[user_id]
 
     def list_online_users(self):
-        return self.online_users
+        return list(self.online_users.values())
     
     def get_user_channel(self, user_id):
         return self.online_users.get(user_id, {}).get('channel')
