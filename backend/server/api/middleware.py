@@ -63,7 +63,5 @@ class JWTVerificationMiddleware:
         response = self.get_response(request)
         if isinstance(response, HttpResponseNotFound) or isinstance(response, HttpResponseNotAllowed):
             return error_response(response)
-        
-        print(response)
-        
+                
         return response

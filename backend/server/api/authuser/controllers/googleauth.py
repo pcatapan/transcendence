@@ -32,7 +32,7 @@ def generate_qr_code(secret_key, user):
 
 @require_GET
 def display_qr_code(request):
-	user = get_object_or_404(CustomUser, pk=request.user['id'])
+	user = request.user
 		
 	if not user.is_2fa_enabled:
 		return JsonResponse({
@@ -54,7 +54,7 @@ def display_qr_code(request):
 
 @require_POST
 def enable_2fa(request):
-	user = get_object_or_404(CustomUser, pk=request.user['id'])
+	user = request.user
 
 	print("enable secret key: ", user.secret_key)
 	if user.is_2fa_enabled:
@@ -74,7 +74,7 @@ def enable_2fa(request):
 
 @require_POST
 def disable_2fa(request):
-	user = get_object_or_404(CustomUser, pk=request.user['id'])
+	user = request.user
 
 	if not user.is_2fa_enabled:
 		return JsonResponse({
@@ -136,7 +136,7 @@ def verify_totp_code(request):
 
 @require_GET
 def user_2fa_setup_complete(request):
-	user = get_object_or_404(CustomUser, pk=request.user['id'])
+	user = request.user
 
 	try:
 		if user.is_2fa_enabled and user.is_2fa_setup_complete:

@@ -51,11 +51,7 @@ def validate_and_get_user_from_token(token):
 		except CustomUser.DoesNotExist:
 			raise Exception('CustomUser not found', 404)
 		
-		return {
-			'id'        : user.id,
-			'username'  : user.username,
-			'fullname'  : user.fullname
-		}
+		return user
 
 	except Exception as e:
 		raise Exception(e.args[0], e.args[1])

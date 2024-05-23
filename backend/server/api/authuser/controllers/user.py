@@ -20,7 +20,7 @@ def show(request, user_id) :
 
 @require_POST
 def update_avatar(request):
-    user = get_object_or_404(CustomUser, pk=request.user['id'])
+    user = request.user
     
     if 'avatar' in request.FILES:
         avatar = request.FILES['avatar']
@@ -62,11 +62,11 @@ def update(request):
             'message': 'Empty payload'
         }, status=400)
 
-    user = get_object_or_404(CustomUser, pk=request.user['id'])
+    user = request.user
 
     try:
         data = json.loads(request.body)
-        data['id'] = request.user['id']
+        data['id'] = user.id
 
     except json.JSONDecodeError:
         return JsonResponse({
@@ -94,7 +94,7 @@ def update(request):
 @require_GET
 def user_friends_list(request):
 
-    user = get_object_or_404(CustomUser, pk=request.user['id'])
+    user = request.user
 
     try:
         friendship = Friendship.objects.get(user=user)
@@ -135,7 +135,7 @@ def user_friends_add(request):
             'message': 'Missing user_id in request'
         }, status=400)
     
-    user = get_object_or_404(CustomUser, pk=request.user['id'])
+    user = request.user
     friend = get_object_or_404(CustomUser, pk=user_id)
 
     try:
@@ -174,7 +174,7 @@ def user_friends_remove(request):
             'message': 'Missing user_id in request'
         }, status=400)
 
-    user = get_object_or_404(CustomUser, pk=request.user['id'])
+    user = request.user
     friend = get_object_or_404(CustomUser, pk=user_id)
 
     try:
@@ -202,7 +202,7 @@ def user_friends_remove(request):
 @require_GET
 def user_blocked_list(request):
     
-        user = get_object_or_404(CustomUser, pk=request.user['id'])
+        user = request.user
     
         try:
             friendship = Friendship.objects.get(user=user)
@@ -240,7 +240,7 @@ def user_blocked_add(request):
             'message': 'Missing user_id in request'
         }, status=400)
 
-    user = get_object_or_404(CustomUser, pk=request.user['id'])
+    user = request.user
     blocked_user = get_object_or_404(CustomUser, pk=user_id)
 
     try:
@@ -267,7 +267,7 @@ def user_blocked_remove(request):
             'message': 'Missing user_id in request'
         }, status=400)
 
-    user = get_object_or_404(CustomUser, pk=request.user['id'])
+    user = request.user
     blocked_user = get_object_or_404(CustomUser, pk=user_id)
 
     try:

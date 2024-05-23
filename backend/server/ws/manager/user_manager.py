@@ -14,14 +14,6 @@ class UserManager:
         self.online_users = {}
 
     @database_sync_to_async
-    def authenticate_user(self, token):
-        try:
-            user_id = get_user_id_from_jwt(token)
-            return str(user_id)
-        except Exception as e:
-          None
-
-    @database_sync_to_async
     def add_user_to_lobby(self, user_id, channel_name):
         User = import_string('api.authuser.models.CustomUser')
         user = get_object_or_404(User, pk=user_id)
@@ -42,23 +34,11 @@ class UserManager:
 
     def list_online_users(self):
         return self.online_users
-
-    async def send_private_message(self, recipient_id, message):
-        channel_name = self.online_users.get(recipient_id, {}).get('channel')
-        logger.info(f"Sending private message to user with ID {recipient_id}")
-        logger.info(f"Channel name: {channel_name}")
-        if channel_name:
-            try:
-                await self.channel_layer.send(channel_name, {
-                    'type': 'private_message',
-                    'message': {
-                        'timestamp': timezone.now().isoformat(),
-                        'sender': self.client_id,
-                        'content': message,
-                    }
-                })
-                logger.info(f"Sent private message to user with ID {recipient_id}")
-            except Exception as e:
-                logger.error(f"Error sending private message to user with ID {recipient_id}: {e}")
-        else:
-            logger.warning(f"User with ID {recipient_id} is not online")
+    
+    def get_user_channel(self, user_id):
+        logger.info(f"Online users: {self.online_users}")
+        logger.info(f"User {self.online_users.get(user_id, {})}")
+        return self.online_users.get(user_id, {}).get('channel')
+    
+    def get_user(self, user_id):
+        return self.online_users.get(user_id, {})

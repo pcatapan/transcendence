@@ -5,7 +5,6 @@ from .. import constants
 
 from channels.generic.websocket import AsyncWebsocketConsumer
 from django.utils import timezone
-from urllib.parse import parse_qs                           # Used to parse the query string
 
 import json                                                 # Used to encode and decode JSON data
 import logging                                              # Used to log errors
@@ -20,20 +19,13 @@ class Lobby(AsyncWebsocketConsumer):
 	async def connect(self):
 		logger.info('connect')
 		try:
-			query_string = self.scope['query_string'].decode('utf-8')
-			query_params = parse_qs(query_string)
-
-			token = query_params.get('token', [None])[0]
-			if not token:
+			self.client_id = None
+			user = self.scope['user']
+			if user.is_authenticated:
+				self.client_id = str(user.id)
+				await self.accept()
+			else:
 				await self.close()
-				return
-			
-			self.client_id = await self.user_manager.authenticate_user(token)
-			if not self.client_id:
-				await self.close()
-				return
-			
-			await self.accept()
 			
 			#check if user is already connected
 			if self.client_id in self.user_manager.online_users:
@@ -44,8 +36,9 @@ class Lobby(AsyncWebsocketConsumer):
 				return
 
 			await self.user_manager.add_user_to_lobby(self.client_id, self.channel_name)
-			await self.channel_layer.group_add(constants.LOBBY_NAME, self.channel_name)
+			logger.info(f"User {self.client_id} connected to the lobby")
 			logger.info(f"Online users: {self.user_manager.list_online_users()}")
+			await self.channel_layer.group_add(constants.LOBBY_NAME, self.channel_name)
 
 			await self.send_layer("Correctly connected to the lobby")
 
@@ -66,12 +59,13 @@ class Lobby(AsyncWebsocketConsumer):
 			return
 
 		try:
-			await self.user_manager.remove_user_from_lobby(self.client_id)
-			await self.broadcast_layer({
+			if self.client_id:
+				await self.user_manager.remove_user_from_lobby(self.client_id)
+				await self.broadcast_layer({
 				'message': f"User {self.client_id} disconnected from the lobby",
 				'users': self.user_manager.list_online_users()
 			})
-			await self.channel_layer.group_discard(constants.LOBBY_NAME, self.channel_name)
+				await self.channel_layer.group_discard(constants.LOBBY_NAME, self.channel_name)
 		except Exception as e:
 			logger.error(f"Error in disconnect method: {e}")
 
@@ -85,8 +79,10 @@ class Lobby(AsyncWebsocketConsumer):
 			handlers = {
 				constants.LIST_OF_USERS: self.handle_list_of_users,
 				constants.SEND_PRV_MSG: self.handle_send_prv_msg,
+
 				constants.JOIN_QUEUE: self.handle_join_queue,
 				constants.LEAVE_QUEUE: self.handle_leave_queue,
+
 				constants.CREATE_3v3: self.handle_create_tournament,
 				constants.JOIN_3v3: self.handle_join_tournament,
 				constants.START_3v3: self.handle_start_tournament,
@@ -106,12 +102,13 @@ class Lobby(AsyncWebsocketConsumer):
 
 # ---------------------------------Messaging methods-----------------------------------
 
-	async def broadcast_layer(self, content, type='broadcast', priority='normal', status='200'):
+	async def broadcast_layer(self, content, command=None, type='broadcast', priority='normal', status='200'):
 
 		message = {
 			'status': status,
 			'type' : type,
 			'content': content,
+			'command': command,
 			'timestamp': timezone.now().isoformat(),
 			'meta': {
 				"channel": "lobby",
@@ -124,28 +121,28 @@ class Lobby(AsyncWebsocketConsumer):
 		except Exception as e:
 			logging.error(f"Error in broadcast_layer method: {e}")
 	
-	async def unicast(self, recipient_id, type, content, priority='normal', status='200'):
+	async def unicast(self, event):
+		sender = self.user_manager.get_user(self.client_id)
+
 		try:
 			await self.send_json({
-				'status': status,
-				'type': type,
-				'content': content,
-				'sender': self.client_id,
-				'recipient': recipient_id,
+				'status': event['status'],
+				'type': 'unicast',
+				'command' : event['command'],
+				'content': event['content'],
+				'sender': sender,
 				'timestamp': timezone.now().isoformat(),
-				'meta': {
-					"channel": "lobby",
-					"priority": priority,
-				}
+				'meta': event['meta']
 			})
 		except Exception as e:
 			logging.error(f"Error in unicast method: {e}")
 	
-	async def send_layer(self, content, type="inform", priority='normal', status='200'):
+	async def send_layer(self, content, command=None, type="inform", priority='normal', status='200'):
 		try:
 			await self.send_json({
 				'status': status,
 				'type': type,
+				'command': command,
 				'content': content,
 				'timestamp': timezone.now().isoformat(),
 				'meta': {
@@ -161,6 +158,7 @@ class Lobby(AsyncWebsocketConsumer):
 			await self.send_json({
 				'status': event['status'],
 				'type': 'broadcast',
+				'command': event['command'],
 				'content': event['content'],
 				'timestamp': timezone.now().isoformat(),
 				'meta': event['meta']
@@ -173,14 +171,33 @@ class Lobby(AsyncWebsocketConsumer):
 
 # -------------------------------------------------------------------------------------
 
+
+
+
+# -------------------------------------- Handle ----------------------------------------
 	async def handle_list_of_users(self, data):
 		await self.send_layer(
 			self.user_manager.list_online_users(),
-			type=constants.LIST_OF_USERS
+			type=constants.LIST_OF_USERS,
+			command=constants.LIST_OF_USERS
 		)
 
 	async def handle_send_prv_msg(self, data):
-		await self.user_manager.send_private_message(data['client_id'], data['message'])
+		recipient_channel_name = self.user_manager.get_user_channel(str(data['recipient_id']))
+
+		try:
+			await self.channel_layer.send(recipient_channel_name, {
+				'status': 200,
+				'type': "unicast",
+				'command': 'private_message',
+				'content': data['message'],
+				'meta': {
+					"channel": "lobby",
+					"priority": 'normal',
+				}
+			})
+		except Exception as e:
+			logging.error(f"Error in unicast method: {e}")
 
 	async def handle_join_queue(self, data):
 		await self.queue_manager.join_queue(data['queue_name'], self.client_id)
@@ -200,7 +217,7 @@ class Lobby(AsyncWebsocketConsumer):
 	async def handle_unknown_command(self, data):
 		await self.send_json({'error': 'Unknown command'})
 
-# ---------------------------------------
+# -------------------------------------------------------------------------------------
 
 
 # WebSocket close codes

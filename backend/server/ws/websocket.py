@@ -1,7 +1,7 @@
 # ws_api/routing.py
 
 from django.urls import re_path
-from .controllers.lobby import Lobby
+from .consumers.lobby import Lobby
 #from .controllers.gameconsumerasbride import GameConsumerAsBridge
 #from .controllers.tournament import Tournament
 #from .controllers.game import Pong
