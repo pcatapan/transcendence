@@ -1,13 +1,11 @@
 import json
 import asyncio
 from channels.generic.websocket import AsyncWebsocketConsumer
-from ws_api.python_pong.Player import Player
-from ws_api.python_pong.Game import Game
-from urllib.parse import parse_qs
+from ..pong.game import Game
+from ..pong.player import Player
 from channels.db import database_sync_to_async
 from django.utils import timezone
 from django.db import transaction
-from api.jwt_utils import get_user_id_from_jwt_token
 from ..utils.message import Message
 
 def set_frame_rate(fps):
@@ -30,8 +28,8 @@ class Pong(AsyncWebsocketConsumer, Message):
         self.keyboard = {}
         self.left_player = None
         self.right_player = None
-        self.player_1_id = None
-        self.player_2_id = None
+        self.player_1 = None
+        self.player_2 = None
         self.player_1_score = 0
         self.player_2_score = 0
         self.match_object = None
@@ -161,23 +159,23 @@ class Pong(AsyncWebsocketConsumer, Message):
 
     async def connect(self):
         try:
-            query_string = self.scope['query_string'].decode('utf-8')
-            query_params = parse_qs(query_string)
-            self.match_id = self.scope['url_route']['kwargs']['match_id']
 
-            if not query_params.get('token'):
-                await self.close()
-                return
+            user = self.scope['user']
+            if user.is_authenticated:
+                self.user = user
+            else:
+                await self.close(code=4001)
+            
+            match_id = self.scope['url_route']['kwargs']['match_id']
+            self.room_group_name = f'match_{match_id}'
 
-            token = query_params['token'][0]
-            user_id = get_user_id_from_jwt_token(token)
-            self.client_id = str(user_id)
+            self.client_id = str(user.id)
 
             await self.channel_layer.group_add(f"{self.match_id}.client_id", self.channel_name)
             await self.channel_layer.group_add(f"{self.match_id}", self.channel_name)
             await self.load_models(self.match_id)
 
-            if self.client_id not in (self.player_1_id, self.player_2_id):
+            if self.client_id not in (self.player_1, self.player_2):
                 await self.close()
                 return
                 
