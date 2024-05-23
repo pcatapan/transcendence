@@ -1,17 +1,17 @@
 from ..manager.queue_manager import QueueManager
 from ..manager.user_manager import UserManager
 from ..manager.tournament_manager import TournamentManager
+from ..utils.message import Message
 from .. import constants
 
 from channels.generic.websocket import AsyncWebsocketConsumer
-from django.utils import timezone
 
 import json                                                 # Used to encode and decode JSON data
 import logging                                              # Used to log errors
 
 logger = logging.getLogger(__name__)
 
-class Lobby(AsyncWebsocketConsumer):
+class Lobby(AsyncWebsocketConsumer, Message):
 	queue_manager = QueueManager()
 	user_manager = UserManager()
 	tournament_manager = TournamentManager()
@@ -22,6 +22,7 @@ class Lobby(AsyncWebsocketConsumer):
 			self.client_id = None
 			user = self.scope['user']
 			if user.is_authenticated:
+				self.user = user
 				self.client_id = str(user.id)
 				await self.accept()
 			else:
@@ -36,16 +37,18 @@ class Lobby(AsyncWebsocketConsumer):
 				return
 
 			await self.user_manager.add_user_to_lobby(self.client_id, self.channel_name)
-			logger.info(f"User {self.client_id} connected to the lobby")
-			logger.info(f"Online users: {self.user_manager.list_online_users()}")
+
 			await self.channel_layer.group_add(constants.LOBBY_NAME, self.channel_name)
 
 			await self.send_layer("Correctly connected to the lobby")
 
 			await self.broadcast_layer({
-				'message': f"User {self.client_id} connected to the lobby",
-				'users': self.user_manager.list_online_users()
-			})
+					'message': f"User {self.client_id} connected to the lobby",
+					'users': self.user_manager.list_online_users()
+				},
+				command=constants.LIST_OF_USERS,
+				channel=constants.LOBBY_NAME
+			)
 
 		except Exception as e:
 			logger.error(f"Exception during connection: {e}")
@@ -62,9 +65,11 @@ class Lobby(AsyncWebsocketConsumer):
 			if self.client_id:
 				await self.user_manager.remove_user_from_lobby(self.client_id)
 				await self.broadcast_layer({
-				'message': f"User {self.client_id} disconnected from the lobby",
-				'users': self.user_manager.list_online_users()
-			})
+						'message': f"User {self.client_id} disconnected from the lobby",
+						'users': self.user_manager.list_online_users()
+					},
+					channel=constants.LOBBY_NAME
+				)
 				await self.channel_layer.group_discard(constants.LOBBY_NAME, self.channel_name)
 		except Exception as e:
 			logger.error(f"Error in disconnect method: {e}")
@@ -77,15 +82,13 @@ class Lobby(AsyncWebsocketConsumer):
 			command = data.get('command')
 
 			handlers = {
-				constants.LIST_OF_USERS: self.handle_list_of_users,
-				constants.SEND_PRV_MSG: self.handle_send_prv_msg,
+				constants.LIST_OF_USERS: self.handle_list_of_users, # Fatto
+				constants.SEND_PRV_MSG: self.handle_send_prv_msg, # Fatto
 
-				constants.JOIN_QUEUE: self.handle_join_queue,
-				constants.LEAVE_QUEUE: self.handle_leave_queue,
+				constants.JOIN_QUEUE: self.handle_join_queue, # Fatto
+				constants.LEAVE_QUEUE: self.handle_leave_queue, # Fatto
 
-				constants.CREATE_3v3: self.handle_create_tournament,
-				constants.JOIN_3v3: self.handle_join_tournament,
-				constants.START_3v3: self.handle_start_tournament,
+				constants.CONFIRM_MATCH: self.handle_confirm_match,
 			}
 
 			handler = handlers.get(command, self.handle_unknown_command)
@@ -94,80 +97,6 @@ class Lobby(AsyncWebsocketConsumer):
 			logger.error(f"JSON decode error: {e}")
 		except Exception as e:
 			logger.error(f"Error in receive method: {e}")
-
-# -------------------------------------------------------------------------------------
-
-
-
-
-# ---------------------------------Messaging methods-----------------------------------
-
-	async def broadcast_layer(self, content, command=None, type='broadcast', priority='normal', status='200'):
-
-		message = {
-			'status': status,
-			'type' : type,
-			'content': content,
-			'command': command,
-			'timestamp': timezone.now().isoformat(),
-			'meta': {
-				"channel": "lobby",
-				"priority": priority,
-			}
-		}
-
-		try:
-			await self.channel_layer.group_send(constants.LOBBY_NAME, message)
-		except Exception as e:
-			logging.error(f"Error in broadcast_layer method: {e}")
-	
-	async def unicast(self, event):
-		sender = self.user_manager.get_user(self.client_id)
-
-		try:
-			await self.send_json({
-				'status': event['status'],
-				'type': 'unicast',
-				'command' : event['command'],
-				'content': event['content'],
-				'sender': sender,
-				'timestamp': timezone.now().isoformat(),
-				'meta': event['meta']
-			})
-		except Exception as e:
-			logging.error(f"Error in unicast method: {e}")
-	
-	async def send_layer(self, content, command=None, type="inform", priority='normal', status='200'):
-		try:
-			await self.send_json({
-				'status': status,
-				'type': type,
-				'command': command,
-				'content': content,
-				'timestamp': timezone.now().isoformat(),
-				'meta': {
-					"channel": "lobby",
-					"priority": priority,
-				}
-			})
-		except Exception as e:
-			logging.error(f"Error in inform method: {e}")
-
-	async def broadcast(self, event):
-		try:
-			await self.send_json({
-				'status': event['status'],
-				'type': 'broadcast',
-				'command': event['command'],
-				'content': event['content'],
-				'timestamp': timezone.now().isoformat(),
-				'meta': event['meta']
-			})
-		except Exception as e:
-			logging.error(f"Error in broadcast method: {e}")
-
-	async def send_json(self, message):
-		await self.send(text_data=json.dumps(message))
 
 # -------------------------------------------------------------------------------------
 
@@ -200,19 +129,13 @@ class Lobby(AsyncWebsocketConsumer):
 			logging.error(f"Error in unicast method: {e}")
 
 	async def handle_join_queue(self, data):
-		await self.queue_manager.join_queue(data['queue_name'], self.client_id)
+		await self.queue_manager.join_queue( data['queue'], self)
 
 	async def handle_leave_queue(self, data):
-		await self.queue_manager.leave_queue(data['queue_name'], self.client_id)
-
-	async def handle_create_tournament(self, data):
-		await self.tournament_manager.create_tournament(self.client_id, data['tournament_name'])
-
-	async def handle_join_tournament(self, data):
-		await self.tournament_manager.join_tournament(self.client_id)
-
-	async def handle_start_tournament(self, data):
-		await self.tournament_manager.start_tournament(self.client_id)
+		await self.queue_manager.leave_queue(data['queue'], self)
+	
+	async def handle_confirm_match(self, data):
+		await self.queue_manager.confirm_match(data['match'], self)
 
 	async def handle_unknown_command(self, data):
 		await self.send_json({'error': 'Unknown command'})

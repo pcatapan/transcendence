@@ -24,6 +24,7 @@ services:
     volumes:
       - ./backend:/app/
     depends_on:
+      - django
       - transcendence_pg
       - redis
     env_file:

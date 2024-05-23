@@ -12,7 +12,8 @@ RUN apk add --no-cache bash \
     && apk add --no-cache --virtual .build-deps \
         build-base \
         jpeg-dev \
-        zlib-dev
+        zlib-dev \
+        file
 
 # Crea un utente non root e passa ad esso
 #RUN adduser -D myuser

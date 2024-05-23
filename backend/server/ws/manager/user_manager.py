@@ -1,9 +1,6 @@
-from django.utils import timezone
 from django.shortcuts import get_object_or_404
 from django.utils.module_loading import import_string
 from channels.db import database_sync_to_async
-
-from api.jwt_utils import get_user_id_from_jwt
 
 import logging
 
@@ -36,8 +33,6 @@ class UserManager:
         return self.online_users
     
     def get_user_channel(self, user_id):
-        logger.info(f"Online users: {self.online_users}")
-        logger.info(f"User {self.online_users.get(user_id, {})}")
         return self.online_users.get(user_id, {}).get('channel')
     
     def get_user(self, user_id):
