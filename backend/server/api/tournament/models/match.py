@@ -1,47 +1,58 @@
 from django.db import models
-from api.authuser.models.custom_user import CustomUser as User
 
 class Match(models.Model):
-    player1_score = models.IntegerField(
+	player1_score = models.IntegerField(
 		default=0
 	)
 
-    player2_score = models.IntegerField(
+	player2_score = models.IntegerField(
 		default=0
 	)
 
-    player1 = models.ForeignKey(
-		User,
+	player1 = models.ForeignKey(
+		'authuser.CustomUser',
 		on_delete=models.CASCADE,
 		related_name='player1'
 	)
 
-    player2 = models.ForeignKey(
-		User,
+	player2 = models.ForeignKey(
+		'authuser.CustomUser',
 		on_delete=models.CASCADE,
 		related_name='player2',
 		null=True
 	)
 	
-    winner = models.ForeignKey(
-		User,
+	winner = models.ForeignKey(
+		'authuser.CustomUser',
 		on_delete=models.CASCADE,
 		related_name='winner',
 		blank=True,
 		null=True
 	)
 
-    date_played = models.DateTimeField(
+	date_played = models.DateTimeField(
 		blank=True,
 		null=True
 	)
 
-    active = models.BooleanField(
+	active = models.BooleanField(
 		default=False
 	)
 
-    def loser(self):
-        return self.player1 if self.winner == self.player2 else self.player2
+	def loser(self):
+		return self.player1 if self.winner == self.player2 else self.player2
+	
+	def to_json(self):
+		return {
+			'id': self.id,
+			'player1': self.player1.username,
+			'player2': self.player2.username,
+			'player1_score': self.player1_score,
+			'player2_score': self.player2_score,
+			'date_played': self.date_played,
+			'active': self.active,
+			'loser':  None if self.player1_score == self.player2_score else self.loser().username,
+		}
 
-    def __str__(self):
-        return f"Match {self.id} - {self.player1} vs {self.player2}"
+	def __str__(self):
+		return f"Match {self.id} - {self.player1} vs {self.player2}"
