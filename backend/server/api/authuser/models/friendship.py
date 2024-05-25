@@ -28,7 +28,10 @@ class Friendship(models.Model):
 	
 	# Ritorna tutti gli amici e gli utenti bloccati in un unico array
 	def get_all(self):
-		return list(self.friends.all()) + list(self.blocked_users.all())
+		users_json = [{'id': index + 1, **user.to_json(), 'type': 'friend'} for index, user in enumerate(self.friends.all())]
+		blocked_users_json = [{'id': index + 1 + len(users_json), **user.to_json(), 'type': 'blocked'} for index, user in enumerate(self.blocked_users.all())]
+		
+		return users_json + blocked_users_json
 
 
 	def __str__(self):
