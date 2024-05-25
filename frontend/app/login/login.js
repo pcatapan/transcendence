@@ -2,10 +2,6 @@ import { showSnackbar } from '../../utils/snackbar.js';
 import { authService } from '../../services/auth.js';
 
 const Login = () => {
-    // const validatePassword = (password) => {
-    //     const passwordPattern = /^(?=.*[A-Z])(?=.*[!@#$%^&*])(?=.*[0-9]).{8,}$/;
-    //     return passwordPattern.test(password);
-    // };
 
     const logIn = (event) => {
         event.preventDefault();
@@ -19,7 +15,6 @@ const Login = () => {
                 setTimeout(() =>{
                     window.location.href = '/';
                 }, 500)
-                localStorage.setItem('token', response.body['token']);
             }
             else{
                 showSnackbar(`${response.body['message']}`, 'error');
