@@ -7,6 +7,8 @@ from django.utils.translation import gettext_lazy as _
 
 from .friendship import Friendship
 
+default_avatar = '/media/avatars/default.png'
+
 class CustomUser(AbstractUser):
 	email = models.EmailField(
 		unique=True,
@@ -152,7 +154,7 @@ class CustomUser(AbstractUser):
 			'id'        : self.id,
 			'username'  : self.username,
 			'email'     : self.email,
-			'avatar'    : self.avatar.url,
+			'avatar'    : self.avatar.url if self.avatar else default_avatar,
 		}
 	
 	def to_json_full(self):

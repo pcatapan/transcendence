@@ -148,7 +148,7 @@ def authenticate(request):
 	return JsonResponse({},status=201)
 
 @require_GET
-def logout():
+def logout(request):
 	response = JsonResponse({
 		'message': 'Logged out successfully'
 	}, status=200)
