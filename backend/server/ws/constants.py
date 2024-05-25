@@ -1,7 +1,8 @@
 # constants.py
 
 # Constants
-LOBBY_NAME = 'lobby'                                # Name of the lobby
+LOBBY_NAME = 'lobby'
+GAME_NAME = 'game'
 
 # Endpoints and commands (Client -> Server)
 # LOBBY

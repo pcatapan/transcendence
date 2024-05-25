@@ -1,8 +1,11 @@
+import os
 from django.db import models
 from django.contrib.auth.models import AbstractUser, Group, Permission
 from django.db.models import JSONField
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
+
+from .friendship import Friendship
 
 class CustomUser(AbstractUser):
 	email = models.EmailField(
@@ -127,6 +130,14 @@ class CustomUser(AbstractUser):
 
 		self.save()
 
+	# Sovrascrivere il metodo save
+	def save(self, *args, **kwargs):
+		# Aggiungere un avatar di default se non è stato fornito
+		if not self.avatar:
+			self.avatar = 'avatars/default.png'
+
+		super(CustomUser, self).save(*args, **kwargs)
+
 	def get_sent_invites(self):
 		return self.list_of_sent_invites
 
@@ -139,9 +150,23 @@ class CustomUser(AbstractUser):
 	def to_json(self):
 		return {
 			'id'        : self.id,
-			'fullname'  : self.fullname,
 			'username'  : self.username,
 			'email'     : self.email,
-			'avatar_url': self.avatar.url if self.avatar else None
+			'avatar'    : self.avatar.url,
+		}
+	
+	def to_json_full(self):
+
+		frindship = Friendship.objects.get(user=self)
+
+		return {
+			'id'        	: self.id,
+			'username'  	: self.username,
+			'email'     	: self.email,
+			'fullname'  	: self.fullname,
+			'avatar'    	: self.avatar.url,
+			'elo'       	: self.ELO,
+			'2FA'			: self.is_2fa_enabled and self.is_2fa_setup_complete,
+			'friends'   	: frindship.get_all(),
 		}
  

@@ -1,4 +1,3 @@
-from django.utils import timezone
 from django.shortcuts import get_object_or_404
 from django.utils.module_loading import import_string
 from channels.db import database_sync_to_async

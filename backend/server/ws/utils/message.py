@@ -18,7 +18,6 @@ class Message:
 			'command': command,
 			'timestamp': timezone.now().isoformat(),
 			'meta': {
-				"channel": "lobby",
 				"priority": priority,
 			}
 		}
@@ -45,7 +44,7 @@ class Message:
 		except Exception as e:
 			logging.error(f"Error in unicast method: {e}")
 	
-	async def send_layer(self, content, command=None, type="inform", priority='normal', status='200'):
+	async def send_layer(self, content, command=None, type="inform", priority='normal', status='200', channel='lobby'):
 		try:
 			await self.send_json({
 				'status': status,
@@ -54,7 +53,7 @@ class Message:
 				'content': content,
 				'timestamp': timezone.now().isoformat(),
 				'meta': {
-					"channel": "lobby",
+					"channel": channel,
 					"priority": priority,
 				}
 			})

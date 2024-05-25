@@ -7,8 +7,14 @@ import threading
 
 
 class Game:
-	def __init__(self, dictKeyboard: dict, 
-				 leftPlayer: Player, rightPlayer: Player, enclousure = None, scoreLimit = 10):
+	def __init__(
+		self,
+		dictKeyboard: dict, 
+		leftPlayer: Player,
+		rightPlayer: Player,
+		enclousure = None,
+		scoreLimit = 10
+	):
 		self._leftPlayer = leftPlayer
 		self._rightPlayer = rightPlayer
 		self._scoreLimit = int(scoreLimit)
@@ -30,13 +36,13 @@ class Game:
 							position= {"x" : self._enclousure["xl"] + 30, 
 				  "y" : self._enclousure["yl"]}, speed = {"x" : 10, "y": 10}, 
 				  size = {"x":10, "y":100}, binds = self._leftPlayer.getBinds(),
-				    enclousure=self._enclousure)
+					enclousure=self._enclousure)
 		self._rightPaddle = Paddle(keyboard=self._dictKeyboard,
 							 dictCanvas = self._dictCanvas, name = "rightPaddle",
 							position= {"x" : self._enclousure["xh"] - 30, 
 				  "y" : self._enclousure["yl"] }, speed = {"x" : 10, "y": 10}, 
 				  size = {"x":10, "y":100}, binds = self._rightPlayer.getBinds(),
-				    enclousure=self._enclousure)
+					enclousure=self._enclousure)
 		self._rightPlayer.resetScore()
 		self._leftPlayer.resetScore()
 		self._ball.addColider(self._leftPaddle)

@@ -73,8 +73,8 @@ def login(request):
 			response = JsonResponse({
 				'callback': reverse('verify_totp_code'),
 				'message': 'Login successful',
-				'data': user.id}
-			, status=206)
+				'data': user.id
+			}, status=206)
 		else:
 			jwt_token = create_jwt_token(user.id, user.username)
 
@@ -83,7 +83,6 @@ def login(request):
 		return response
 	else:
 		return JsonResponse({'message': 'Invalid credentials'}, status=401)
-
 
 def oauth_start(request):
     client_id = os.getenv("INTRA_CLIENT_ID")
@@ -147,3 +146,12 @@ def authenticate(request):
 		return JsonResponse({}, status=e.args[1] if len(e.args) > 1 else 401)
 	
 	return JsonResponse({},status=201)
+
+@require_GET
+def logout():
+	response = JsonResponse({
+		'message': 'Logged out successfully'
+	}, status=200)
+
+	response.delete_cookie('Authorization')
+	return response

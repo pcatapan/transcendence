@@ -4,7 +4,7 @@ from django.conf.urls.static import static
 
 from .controllers.user import show, update_avatar, update, user_friends_list, \
 	user_friends_add, user_friends_remove, user_blocked_list, user_blocked_add, user_blocked_remove
-from .controllers.auth import signup, login, authenticate
+from .controllers.auth import signup, login, authenticate, logout
 from .controllers.googleauth import enable_2fa, disable_2fa, display_qr_code, verify_totp_code, user_2fa_setup_complete
 from .controllers.auth import oauth_start, oauth_login
 from .controllers.stats import get_kpi
@@ -35,6 +35,8 @@ urlpatterns = [
 	path('oauth/login', oauth_login, name="oauth-login"),
 
 	path('user/stats', get_kpi, name="get_kpi"),
+
+	path('logout', logout, name="logout"),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -9,7 +9,7 @@ EXCLUDED_PREFIXES = [
 	'/api/user/signup',
 	'/api/verify_totp_code',
 	'/api/oauth-init',
-	'/api/oauth/login'
+	'/api/oauth/login',
 	'/media/',
 	'/pong/',
 	'/admin/',
@@ -34,7 +34,7 @@ class JWTVerificationMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
-
+        print("Middleware")
         if should_exclude_path(request.path):
             response = self.get_response(request)
             if isinstance(response, HttpResponseNotAllowed) or isinstance(response, HttpResponseNotFound):

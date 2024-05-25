@@ -3,13 +3,19 @@ import asyncio
 from channels.generic.websocket import AsyncWebsocketConsumer
 from ..pong.game import Game
 from ..pong.player import Player
+from ..manager.match_manager import MatchManager
 from channels.db import database_sync_to_async
+from django.utils.module_loading import import_string
 from django.utils import timezone
 from django.db import transaction
 from ..utils.message import Message
-import logging                                              # Used to log errors
+
+from .. import constants
+import logging
 
 logger = logging.getLogger(__name__)
+
+User = import_string('api.authuser.models.CustomUser')
 
 def set_frame_rate(fps):
     if fps < 1 or fps > 60 or not isinstance(fps, int):
@@ -17,12 +23,14 @@ def set_frame_rate(fps):
     return 1 / fps
 
 class Pong(AsyncWebsocketConsumer, Message):
-    list_of_players = {}
+    match_manager = MatchManager()
+
     shared_game_keyboard = {}
     shared_game_task = {}
     shared_game = {}
     run_game = {}
     finished = {}
+    scorelimit = 10
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -30,59 +38,160 @@ class Pong(AsyncWebsocketConsumer, Message):
         self.keyboard = {}
         self.left_player = None
         self.right_player = None
-        self.player_1 = None
-        self.player_2 = None
+        self.player_1_id = None
+        self.player_2_id = None
         self.player_1_score = 0
         self.player_2_score = 0
         self.match_object = None
         self.match_id = None
         self.client_id = None
 
+    async def connect(self):
+        try:
+
+            user = self.scope['user']
+            if user.is_authenticated:
+                self.player_object = user
+            else:
+                await self.close(code=4001)
+            
+            self.client_id = str(user.id)
+            match_id = self.scope['url_route']['kwargs']['match_id']
+            self.room_group_name = f'match_{match_id}'
+
+            self.match_object = await self.match_manager.get_match_and_player(match_id)
+            if not self.match_object or user.id in {self.match_object.player1.id, self.match_object.player2.id}:
+                await self.close()
+
+            if not self.match_object.active:
+                await self.send_layer(
+                    content="Match is not active",
+                    status=400,
+                    channel=constants.GAME_NAME
+                )
+                await self.close()
+
+            await self.channel_layer.group_add(f"{self.match_id}.client_id", self.channel_name)
+            await self.channel_layer.group_add(f"{self.match_id}", self.channel_name)
+            
+            await self.load_models(self.match_id)
+                
+            await self.accept()
+
+            Pong.finished[self.match_id] = False
+                        
+            await self.broadcast_layer(
+                content={
+                    "message": "User Connected",
+                    "connected_users": self.match_manager.get_list_of_players_rtr(self.match_id)
+                },
+                channel=f"{self.match_id}"
+            )
+            
+            if self.match_manager.player_in_list(self.player_1_id, self.match_id) and \
+            self.match_manager.player_in_list(self.player_2_id, self.match_id):
+                await self.broadcast_layer(
+                    content="Game Ready",
+                    channel=f"{self.match_id}"
+                )
+            else:
+                await self.broadcast_layer(
+                    content="Waiting for opponent, please wait",
+                    channel=f"{self.match_id}"
+                )
+                  
+        except Exception as e:
+            await self.close()
+            logger.error(f"Error during connect: {e}")
+
+    async def disconnect(self, close_code=1000):
+        if self.client_id in Pong.list_of_players[self.match_id]:
+            del Pong.list_of_players[self.match_id][self.client_id]
+
+        Pong.run_game[self.match_id] = False
+        try:
+            res = await self.save_models(disconnect=True)
+            if res:
+                await self.broadcast_to_group(str(self.match_id), "match_finished", res)
+        except Exception as e:
+            logger.error(f"Error during disconnect: {e}")
+
+        await self.discard_channels()
+
+    async def receive(self, text_data):
+        try:
+            data = json.loads(text_data)
+
+            if not data.get('command'):
+                return
+
+            if data['command'] == 'keyboard' and Pong.run_game[self.match_id]:
+                await self.keyboard_input(data)
+            elif data['command'] == 'start_ball':
+                Pong.run_game[self.match_id] = True
+                Pong.shared_game_task[self.match_id] = asyncio.create_task(self.start_game(data))
+
+        except Exception as e:
+            logger.error(f"Error during receive: {e}")
+            await self.close()
+
+
     @database_sync_to_async
     def load_models(self, match_id):
-        from api.tournament.models import Match
-        from api.authuser.models import CustomUser as User
-        Pong.run_game[self.match_id] = False
+        try:
 
-        self.match_object = Match.objects.get(id=match_id)
-        self.player_object = User.objects.get(id=self.client_id)
-        
-        self.player_1_id = str(self.match_object.player1.id)
-        self.player_2_id = str(self.match_object.player2.id)
-        self.scorelimit = 7
+            self.player_1_id = str(self.match_object.player1.id)
+            self.player_2_id = str(self.match_object.player2.id)
 
-        if not Pong.list_of_players.get(self.match_id):
-            Pong.list_of_players[self.match_id] = {}
-        Pong.list_of_players[self.match_id][self.client_id] = self
-        
-        self.list_of_players[self.player_1_id] = User.objects.get(id=self.player_1_id)
-        self.list_of_players[self.player_2_id] = User.objects.get(id=self.player_2_id)
+            # Inizializza o aggiorna la lista dei giocatori per il match corrente
+            self.match_manager.inzialize_list_of_players(match_id, self.client_id, self)
 
-        self.keyboard[self.player_1_id] = {"up": f"up.{self.player_1_id}", "down": f"down.{self.player_1_id}", "left": "xx", "right": "xx"}
-        self.keyboard[self.player_2_id] = {"up": f"up.{self.player_2_id}", "down": f"down.{self.player_2_id}", "left": "xx", "right": "xx"}
-        
-        self.left_player = Player(name=self.player_1_id, binds=self.keyboard[self.player_1_id])
-        self.right_player = Player(name=self.player_2_id, binds=self.keyboard[self.player_2_id])
-        
-        Pong.shared_game_keyboard[self.match_id] = {
-            f'up.{self.player_1_id}': False,
-            f'down.{self.player_1_id}': False,
-            f'up.{self.player_2_id}': False,
-            f'down.{self.player_2_id}': False,
-        }
+            # Carica gli oggetti User per entrambi i giocatori
+            self.match_manager.add_player(self.match_object.player1)
+            self.match_manager.add_player(self.match_object.player2)
 
-        Pong.shared_game[self.match_id] = Game(
-            dictKeyboard=Pong.shared_game_keyboard[self.match_id],
-            leftPlayer=self.left_player,
-            rightPlayer=self.right_player,
-            scoreLimit=self.scorelimit,
-        )
+            # Configura i binding della tastiera per entrambi i giocatori
+            self.keyboard = {
+                self.player_1_id: self.match_manager.get_defoult_keyboard(self.player_1_id),
+                self.player_2_id: self.match_manager.get_defoult_keyboard(self.player_2_id),
+            }
+
+            self.left_player = Player(
+                name = self.player_1_id,
+                binds = self.keyboard[self.player_1_id]
+            )
+            self.right_player = Player(
+                name = self.player_2_id,
+                binds = self.keyboard[self.player_2_id]
+            )
+
+            # Inizializza la tastiera condivisa del gioco
+            Pong.shared_game_keyboard[self.match_id] = {
+                f'up.{self.player_1_id}': False,
+                f'down.{self.player_1_id}': False,
+                f'up.{self.player_2_id}': False,
+                f'down.{self.player_2_id}': False,
+            }
+
+            Pong.run_game[self.match_id] = False
+
+            # Crea l'oggetto Game condiviso
+            Pong.shared_game[self.match_id] = Game(
+                dictKeyboard = Pong.shared_game_keyboard[self.match_id],
+                leftPlayer = self.left_player,
+                rightPlayer = self.right_player,
+                scoreLimit = self.scorelimit,
+            )
+
+        except Exception as e:
+            logger.error(f"Error loading models: {e}")
+            self.close()
     
     @database_sync_to_async
     @transaction.atomic
     def save_models(self, disconnect=False, close_code=1000):
-        from api.tournament.models import Match
-        from api.userauth.models import CustomUser as User
+        Match = import_string('api.tournament.models.match')
+        User = import_string('api.authuser.models.CustomUser')
 
         if Pong.finished.get(self.match_id):
             return
@@ -159,89 +268,6 @@ class Pong(AsyncWebsocketConsumer, Message):
                 Pong.shared_game_task[self.match_id] = asyncio.create_task(self.start_game())
                 return
 
-    async def connect(self):
-        try:
-
-            user = self.scope['user']
-            if user.is_authenticated:
-                self.user = user
-            else:
-                await self.close(code=4001)
-            
-            match_id = self.scope['url_route']['kwargs']['match_id']
-            self.room_group_name = f'match_{match_id}'
-
-            self.client_id = str(user.id)
-
-            await self.channel_layer.group_add(f"{self.match_id}.client_id", self.channel_name)
-            await self.channel_layer.group_add(f"{self.match_id}", self.channel_name)
-            await self.load_models(self.match_id)
-
-            if self.client_id not in (self.player_1, self.player_2):
-                await self.close()
-                return
-                
-            await self.accept()
-
-            Pong.finished[self.match_id] = False
-
-            if not self.match_object.active:
-                await self.send_json({
-                    "type": "inactive_match",
-                    "message": "The match you are trying to join already finished"
-                })
-                await self.close()
-                return
-                        
-            await self.broadcast_to_group(f"{self.match_id}", "message", {
-                "message": "User Connected",
-                "client_id": self.client_id,
-                "connected_users": list(Pong.list_of_players[self.match_id].keys()),
-            })
-            
-            if self.player_1_id in Pong.list_of_players[self.match_id] and self.player_2_id in Pong.list_of_players[self.match_id]:
-                await self.broadcast_to_group(f"{self.match_id}", "message", {
-                    "message": 'Game Ready',
-                })
-            else:
-                await self.broadcast_to_group(f"{self.match_id}", "message", {
-                    "message": 'Please refresh the page',
-                })
-                  
-        except Exception as e:
-            await self.close()
-            logger.error(f"Error during connect: {e}")
-
-    async def disconnect(self, close_code=1000):
-        if self.client_id in Pong.list_of_players[self.match_id]:
-            del Pong.list_of_players[self.match_id][self.client_id]
-
-        Pong.run_game[self.match_id] = False
-        try:
-            res = await self.save_models(disconnect=True)
-            if res:
-                await self.broadcast_to_group(str(self.match_id), "match_finished", res)
-        except Exception as e:
-            logger.error(f"Error during disconnect: {e}")
-
-        await self.discard_channels()
-
-    async def receive(self, text_data):
-        try:
-            data = json.loads(text_data)
-
-            if not data.get('command'):
-                return
-
-            if data['command'] == 'keyboard' and Pong.run_game[self.match_id]:
-                await self.keyboard_input(data)
-            elif data['command'] == 'start_ball':
-                Pong.run_game[self.match_id] = True
-                Pong.shared_game_task[self.match_id] = asyncio.create_task(self.start_game(data))
-
-        except Exception as e:
-            logger.error(f"Error during receive: {e}")
-            await self.close()
 
     async def keyboard_input(self, data):
         try:

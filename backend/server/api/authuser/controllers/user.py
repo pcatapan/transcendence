@@ -10,13 +10,13 @@ from api.authuser.models.custom_user import CustomUser
 from api.authuser.models.friendship import Friendship
 
 from .validation.user_validator import UserUpdateValidator
-from .utils.image import is_valid_image, get_unique_filename, save_avatar_from_url
+from .utils.image import is_valid_image, save_avatar_from_url
 
 @require_GET
 def show(request, user_id) :
 	user = get_object_or_404(CustomUser, pk=user_id)
 
-	return JsonResponse({'data':user.to_json()}, status=200)
+	return JsonResponse({'data':user.to_json_full()}, status=200)
 
 @require_POST
 def update_avatar(request):

@@ -1,8 +1,14 @@
 class Player:
 
-    def __init__(self, name = "Player", binds = {"up" : "UNUSED_DEFAULT_KEY", 
-    "down" : "UNUSED_DEFAULT_KEY", "left" : "UNUSED_DEFAULT_KEY", 
-    "right" : "UNUSED_DEFAULT_KEY"}):
+    def __init__(
+        self,
+        name = "Player",
+        binds = {
+            "up" : "UNUSED_DEFAULT_KEY",
+            "down" : "UNUSED_DEFAULT_KEY",
+            "left" : "UNUSED_DEFAULT_KEY", 
+            "right" : "UNUSED_DEFAULT_KEY"
+    }):
         self._name = name
         self._binds = binds
         self._score = 0
