@@ -7,12 +7,14 @@ from channels.db import database_sync_to_async
 from django.utils import timezone
 from django.db import transaction
 from ..utils.message import Message
+import logging                                              # Used to log errors
+
+logger = logging.getLogger(__name__)
 
 def set_frame_rate(fps):
-    if fps < 1 or fps > 60 or type(fps) != int:
+    if fps < 1 or fps > 60 or not isinstance(fps, int):
         fps = 60
-    frame_dur = 1 / fps
-    return frame_dur
+    return 1 / fps
 
 class Pong(AsyncWebsocketConsumer, Message):
     list_of_players = {}
