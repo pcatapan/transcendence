@@ -7,7 +7,6 @@ from .controllers.user import show, update_avatar, update, user_friends_list, \
 from .controllers.auth import signup, login, authenticate, logout
 from .controllers.googleauth import enable_2fa, disable_2fa, display_qr_code, verify_totp_code, user_2fa_setup_complete
 from .controllers.auth import oauth_start, oauth_login
-from .controllers.stats import get_kpi
 
 urlpatterns = [
 
