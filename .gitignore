@@ -15,8 +15,8 @@ staticfiles/
 
 # Ignore django avatar imgs and qrcodes
 backend/server/static/*
-backend/server/media/*
 !backend/server/media/avatars/default.png
+backend/server/media/*
 
 # Ignore the virtual environment directory
 venv/

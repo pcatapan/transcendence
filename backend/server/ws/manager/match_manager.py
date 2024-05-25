@@ -4,7 +4,6 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-Match = import_string('api.tournament.models.match')
 
 class MatchManager():
 	list_of_players = {}
@@ -24,6 +23,7 @@ class MatchManager():
 		self.list_of_players[str(player.id)] = player
 
 	def get_match_and_player(self, match_id):
+		Match = import_string('api.tournament.models.match')
 		match = Match.objects.select_related('player1', 'player2').get(id=match_id)
 
 		if match:

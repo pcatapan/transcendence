@@ -185,7 +185,10 @@ class CustomUser(AbstractUser):
 	
 	def user_stats(self):
 		from api.tournament.models.match import Match
+		from api.tournament.models.tournament import Tournament
+
 		matches = Match.objects.filter(Q(player1=self) | Q(player2=self))
+		tournament_wins = Tournament.objects.filter(winner=self)
 
 		if not matches:
 			return {
@@ -197,7 +200,8 @@ class CustomUser(AbstractUser):
 				'goal_conceded': 0,
 				'win_rate': 0,
 				'loss_rate': 0,
-				'tie_rate': 0
+				'tie_rate': 0,
+				'tournaments_won': 0
 			}
 
 		total_matches = matches.count()
@@ -220,6 +224,7 @@ class CustomUser(AbstractUser):
 			'goal_conceded': goal_conceded,
 			'win_rate': win_rate,
 			'loss_rate': loss_rate,
-			'tie_rate': tie_rate
+			'tie_rate': tie_rate,
+			'tournaments_won': len(tournament_wins)
 		}
  

@@ -1,21 +1,21 @@
 import json
+import logging
 import asyncio
+
 from channels.generic.websocket import AsyncWebsocketConsumer
-from ..pong.game import Game
-from ..pong.player import Player
-from ..manager.match_manager import MatchManager
 from channels.db import database_sync_to_async
+
 from django.utils.module_loading import import_string
 from django.utils import timezone
 from django.db import transaction
-from ..utils.message import Message
 
+from ..pong.game import Game
+from ..pong.player import Player
+from ..manager.match_manager import MatchManager
+from ..utils.message import Message
 from .. import constants
-import logging
 
 logger = logging.getLogger(__name__)
-
-User = import_string('api.authuser.models.CustomUser')
 
 def set_frame_rate(fps):
     if fps < 1 or fps > 60 or not isinstance(fps, int):

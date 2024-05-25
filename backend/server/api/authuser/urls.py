@@ -17,9 +17,11 @@ urlpatterns = [
 	path('user/show/<int:user_id>', show, name="user-show"),
 	path('user/update', update, name="user-update"),
 	path('user/update-avatar', update_avatar, name='update-avatar'),
+	
 	path('user/friendlist', user_friends_list, name='user_friendlist'),
 	path('user/friend/add/', user_friends_add, name='user_friend_add'),
 	path('user/friend/remove/', user_friends_remove, name='user_friend_remove'),
+
 	path('user/blockedlist', user_blocked_list, name='user_blockedlist'),
 	path('user/blocked/add/', user_blocked_add, name='user_blocked_add'),
 	path('user/blocked/remove/', user_blocked_remove, name='user_blocked_remove'),
@@ -28,13 +30,13 @@ urlpatterns = [
 	path('enable_2fa', enable_2fa, name='enable_2fa'),
 	path('disable_2fa', disable_2fa, name='disable_2fa'),
 	path('verify_totp_code', verify_totp_code, name='verify_totp_code'),
+
+	# da valutare
 	path('display_qr_code', display_qr_code, name='display_qr_code'),
 	path('is_2fa_setup_complete', user_2fa_setup_complete, name="is_2fa_setup_complete"),
 
 	path('oauth-init', oauth_start, name="oauth-start"),
 	path('oauth/login', oauth_login, name="oauth-login"),
-
-	path('user/stats', get_kpi, name="get_kpi"),
 
 	path('logout', logout, name="logout"),
 ]
