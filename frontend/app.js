@@ -28,8 +28,13 @@ const loadCSS = (url) => {
     });
 };
 
-const navigateTo = async (url) => {
-    if (!notAuthorizedRoutes.includes(url)) {
+const getURI = (url) => {
+    let exploded = url.split("/").pop();
+    return '/' + exploded;
+}
+
+window.navigateTo = async (url) => {
+    if (!notAuthorizedRoutes.includes(getURI(url))) {
         let isAuthorized = await checkAuthorization();
         if (!isAuthorized) {
             url = "/login";
@@ -44,7 +49,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.body.addEventListener("click", e => {
         if (e.target.matches("[data-link]")) {
             e.preventDefault();
-            navigateTo(e.target.href);
+            window.navigateTo(e.target.href);
         }
     });
     router();

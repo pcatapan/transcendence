@@ -25,7 +25,7 @@ const SignUp = () => {
             if (response.status === 201) {
                 showSnackbar(`${response.body['message']}`, 'success');
                 setTimeout(() =>{
-                    window.location.href = '/';
+                    window.navigateTo('/');
                 }, 500)
             }
             else{

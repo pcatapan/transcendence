@@ -13,7 +13,7 @@ const Login = () => {
             if (response.status === 200) {
                 showSnackbar(`${response.body['message']}`, 'success');
                 setTimeout(() =>{
-                    window.location.href = '/';
+                    window.navigateTo('/');
                 }, 500)
             }
             else{
