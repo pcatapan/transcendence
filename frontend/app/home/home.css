@@ -2,8 +2,8 @@
     --background-color: #000;
     --panel-background-color: #101010;
     --panel-shadow: 0 0 10px rgb(255, 255, 255);
-    --form-background-color: rgba(255, 255, 255, 0.13);
-    --form-border-color: rgb(0 0 0 / 72%);
+    --form-background-color: rgb(0 0 0 / 72%);
+    --form-border-color: rgba(255, 255, 255, 0.1);
     --form-shadow: 0 0 10px rgb(255, 255, 255);
     --input-background-color: rgba(255, 255, 255, 0.07);
     --input-placeholder-color: #e5e5e5;
@@ -11,6 +11,10 @@
     --button-text-color: #080710;
     --shape-gradient-1: linear-gradient(#060ba6, #23a2f6);
     --shape-gradient-2: linear-gradient(to right, #fe6d25, #b80000);
+    --shape-gradient-3: linear-gradient(#ff8c00, #ff0080);
+    --shape-gradient-4: linear-gradient(#00ff00, #00ffff);
+    --shape-gradient-5: linear-gradient(#ff00ff, #800080);
+    --shape-gradient-6: linear-gradient(#ff0000, #ffff00);
     --social-background: rgba(255, 255, 255, 0.27);
     --social-hover-background: rgba(255, 255, 255, 0.47);
     --font-family: 'Poppins', sans-serif;
@@ -34,7 +38,7 @@ body {
     width: 50%;
     max-width: 800px;
     box-shadow: var(--panel-shadow);
-	height: fit-content !important;
+    height: fit-content !important;
 }
 
 .background {
@@ -54,16 +58,40 @@ body {
     animation: moveShapes 3s infinite alternate ease-in-out;
 }
 
-.shape:first-child {
+.shape:nth-child(1) {
     background: var(--shape-gradient-1);
-    left: -100px;
-    top: -100px;
+    left: -200px;
+    top: -200px;
 }
 
-.shape:last-child {
+.shape:nth-child(2) {
     background: var(--shape-gradient-2);
-    right: -50px;
-    bottom: -100px;
+    right: -200px;
+    bottom: -200px;
+}
+
+.shape:nth-child(3) {
+    background: var(--shape-gradient-3);
+    left: 200px;
+    top: 250px;
+}
+
+.shape:nth-child(4) {
+    background: var(--shape-gradient-4);
+    right: 250px;
+    top: 150px;
+}
+
+.shape:nth-child(5) {
+    background: var(--shape-gradient-5);
+    left: -250px;
+    bottom: 250px;
+}
+
+.shape:nth-child(6) {
+    background: var(--shape-gradient-6);
+    right: -200px;
+    top: -200px;
 }
 
 @keyframes moveShapes {
@@ -71,12 +99,12 @@ body {
         transform: translate(0, 0);
     }
     100% {
-        transform: translate(50px, 50px);
+        transform: translate(calc(150px * var(--random-x, 1)), calc(150px * var(--random-y, 1)));
     }
 }
 
 form {
-    height: fit-content;
+    height: 800px;
     width: 400px;
     background-color: var(--form-background-color);
     position: absolute;
@@ -96,6 +124,10 @@ form * {
     letter-spacing: 0.5px;
     outline: none;
     border: none;
+	display: flex;
+	flex-direction: column;
+	justify-items: center;
+	align-items: center;
 }
 
 form h3 {
@@ -165,12 +197,12 @@ button {
 
 @keyframes glow {
     from {
-      text-shadow: 0 0 5px #1a1a1a;
+        text-shadow: 0 0 5px #1a1a1a;
     }
     to {
-      text-shadow: 0 0 10px #f200ff;
+        text-shadow: 0 0 10px #f200ff;
     }
-  }
+}
 
 h1 {
     margin: 0;
@@ -179,7 +211,47 @@ h1 {
     z-index: 1;
     font-family: 'Teko', sans-serif;
     font-size: 3rem;
-    /* text-transform: uppercase; */
     animation: glow 2s ease-in-out infinite alternate;
     text-align: center;
-  }
+}
+
+.choose{
+	padding: 5px 0px;
+}
+
+.choose:hover {
+	cursor: pointer;
+	color: #00ff00;
+	padding: 5px 0px;
+}
+
+.buttons{
+	display: flex;
+	flex-direction: row;
+	justify-content: start;
+	height: fit-content;
+	margin-top: 0px !important;
+	gap: 1rem;
+}
+
+.icons{
+	width: 30px;
+}
+
+.panel{
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+.menu{
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	align-items: center;
+	gap: 1rem;
+}
+
+.btn:hover{
+	border: 1px solid #00ff00;
+}

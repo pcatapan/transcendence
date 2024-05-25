@@ -1,15 +1,17 @@
-import { apiUrlDev} from '../enviroments.js';
+import { apiUrl } from '../enviroments.js';
 
-const BASE_URL = apiUrlDev;
+const BASE_URL = apiUrl;
+
+const headers = {
+	'Content-Type': 'application/json',
+	'Accept': '*/*'
+};
 
 export const authService = {
     loginIn: async (email, password) => {
 		const response = await fetch(`${BASE_URL}/user/login`, {
 			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-				'Accept': '*/*'
-			},
+			headers: headers,
 			body: JSON.stringify({ email, password }),
 		});
 		return {status : response.status, body: await response.json()};
@@ -17,12 +19,17 @@ export const authService = {
 	signUp: async (email, password, username, fullname) => {
 		const response = await fetch(`${BASE_URL}/user/signup`, {
 			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-				'Accept': '*/*'
-			},
+			headers: headers,
 			body: JSON.stringify({ email, password, username, fullname }),
 		});
 		return {status : response.status, body: await response.json()};
-	}
+	},
+	checkAuthorization: async () => {
+		const response = await fetch(`${BASE_URL}/authenticate`, {
+			method: 'GET',
+			headers: headers,
+		});
+		return {status : response.status};
+	},
+
 };

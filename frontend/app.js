@@ -1,4 +1,20 @@
+import { showSnackbar } from '/utils/snackbar.js';
 import { routes, loadHTML } from '/router.js';
+import { authService } from '/services/auth.js';
+
+const notAuthorizedRoutes = ["/login", "/sign-up"];
+
+
+const checkAuthorization = async () => {
+    try {
+        const response = await authService.checkAuthorization();
+        return response.status === 201;
+    } catch (error) {
+        return false;
+    }
+}
+
+// window.ws = await initializeWebSocket();
 
 // Funzione per caricare CSS dinamicamente
 const loadCSS = (url) => {
@@ -12,7 +28,14 @@ const loadCSS = (url) => {
     });
 };
 
-const navigateTo = url => {
+const navigateTo = async (url) => {
+    if (!notAuthorizedRoutes.includes(url)) {
+        let isAuthorized = await checkAuthorization();
+        if (!isAuthorized) {
+            url = "/login";
+            showSnackbar("Devi essere loggato per poter accedere a questa pagina", "error");
+        }
+    }
     history.pushState(null, null, url);
     router();
 };
@@ -44,6 +67,18 @@ const router = async () => {
         };
     }
 
+    if (!notAuthorizedRoutes.includes(match.route.path)) {
+        let isAuthorized = await checkAuthorization();
+        if (!isAuthorized) {
+            match = {
+                route: routes.find(route => route.path === "/login"),
+                isMatch: true
+            };
+            showSnackbar("Devi essere loggato per poter accedere a questa pagina", "error");
+        }
+    }
+
+
     const view = await loadHTML(match.route.html);
     document.querySelector("#app").innerHTML = view;
 
@@ -57,5 +92,7 @@ const router = async () => {
         match.route.component();
     }
 };
+
+
 
 window.addEventListener("popstate", router);
