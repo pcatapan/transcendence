@@ -7,7 +7,6 @@ logger = logging.getLogger(__name__)
 
 class Message:
 	async def broadcast_layer(self, content, channel, command=None, type='broadcast', priority='normal', status='200'):
-
 		if channel is None:
 			return
 		

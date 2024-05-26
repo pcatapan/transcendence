@@ -48,71 +48,94 @@ class Pong(AsyncWebsocketConsumer, Message):
 
     async def connect(self):
         try:
-
             user = self.scope['user']
             if user.is_authenticated:
                 self.player_object = user
             else:
+                logger.error("User is not authenticated")
                 await self.close(code=4001)
+                return
             
             self.client_id = str(user.id)
-            match_id = self.scope['url_route']['kwargs']['match_id']
-            self.room_group_name = f'match_{match_id}'
+            self.match_id = self.scope['url_route']['kwargs']['match_id']
+            #self.room_group_name = f'match_{self.match_id}'
 
-            self.match_object = await self.match_manager.get_match_and_player(match_id)
-            if not self.match_object or user.id in {self.match_object.player1.id, self.match_object.player2.id}:
+            logger.info(f"Get match {self.match_id}")
+            self.match_object = await self.match_manager.get_match_and_player(self.match_id)
+            if not self.match_object:
+                logger.error(f"Match {self.match_id} not found")
                 await self.close()
-
-            if not self.match_object.active:
-                await self.send_layer(
-                    content="Match is not active",
-                    status=400,
-                    channel=constants.GAME_NAME
-                )
-                await self.close()
-
-            await self.channel_layer.group_add(f"{self.match_id}.client_id", self.channel_name)
-            await self.channel_layer.group_add(f"{self.match_id}", self.channel_name)
+                return
             
-            await self.load_models(self.match_id)
-                
+            if user.id not in {self.match_object.player1.id, self.match_object.player2.id}:
+                logger.info(f"User {self.client_id} is in the match {self.match_id}")
+                await self.close()
+                return
+
+            if self.match_object.active:
+                logger.error(f"Match {self.match_id} is active")
+                await self.close()
+                return
+
+            logger.info(f"Adding client {self.client_id} to the match {self.match_id}")
+            # da valutare se server
+            await self.channel_layer.group_add(f"{self.match_id}.player.{self.client_id}", self.channel_name)
+            await self.channel_layer.group_add(f"{self.match_id}", self.channel_name)
+
+            logger.info(f"loading models for match {self.match_id}")
+            await self.load_models()
+
             await self.accept()
 
             Pong.finished[self.match_id] = False
-                        
+
             await self.broadcast_layer(
                 content={
                     "message": "User Connected",
+                    "command":constants.CONNECTED_USERS,
                     "connected_users": self.match_manager.get_list_of_players_rtr(self.match_id)
                 },
                 channel=f"{self.match_id}"
             )
             
+            logger.info(f"Checking if both players are connected to the match {self.match_id}")
             if self.match_manager.player_in_list(self.player_1_id, self.match_id) and \
             self.match_manager.player_in_list(self.player_2_id, self.match_id):
                 await self.broadcast_layer(
                     content="Game Ready",
+                    command=constants.START_MATCH,
+                    next_command=constants.START_MATCH,
                     channel=f"{self.match_id}"
                 )
             else:
                 await self.broadcast_layer(
                     content="Waiting for opponent, please wait",
+                    command=constants.WAITING_FOR_OPPONENT,
                     channel=f"{self.match_id}"
                 )
+            logger.info(f"Client {self.client_id} connected")
                   
         except Exception as e:
             await self.close()
             logger.error(f"Error during connect: {e}")
 
-    async def disconnect(self, close_code=1000):
-        if self.client_id in Pong.list_of_players[self.match_id]:
-            del Pong.list_of_players[self.match_id][self.client_id]
+    async def disconnect(self, code=1000):
+
+        logger.info(f"Client {self.client_id} disconnected with code {code}")
+        if (code == 4001 or self.match_id is None):
+            return
+
+        if self.match_manager.player_in_list(self.client_id, self.match_id):
+            self.match_manager.remove_player(self.match_id, self.client_id)
 
         Pong.run_game[self.match_id] = False
         try:
             res = await self.save_models(disconnect=True)
             if res:
-                await self.broadcast_to_group(str(self.match_id), "match_finished", res)
+                await self.broadcast_layer(
+                    content="Opponent disconnected",
+                    channel=f"{self.match_id}"
+                )
         except Exception as e:
             logger.error(f"Error during disconnect: {e}")
 
@@ -136,15 +159,14 @@ class Pong(AsyncWebsocketConsumer, Message):
             await self.close()
 
 
-    @database_sync_to_async
-    def load_models(self, match_id):
+    #@database_sync_to_async
+    async def load_models(self):
         try:
-
             self.player_1_id = str(self.match_object.player1.id)
             self.player_2_id = str(self.match_object.player2.id)
 
             # Inizializza o aggiorna la lista dei giocatori per il match corrente
-            self.match_manager.inzialize_list_of_players(match_id, self.client_id, self)
+            self.match_manager.inzialize_list_of_players(self.match_id, self.client_id, self)
 
             # Carica gli oggetti User per entrambi i giocatori
             self.match_manager.add_player(self.match_object.player1)
@@ -185,18 +207,17 @@ class Pong(AsyncWebsocketConsumer, Message):
 
         except Exception as e:
             logger.error(f"Error loading models: {e}")
-            self.close()
+            await self.close()
     
     @database_sync_to_async
     @transaction.atomic
     def save_models(self, disconnect=False, close_code=1000):
-        Match = import_string('api.tournament.models.match')
         User = import_string('api.authuser.models.CustomUser')
 
         if Pong.finished.get(self.match_id):
             return
 
-        match_object = Match.objects.select_for_update().get(id=self.match_id)
+        match_object = self.match_manager.get_match_atomic(self.match_id)
         match_object.player1_score = Pong.shared_game[self.match_id]._leftPlayer.getScore()
         match_object.player2_score = Pong.shared_game[self.match_id]._rightPlayer.getScore()
 
@@ -327,11 +348,11 @@ class Pong(AsyncWebsocketConsumer, Message):
                 self.channel_name
             )
             await self.channel_layer.group_discard(
-                f"{self.match_id}.player_1_id",
+                f"{self.match_id}.player.{self.player_1_id}",
                 self.channel_name
             )
             await self.channel_layer.group_discard(
-                f"{self.match_id}.player_2_id",
+                f"{self.match_id}.player.{self.player_2_id}",
                 self.channel_name
             )
             

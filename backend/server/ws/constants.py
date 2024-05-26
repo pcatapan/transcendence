@@ -16,6 +16,8 @@ CONFIRM_MATCH = 'confirm_match'
 
 # GAME
 START_MATCH = 'start_match'
+WAITING_FOR_OPPONENT = 'waiting_for_opponent'
+CONNECTED_USERS = 'connected_users'
 
 # END GAME
 

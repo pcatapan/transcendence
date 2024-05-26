@@ -5,7 +5,6 @@ import random
 import time
 import threading
 
-
 class Game:
 	def __init__(
 		self,
@@ -52,12 +51,10 @@ class Game:
 		self._frame = 0
 		self._delayedActions = {}
 
-
 	def reportScore(self):
 		self._scoreReporter[self._leftPlayer.getName()] = self._leftPlayer.getScore()
 		self._scoreReporter[self._rightPlayer.getName()] = self._rightPlayer.getScore()
 		return self._scoreReporter.copy()
-
 
 	def pointLoop(self):
 		self.runDelayedActions()
@@ -95,8 +92,6 @@ class Game:
 			self._rightPaddle.draw()
 			self._rightPaddle.updatePosition()
 		self._frame += 1
-		
-		
 
 	def resetPosition(self):
 		self._ball.setPosition(x = (self._enclousure["xl"] + 
@@ -167,8 +162,7 @@ class Game:
 		elif diff_frames == 0:
 			self._dictKeyboard[formatted_key] = is_pressed
 		else:
-			self.addDelayedAction(frame, self.processInput,formatted_key, is_pressed, frame)
-			
+			self.addDelayedAction(frame, self.processInput,formatted_key, is_pressed, frame)		
 	
 	def addDelayedAction(self, frame, function, *args, **kwargs):
 		if frame not in self._delayedActions:
