@@ -8,7 +8,6 @@ async function initializeWebSocket() {
         let isAuthorized = await authService.checkAuthorization();
         if (isAuthorized.status === 201) {
             window.ws = new WebSocket(`${webSocketUrl}/lobby`);
-
             window.ws.onmessage = function (event) {
                 console.log(JSON.parse(event.data));
             };

@@ -31,5 +31,20 @@ export const authService = {
 		});
 		return {status : response.status};
 	},
+	logout: async () => {
+		const response = await fetch(`${BASE_URL}/logout`, {
+			method: 'GET',
+			headers: headers,
+		});
+		return {status : response.status, body: await response.json()};
+	},
+	verifyOtp: async (user_id, totp_code) => {
+		const response = await fetch(`${BASE_URL}/verify_totp_code`, {
+			method: 'POST',
+			headers: headers,
+			body: JSON.stringify({ user_id, totp_code }),
+		});
+		return {status : response.status, body: await response.json()};
+	},
 
 };
