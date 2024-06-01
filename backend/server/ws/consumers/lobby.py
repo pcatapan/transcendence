@@ -88,7 +88,7 @@ class Lobby(AsyncWebsocketConsumer, Message):
 				constants.JOIN_QUEUE: self.handle_join_queue, # Fatto
 				constants.LEAVE_QUEUE: self.handle_leave_queue, # Fatto
 
-				constants.CONFIRM_MATCH: self.handle_confirm_match,
+				constants.CONFIRM_MATCH: self.handle_confirm_match, # Fatto
 			}
 
 			handler = handlers.get(command, self.handle_unknown_command)

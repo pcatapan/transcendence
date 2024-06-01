@@ -3,6 +3,10 @@
 # Constants
 LOBBY_NAME = 'lobby'
 GAME_NAME = 'game'
+ELO_DIFF = 300
+ELO_BASE = 25
+ELO_MOLTIPLIER = 2.5
+SECOND_WAIT = 10
 
 # Endpoints and commands (Client -> Server)
 # LOBBY
@@ -15,10 +19,12 @@ CONFIRM_MATCH = 'confirm_match'
 # END LOBBY
 
 # GAME
-START_MATCH = 'start_match'
+KEYBOARD = 'keyboard'
+START_BALL = 'start_ball'
+UPDATE_GAME = 'update_game'
+FINISH_MATCH = 'finish_match'
 WAITING_FOR_OPPONENT = 'waiting_for_opponent'
 CONNECTED_USERS = 'connected_users'
-
 # END GAME
 
 LIST_SENT_INVITES = 'list_sent_invites'             # Command to send the list of invites sent

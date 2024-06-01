@@ -3,6 +3,8 @@ import django
 from django.shortcuts import get_object_or_404
 from django.utils.module_loading import import_string
 
+from .. import constants
+
 from channels.db import database_sync_to_async
 import logging
 
@@ -11,6 +13,8 @@ logger = logging.getLogger(__name__)
 
 class MatchManager():
 	list_of_players = {}
+	winner = None
+	loser = None
 
 	def __init__(self):
 		pass
@@ -89,3 +93,27 @@ class MatchManager():
 			del self.list_of_players[match_id][player_id]
 		except Exception as e:
 			logger.error(f"Error in remove_player: {e}")
+	
+	def update_elo(self, match_obj, player1_id):
+		try :
+			from api.authuser.models import CustomUser
+
+			winner_id = match_obj.winner.id
+			loser_id = match_obj.loser().id
+
+			self.winner = CustomUser.objects.get(winner_id)
+			self.loser = CustomUser.objects.get(loser_id)
+
+			winner_score = match_obj.player1_score if winner_id == player1_id else match_obj.player2_score
+			loser_score = match_obj.player2_score if winner_id == player1_id else match_obj.player1_score
+			score_margin = (winner_score - loser_score) * constants.ELO_MOLTIPLIER
+
+			elo_change = constants.ELO_BASE + score_margin
+
+			self.winner.ELO = max(0, self.winner.ELO + elo_change)
+			self.loser.ELO = max(0, self.loser.ELO - elo_change)
+
+			self.winner.save()
+			self.loser.save()
+		except Exception as e:
+			logger.error(f"Error in update_elo: {e}")

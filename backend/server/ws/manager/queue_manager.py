@@ -7,7 +7,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-elo_diff = 300
+elo_diff = constants.ELO_DIFF
 
 class QueueManager():
 
@@ -141,8 +141,10 @@ class QueueManager():
 
 			self.pending_matches[match.id] = {
 				'player1': user.id,
+				'player1_obj' : user,
 				'player1_confirmed': False,
 				'player2': opponent.id,
+				'player2_obj' : opponent,
 				'player2_confirmed': False,
 				'match_id': match.id,
 			}
@@ -174,7 +176,6 @@ class QueueManager():
 					'status': 200,
 					'type': "unicast",
 					'command': constants.CONFIRM_MATCH,
-					'next_command': 'start_match',
 					'content': match_url,
 					'meta': {
 						"channel": "lobby",
@@ -186,7 +187,6 @@ class QueueManager():
 					'status': 200,
 					'type': "unicast",
 					'command': constants.CONFIRM_MATCH,
-					'next_command': 'start_match',
 					'content': match_url,
 					'meta': {
 						"channel": "lobby",
