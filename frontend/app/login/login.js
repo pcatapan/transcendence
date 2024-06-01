@@ -1,5 +1,6 @@
 import { showSnackbar } from '../../utils/snackbar.js';
 import { authService } from '../../services/auth.js';
+import { initializeWebSocket } from '../../websocket.js';
 
 const Login = () => {
 
@@ -12,6 +13,9 @@ const Login = () => {
         authService.loginIn(email, password).then((response) => {
             if (response.status === 200) {
                 showSnackbar(`${response.body['message']}`, 'success');
+
+                initializeWebSocket();
+
                 setTimeout(() =>{
                     window.navigateTo('/');
                 }, 500)

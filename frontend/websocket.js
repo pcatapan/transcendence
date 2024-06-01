@@ -4,10 +4,9 @@ import { authService } from './services/auth.js';
 initializeWebSocket();
 
 async function initializeWebSocket() {
-	console.log('window', window.ws)
     if (!window.ws) {
         let isAuthorized = await authService.checkAuthorization();
-        if (isAuthorized) {
+        if (isAuthorized.status === 201) {
             window.ws = new WebSocket(`${webSocketUrl}/lobby`);
 
             window.ws.onmessage = function (event) {

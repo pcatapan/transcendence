@@ -10,8 +10,8 @@ from django.utils.module_loading import import_string
 from django.utils import timezone
 from django.db import transaction
 
-from ..pong.game import Game
-from ..pong.player import Player
+from ..pong_object.game import Game
+from ..pong_object.player import Player
 from ..manager.match_manager import MatchManager
 from ..utils.message import Message
 from .. import constants

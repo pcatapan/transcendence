@@ -14,8 +14,6 @@ const checkAuthorization = async () => {
     }
 }
 
-// window.ws = await initializeWebSocket();
-
 // Funzione per caricare CSS dinamicamente
 const loadCSS = (url) => {
     return new Promise((resolve, reject) => {
@@ -45,6 +43,11 @@ window.navigateTo = async (url) => {
     router();
 };
 
+/**
+ * Interceptor per la gestione dei link
+ * Se il link ha l'attributo data-link, allora viene intercettato
+ * e gestito tramite il router
+ */
 document.addEventListener("DOMContentLoaded", () => {
     document.body.addEventListener("click", e => {
         if (e.target.matches("[data-link]")) {
