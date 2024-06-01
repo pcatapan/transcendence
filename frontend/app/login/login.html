@@ -1,15 +1,14 @@
-<div id="snackbar" class="snackbar"></div>
 <div class="login-panel w-auto button-85">
-	<div class="background">
+    <div class="background">
         <div class="shape"></div>
         <div class="shape"></div>
     </div>
     <form id="login-form">
         <h4>Welcome to</h4>
-		<h1><span class='one'>P</span><span class='two'>o</span><span class='three'>n</span><span class='four'>g</span>
-			<span class='five'>v</span><span class='six'>s</span> 
-			<span class='seven'>P</span><span class='eight'>o</span><span class='nine'>n</span><span class='ten'>g</span>
-		</h1>
+        <h1><span class='one'>P</span><span class='two'>o</span><span class='three'>n</span><span class='four'>g</span>
+            <span class='five'>v</span><span class='six'>s</span>
+            <span class='seven'>P</span><span class='eight'>o</span><span class='nine'>n</span><span class='ten'>g</span>
+        </h1>
 
         <label for="email">Email</label>
         <input type="email" placeholder="Email" id="email" required>
@@ -22,10 +21,16 @@
             <h6>Login with</h6>
             <div class="go"><i class=""></i> 42 Login</div>
         </div>
-        <div class="social mt-5 ">
-            <h6>Non ha un account? <a class="text-decoration-underline " href="/sign-up" data-link>Registrati</a> </h6>
-            <!-- <div class="go"><i class=""></i> 42 Login</div> -->
+        <div class="social mt-5">
+            <h6>Non ha un account? <a class="text-decoration-underline" href="/sign-up" data-link>Registrati</a></h6>
         </div>
-
     </form>
+    <div id="otp-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="close-otp-modal">&times;</span>
+            <p>Inserisci l'OTP:</p>
+            <input type="text" id="otp" placeholder="OTP" required>
+            <button id="otp-submit">Invia</button>
+        </div>
+    </div>
 </div>

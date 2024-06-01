@@ -16,16 +16,29 @@ const checkAuthorization = async () => {
 
 // window.ws = await initializeWebSocket();
 
+let loadedCSS = [];
+
 // Funzione per caricare CSS dinamicamente
 const loadCSS = (url) => {
     return new Promise((resolve, reject) => {
         const link = document.createElement('link');
         link.rel = 'stylesheet';
         link.href = url;
-        link.onload = resolve;
+        link.onload = () => {
+            loadedCSS.push(link);
+            resolve();
+        };
         link.onerror = reject;
         document.head.appendChild(link);
     });
+};
+
+// Funzione per rimuovere tutti i CSS caricati dinamicamente
+const removeLoadedCSS = () => {
+    loadedCSS.forEach(link => {
+        document.head.removeChild(link);
+    });
+    loadedCSS = [];
 };
 
 const getURI = (url) => {
@@ -86,6 +99,9 @@ const router = async () => {
 
     const view = await loadHTML(match.route.html);
     document.querySelector("#app").innerHTML = view;
+
+    // Rimuove tutti i CSS caricati dinamicamente
+    removeLoadedCSS();
 
     // Carica il CSS se definito
     if (match.route.css) {

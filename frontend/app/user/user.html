@@ -1,1 +1,81 @@
-<div>User page</div>
+<div class="button-home pb-4">
+	<a href="/" data-link id="button-home" class="btn w-auto">
+		<img src="../../assets/icons/home.png" class="icons">
+	</a>
+</div>
+<div class="profile-container">
+	<div class="background">
+		<div class="shape"></div>
+		<div class="shape"></div>
+		<div class="shape"></div>
+		<div class="shape"></div>
+		<div class="shape"></div>
+		<div class="shape"></div>
+	</div>
+	<div class="profile-panel user-info">
+		<div class="header">
+			<h3>User Info</h3>
+			<button class="edit-btn" id="edit-info">
+				<img src="../../assets/icons/edit.png" alt="Edit" class="icon">
+			</button>
+		</div>
+		<div class="user-info-content">
+			<div class="avatar-container">
+				<img id="avatar" src="" alt="Avatar" class="avatar">
+				<div class="elo-container">
+					<img src="../../assets/icons/elo.png" alt="Trophy" class="trophy-icon">
+					<span id="elo" class="elo-info"></span>
+				</div>
+			</div>
+			<div class="user-details">
+				<p><span id="username"></span></p>
+				<p><span id="fullname"></span></p>
+				<p><span id="email"></span></p>
+				<p><strong>2FA:</strong> <span id="2fa"></span></p>
+			</div>
+		</div>
+	</div>
+	<div class="profile-panel user-stats">
+		<h3>Statistics</h3>
+		<div class="first-row-sts">
+			<div class="stats lost">
+				<h4>Lost</h4>
+				<span id="lost-games"></span>
+				<div class="more-info">
+					<span id="lost-games-number"></span>
+					<span id="lost-goals"></span>
+				</div>
+			</div>
+			<div class="stats draw">
+				<h4>Draw</h4>
+				<span id="draw-games"></span>
+				<div class="more-info">
+					<span id="draw-games-number"></span>
+				</div>
+			</div>
+			<div class="stats won">
+				<h4>Won</h4>
+				<span id="won-games"></span>
+				<div class="more-info">
+					<span id="won-games-number"></span>
+				</div>
+			</div>
+			<div class="stats tournament">
+				<h4>Tournament</h4>
+				<span id="tournament-games"></span>
+			</div>
+		</div>
+	</div>
+	<div class="profile-panel user-friends">
+		<h3>Friends</h3>
+		<table id="friends-table">
+			<tbody>
+				<!-- Friends will be populated here -->
+			</tbody>
+		</table>
+	</div>
+	<div class="profile-panel match-history">
+		<h3>Match History</h3>
+		<!-- Add match history here -->
+	</div>
+</div>
