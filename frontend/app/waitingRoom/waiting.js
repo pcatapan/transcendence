@@ -46,13 +46,11 @@ const WaitingRoom = async () => {
 		let data = {
 			'queue': 'global'
 		}
-
 		sendMessage(window.ws, commands.leave_queue, data);
 	});
 };
 
 function defineModeOfPlay() {
-
 	switch (window.game.mode) {
 		case 'online':
 			joinGlobalQueue();

@@ -103,13 +103,13 @@ class Game:
 
 			# Assegna una nuova velocità alla palla basata sul valore casuale generato
 			if ran < 0.25:
-				self._ball.speed = {"x": 2, "y": 1}
+				self._ball.speed = {"x": 3, "y": 1}
 			elif ran < 0.5:
-				self._ball.speed = {"x": -2, "y": 1}
+				self._ball.speed = {"x": -3, "y": 1}
 			elif ran < 0.75:
-				self._ball.speed = {"x": 2, "y": -1}
+				self._ball.speed = {"x": 3, "y": -1}
 			else:
-				self._ball.speed = {"x": -2, "y": -1}
+				self._ball.speed = {"x": -3, "y": -1}
 		except Exception as e:
 			logger.error(f"Error in Game.resetPosition: {e}")
 
@@ -135,11 +135,11 @@ class Game:
 			self._leftPaddle.draw()
 			self._leftPaddle.updatePosition()
 
-			if self._ia_opponent:
-				self.update_ai_paddle()  # Aggiorna la posizione della paletta dell'IA
-			else:
-				self._rightPaddle.draw()
-				self._rightPaddle.updatePosition()
+			#if self._ia_opponent:
+			#	self.update_ai_paddle()  # Aggiorna la posizione della paletta dell'IA
+			#else:
+			self._rightPaddle.draw()
+			self._rightPaddle.updatePosition()
 
 		self._frame += 1
 

@@ -12,11 +12,11 @@ window.game = {
     isActive : true
 };
 
-if (APP_ENV === 'development') {
+if (APP_ENV === 'development' && false) {
     window.game.mode = 'online';
     window.game.match_id = 27;
     window.game.opponent = {
-        name: 'Opponent',
+        username: 'Opponent',
         avatar: 'https://www.gravatar.com/avatar/' + Math.floor(Math.random() * 1000000) + '?d=identicon'
     };
 }

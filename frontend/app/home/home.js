@@ -16,6 +16,12 @@ const Home = () => {
     }); 
     
     document.getElementById('button-signout').addEventListener('click', function(event) {
+
+        if (window.ws) {
+            window.ws.close();
+            window.ws = null;
+        }
+
         authService.logout().then((response) => {
             if (response.status === 200) {
                 localStorage.clear();

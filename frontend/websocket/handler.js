@@ -11,7 +11,7 @@ const commandHandlers = {
 
 	[commands.start_ball]: handler_startBall,
 	[commands.update_game]: handler_updateGame,
-	[commands.confirm_match]: () => {}, // Funzione vuota, da definire se necessario
+	[commands.confirm_match]: (response) => console.log("Match confirmed:", response.content),
 	[commands.send_prv_msg]: () => {}, // Funzione vuota, da definire se necessario,
 	[commands.leave_queue]: (response) => console.log("Left queue:", response.content),
 	null: (response) => console.log(response.content)
@@ -38,8 +38,6 @@ function handler_joinQueue(res) {
 		return;
 	}
 
-	console.log(res.content)
-
 	showSnackbar(res.content, 'info')
 }
 
@@ -53,7 +51,7 @@ function handler_foundOpponent(res) {
 
 	// Salvo i dati della partita
 	window.game.match_id = res.content.match_id
-	window.game.opponent = res.sender
+	window.game.opponent = res.content.opponent
 
 	setTimeout(() => {
 		window.navigateTo('/game');
@@ -120,12 +118,15 @@ function handler_updateGame(res) {
 }
 
 function handler_startBall(res) {
-	console.log('Ball started:', res.content)
-
 	window.game.isActive = true;
-	setTimeout(() => {
+
+	if (!window.ws_game) {
+		setTimeout(() => {
+			sendMessage(window.ws_game, commands.start_ball);
+		}, 1500)
+	} else {
 		sendMessage(window.ws_game, commands.start_ball);
-	}, 1500)
+	}
 }
 
 function handler_IAOpponentFound(res) {

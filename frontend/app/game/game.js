@@ -50,11 +50,10 @@ const Game = () => {
     
     initializeGameSocket(window.game.match_id);
 
-    setTimeout(() => {
-        console.log('Aspetto per essere sicuro che venga inizializzata la connessione WebSocket');
-    }, 1000);
-
-    sendMessage(window.ws_game, commands.confirm_match);
+    let data = {
+        'match': window.game.match_id
+    }
+    sendMessage(window.ws, commands.confirm_match, data);
 
     animationFoundOpponent();
 
@@ -91,7 +90,7 @@ function animationFoundOpponent() {
     console.log('Found opponent:', opponent);
 
     document.getElementById('opponent-avatar').src = opponent.avatar;
-    document.getElementById('opponent-name').textContent = opponent.name;
+    document.getElementById('opponent-name').textContent = opponent.username;
 
     // Countdown
     let countdown = 5;
