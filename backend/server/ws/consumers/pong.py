@@ -1,4 +1,5 @@
 import json
+import time
 import logging
 import asyncio
 from typing import Dict, Optional, Any
@@ -20,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 def set_frame_rate(fps):
 	if fps < 1 or fps > 60 or not isinstance(fps, int):
-		fps = 60
+		fps = constants.BASE_FPS
 	return 1 / fps
 
 class Pong(AsyncWebsocketConsumer, Message):
@@ -33,7 +34,7 @@ class Pong(AsyncWebsocketConsumer, Message):
 	finished = {}
 	scorelimit = 10
 
-	def __init__(self, *args, **kwargs):
+	def __init__(self, scope, *args, **kwargs):
 		super().__init__(*args, **kwargs)
 		self.client_object = None
 		self.keyboard = {}
@@ -44,7 +45,8 @@ class Pong(AsyncWebsocketConsumer, Message):
 		self.player_1_score = 0
 		self.player_2_score = 0
 		self.match_object = None
-		self.match_id = None
+		self.match_id = scope.get('match_id', None)
+		self.isAi = scope.get('ai', False)
 		self.client_id = None
 
 	async def connect(self):
@@ -58,6 +60,21 @@ class Pong(AsyncWebsocketConsumer, Message):
 				return
 			
 			self.client_id = str(user.id)
+
+			if self.isAi :
+				await self.channel_layer.group_add(f"{self.match_id}", self.channel_name)
+
+				await self.load_models()
+
+				await self.accept()
+
+				await self.broadcast_layer(
+					content="Game Ready",
+					command=constants.START_BALL,
+					channel=f"{self.match_id}"
+				)
+				return
+			
 			self.match_id = self.scope['url_route']['kwargs']['match_id']
 			#self.room_group_name = f'match_{self.match_id}'
 
@@ -73,16 +90,18 @@ class Pong(AsyncWebsocketConsumer, Message):
 
 			if self.match_object.active:
 				logger.error(f"Match {self.match_id} is active")
-				await self.close()
+				await self.close(code=4001)
 				return
 
-			logger.info(f"Adding client {self.client_id} to the match {self.match_id}")
+			if self.match_object.winner_id:
+				logger.error(f"Match {self.match_id} has already a winner")
+				await self.close(code=4001)
+				return
 
 			await self.channel_layer.group_add(f"{self.match_id}", self.channel_name)
 			# da valutare se serve
 			await self.channel_layer.group_add(f"{self.match_id}.player.{self.client_id}", self.channel_name)
 
-			logger.info(f"loading models for match {self.match_id}")
 			await self.load_models()
 
 			await self.accept()
@@ -98,7 +117,6 @@ class Pong(AsyncWebsocketConsumer, Message):
 				channel=f"{self.match_id}"
 			)
 			
-			logger.info(f"Checking if both players are connected to the match {self.match_id}")
 			if self.match_manager.player_in_list(self.player_1_id, self.match_id) and \
 			self.match_manager.player_in_list(self.player_2_id, self.match_id):
 				await self.broadcast_layer(
@@ -112,7 +130,6 @@ class Pong(AsyncWebsocketConsumer, Message):
 					command=constants.WAITING_FOR_OPPONENT,
 					channel=f"{self.match_id}"
 				)
-			logger.info(f"Client {self.client_id} connected")
 				  
 		except Exception as e:
 			await self.close()
@@ -121,7 +138,7 @@ class Pong(AsyncWebsocketConsumer, Message):
 	async def disconnect(self, code=1000):
 
 		logger.info(f"Client {self.client_id} disconnected with code {code}")
-		if (code == 4001 or self.match_id is None):
+		if (code == 4001 or self.match_id is None or self.isAi):
 			return
 
 		if self.match_manager.player_in_list(self.client_id, self.match_id):
@@ -142,6 +159,16 @@ class Pong(AsyncWebsocketConsumer, Message):
 			logger.error(f"Error during disconnect: {e}")
 
 		await self.discard_channels()
+
+	async def close(self, code=1000):
+		try:
+			await asyncio.wait_for(super().close(code=code), timeout=5.0)
+		except asyncio.TimeoutError:
+			logger.error("Timeout during close.")
+		except asyncio.CancelledError:
+			logger.error("Close cancelled.")
+		except Exception as e:
+			logger.error(f"Error during close: {e}")
 
 	async def receive(self, text_data):
 		logger.info('receive')
@@ -216,15 +243,17 @@ class Pong(AsyncWebsocketConsumer, Message):
 # -------------------------------------- Methods ----------------------------------------
 	async def load_models(self):
 		try:
-			self.player_1_id = str(self.match_object.player1.id)
-			self.player_2_id = str(self.match_object.player2.id)
+			self.player_1_id = self.isAi if self.client_id else str(self.match_object.player1.id)
+			self.player_2_id = self.isAi if 'AI' else str(self.match_object.player2.id)
 
-			# Inizializza o aggiorna la lista dei giocatori per il match corrente
-			self.match_manager.inzialize_list_of_players(self.match_id, self.client_id, self)
+			if not self.isAi:
+				# Inizializza o aggiorna la lista dei giocatori per il match corrente
+				self.match_manager.inzialize_list_of_players(self.match_id, self.client_id, self)
 
-			# Carica gli oggetti User per entrambi i giocatori
-			self.match_manager.add_player(self.match_object.player1)
-			self.match_manager.add_player(self.match_object.player2)
+			if not self.isAi:
+				# Carica gli oggetti User per entrambi i giocatori
+				self.match_manager.add_player(self.match_object.player1)
+				self.match_manager.add_player(self.match_object.player2)
 
 			# Configura i binding della tastiera per entrambi i giocatori
 			self.keyboard = {
@@ -233,9 +262,9 @@ class Pong(AsyncWebsocketConsumer, Message):
 			}
 
 			self.left_player = Player(
-				name = self.player_1_id,
 				binds = self.keyboard[self.player_1_id]
 			)
+
 			self.right_player = Player(
 				name = self.player_2_id,
 				binds = self.keyboard[self.player_2_id]
@@ -257,12 +286,13 @@ class Pong(AsyncWebsocketConsumer, Message):
 				leftPlayer = self.left_player,
 				rightPlayer = self.right_player,
 				scoreLimit = self.scorelimit,
+				ia_opponent = self.isAi
 			)
 
 		except Exception as e:
 			logger.error(f"Error loading models: {e}")
 			await self.close()
-	
+
 	@database_sync_to_async
 	@transaction.atomic
 	def save_models(self, disconnect: bool = False, close_code: int = 1000) -> Optional[Dict[str, Any]]:
@@ -321,18 +351,35 @@ class Pong(AsyncWebsocketConsumer, Message):
 
 	async def async_proces_game(self, data):
 		try:
-			frame_rate = set_frame_rate(60)
+			frame_rate = set_frame_rate(constants.BASE_FPS)
 			match_id = self.match_id
 			game = Pong.shared_game[match_id]
+			start_time = time.time()
+
+			prev_state = None
 
 			while Pong.run_game[match_id]:
 				game.pointLoop()
 
 				left_score = game._leftPlayer.score
 				right_score = game._rightPlayer.score
+				elapsed_time = time.time() - start_time
+
+				current_state = {
+					"canvas": game.reportScreen(),
+					"left_score": left_score,
+					"right_score": right_score,
+					"elapsed_time": elapsed_time
+				}
 
 				if left_score >= self.scorelimit or right_score >= self.scorelimit:
 					Pong.run_game[match_id] = False
+					await self.broadcast_layer(
+						current_state,
+						str(match_id),
+						constants.UPDATE_GAME,
+					)
+
 					await self.broadcast_layer(
 						await self.save_models(),
 						str(match_id),
@@ -342,49 +389,54 @@ class Pong(AsyncWebsocketConsumer, Message):
 					Pong.finished[match_id] = True
 
 					await asyncio.sleep(0.5)
-					await self.close()
-
+					await self.close_with_timeout()
 					return
+				
+				if prev_state != current_state:
+					await self.broadcast_layer(
+						current_state,
+						str(match_id),
+						constants.UPDATE_GAME,
+					)
+					await asyncio.sleep(frame_rate)
+					prev_state = current_state
 
-				await self.broadcast_layer(
-					{
-						"canvas": game.reportScreen(),
-						"left_score": left_score,
-						"right_score": right_score
-					},
-					str(match_id),
-					constants.UPDATE_GAME,
-				)
-				await asyncio.sleep(frame_rate)
-
-			await asyncio.sleep(0.5)
+			await asyncio.sleep(1)
 
 			if Pong.finished[match_id]:
-				await self.close()
+				await self.close_with_timeout()
 
 		except asyncio.CancelledError:
 			logger.info('Game stopped')
 		except Exception as e:
 			logger.error(f"Error during aync_proces_game: {e}")
-			await self.close()
+			await self.close_with_timeout()
 	
 	async def check_reconnect(self):
 		try:
 			for seconds in range(constants.SECOND_WAIT):
-				await self.broadcast_layer(
-					{
-						"message": "Waiting for opponent to reconnect",
-						"seconds_left": f"{constants.SECOND_WAIT - seconds - 1} seconds"
-					},
-					str(self.match_id),
-					constants.WAITING_FOR_OPPONENT,
-				)
-				await asyncio.sleep(1)
+				try:
+					await self.broadcast_layer(
+						{
+							"message": "Waiting for opponent to reconnect",
+							"seconds_left": f"{constants.SECOND_WAIT - seconds - 1} seconds"
+						},
+						str(self.match_id),
+						constants.WAITING_FOR_OPPONENT,
+					)
+					await asyncio.sleep(1)
+				except Exception as e:
+					logger.error(f"Error during check_reconnect - broadcast_layer: {e}")
+					return
 
-				if len(self.match_manager.list_of_players(self.match_id)) == 2:
-					logger.info(f"Both players reconnected in match {self.match_id}. Resuming game.")
-					Pong.run_game[self.match_id] = True
-					Pong.shared_game_task[self.match_id] = asyncio.create_task(self.async_proces_game(None))
+				try :
+					if len(self.match_manager.list_of_players[self.match_id]) == 2:
+						logger.info(f"Both players reconnected in match {self.match_id}. Resuming game.")
+						Pong.run_game[self.match_id] = True
+						Pong.shared_game_task[self.match_id] = asyncio.create_task(self.async_proces_game(None))
+						return
+				except Exception as e:
+					logger.error(f"Error during check_reconnect - list_of_players: {e}")
 					return
 
 			# If the loop completes without both players reconnecting, close the match
@@ -394,6 +446,12 @@ class Pong(AsyncWebsocketConsumer, Message):
 		except Exception as e:
 			logger.error(f"Error during check_reconnect: {e}")
 			await self.close()
+
+	async def close_with_timeout(self, code=1000):
+		try:
+			await asyncio.wait_for(self.close(code), timeout=5)
+		except asyncio.TimeoutError:
+			logger.warning("Closing the WebSocket took too long and was forcefully terminated.")
 
 	async def discard_channels(self):
 		try:

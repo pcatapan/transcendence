@@ -169,7 +169,7 @@ class CustomUser(AbstractUser):
 			'avatar'    	: self.avatar.url if self.avatar else default_avatar,
 			'elo'       	: self.ELO,
 			'2FA'			: self.is_2fa_enabled and self.is_2fa_setup_complete,
-			'friends'   	: frindship.get_all(),
+			'friends'   	: frindship.get_all() if frindship else [],
 			'match_history' : self.get_match_history(),
 			'user_stats'	: self.user_stats()
 		}

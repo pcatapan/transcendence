@@ -1,5 +1,8 @@
 from typing import Dict, Optional
 from .rectangle import MovingRectangle
+import logging
+
+logger = logging.getLogger(__name__)
 
 class Paddle(MovingRectangle):
 	
@@ -12,40 +15,43 @@ class Paddle(MovingRectangle):
 		speed: Optional[Dict[str, int]] = None,
 		size: Optional[Dict[str, int]] = None,
 		binds: Optional[Dict[str, str]] = None,
-		enclousure: Optional[Dict[str, int]] = None
+		enclosure: Optional[Dict[str, int]] = None
 	) -> None:
-
-		if position is None:
-			position = {"x": 30, "y": 0}
-		if speed is None:
-			speed = {"x": 10, "y": 10}
-		if size is None:
-			size = {"x": 10, "y": 30}
-		if binds is None:
-			binds = {
-				"up": "UNUSED_DEFAULT_KEY", 
-				"down": "UNUSED_DEFAULT_KEY",
-				"left": "UNUSED_DEFAULT_KEY", 
-				"right": "UNUSED_DEFAULT_KEY"
-			}
-		
-		# Inizializza la classe base MovingRectangle
-		self.initialize(
-			dictCanvas=dictCanvas, 
-			name=name, 
-			position=position, 
-			speed=speed, 
-			size=size, 
-			enclousure=enclousure
-		)
-		
-		self._binds = binds
-		self._maxSpeed = speed
-		self._keyboard = keyboard
-		
-		# Inizializza lo stato dei tasti a False
-		for value in binds.values():
-			self._keyboard[value] = False
+		try:
+			# Inizializza i valori di default
+			if position is None:
+				position = {"x": 30, "y": 0}
+			if speed is None:
+				speed = {"x": 10, "y": 10}
+			if size is None:
+				size = {"x": 10, "y": 30}
+			if binds is None:
+				binds = {
+					"up": "UNUSED_DEFAULT_KEY", 
+					"down": "UNUSED_DEFAULT_KEY",
+					"left": "UNUSED_DEFAULT_KEY", 
+					"right": "UNUSED_DEFAULT_KEY"
+				}
+			
+			# Inizializza la classe base MovingRectangle
+			self.initialize(
+				dictCanvas=dictCanvas, 
+				name=name, 
+				position=position, 
+				speed=speed, 
+				size=size, 
+				enclosure=enclosure
+			)
+			
+			self._binds = binds
+			self._maxSpeed = speed
+			self._keyboard = keyboard
+			
+			# Inizializza lo stato dei tasti a False
+			for value in binds.values():
+				self._keyboard[value] = False
+		except Exception as e:
+			logger.error(f"Error in Paddle.__init__: {e}")
 
 	@property
 	def maxSpeed(self) -> Dict[str, int]:
@@ -65,15 +71,15 @@ class Paddle(MovingRectangle):
 		ySpeed = 0 if not isinstance(ySpeed, (int, float)) else ySpeed
 		
 		# Impedisce al paddle di muoversi fuori dall'area di gioco lungo l'asse x
-		if xSpeed < 0 and self.position["x"] <= self.enclousure["xl"]:
+		if xSpeed < 0 and self.position["x"] <= self.enclosure["xl"]:
 			xSpeed = 0
-		if xSpeed > 0 and self.position["x"] + self.size["x"] >= self.enclousure["xh"]:
+		if xSpeed > 0 and self.position["x"] + self.size["x"] >= self.enclosure["xh"]:
 			xSpeed = 0
 		
 		# Impedisce al paddle di muoversi fuori dall'area di gioco lungo l'asse y
-		if ySpeed < 0 and self.position["y"] <= self.enclousure["yl"]:
+		if ySpeed < 0 and self.position["y"] <= self.enclosure["yl"]:
 			ySpeed = 0
-		if ySpeed > 0 and self.position["y"] + self.size["y"] >= self.enclousure["yh"]:
+		if ySpeed > 0 and self.position["y"] + self.size["y"] >= self.enclosure["yh"]:
 			ySpeed = 0
 		
 		# Calcola la nuova posizione del paddle
@@ -81,8 +87,8 @@ class Paddle(MovingRectangle):
 		yNewPos = self.position["y"] + ySpeed
 		
 		# Limita la nuova posizione all'interno dell'area di gioco
-		xNewPos = max(self.enclousure["xl"], min(xNewPos, self.enclousure["xh"] - self.size["x"]))
-		yNewPos = max(self.enclousure["yl"], min(yNewPos, self.enclousure["yh"] - self.size["y"]))
+		xNewPos = max(self.enclosure["xl"], min(xNewPos, self.enclosure["xh"] - self.size["x"]))
+		yNewPos = max(self.enclosure["yl"], min(yNewPos, self.enclosure["yh"] - self.size["y"]))
 		
 		# Aggiorna la posizione e la velocità del paddle
 		self.position = {"x": xNewPos, "y": yNewPos}

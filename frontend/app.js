@@ -1,9 +1,25 @@
 import { showSnackbar } from '/utils/snackbar.js';
 import { routes, loadHTML } from '/router.js';
 import { authService } from '/services/auth.js';
+import { APP_ENV } from '/enviroments.js';
 
 const notAuthorizedRoutes = ["/login", "/sign-up"];
 
+window.game = {
+    mode : null,
+    match_id : null,
+    opponent : null,
+    isActive : true
+};
+
+if (APP_ENV === 'development') {
+    window.game.mode = 'online';
+    window.game.match_id = 27;
+    window.game.opponent = {
+        name: 'Opponent',
+        avatar: 'https://www.gravatar.com/avatar/' + Math.floor(Math.random() * 1000000) + '?d=identicon'
+    };
+}
 
 const checkAuthorization = async () => {
     try {

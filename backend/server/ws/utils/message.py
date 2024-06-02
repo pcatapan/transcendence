@@ -35,7 +35,7 @@ class Message:
 				'type': 'unicast',
 				'command' : event['command'],
 				'content': event['content'],
-				'next_command': event['next_command'],
+				'next_command': event['next_command'] if 'next_command' in event else None,
 				'sender': sender,
 				'timestamp': timezone.now().isoformat(),
 				'meta': event['meta']

@@ -1,8 +1,32 @@
-<div id="game-container">
-	<canvas id="gameCanvas"></canvas>
-	<div id="scoreBoard">
-		<div id="player1Score" class="score">0</div>
-		<div id="player2Score" class="score">0</div>
+<div id="game-container" hidden>
+	<div class="w-100 row">
+		<div class="player-info col">
+			<img id="player1-avatar" src="" alt="Player Avatar" class="avatar">
+			<h2 id="player1-name"></h2>
+		</div>
+		<div class="scoreboard col">
+			<h2>Score</h2>
+			<div id="player1-score" class="score">0</div>
+			<div id="player2-score" class="score">0</div>
+		</div>
+		<div class="opponent-info col">
+			<img id="player2-avatar" src="" alt="Opponent Avatar" class="avatar">
+			<h2 id="player2-name"></h2>
+		</div>
 	</div>
-	<button id="startGameButton">Start Game</button>
+
+	<canvas id="game-canvas" width="850" height="520"></canvas>
+	<span class="text-left d-block mt-3 w-100">
+		<p class="m-0">Using the ArrowUp to move up the paddle.</p>
+		<p class="m-0">Using the ArrowDown to move down the paddle.</p>
+		<p class="m-0">Win the game by reaching 10 points first!</p>
+	</span>
+</div>
+
+<div class="d-flex flex-column justify-content-center align-items-center h-100 transition-5" id="opponent-info">
+	<h1 class="text-uppercase light">We found a worthy opponent for you!</h1>
+	<img id="opponent-avatar" src="" alt="Opponent Avatar" class="avatar">
+	<h3 id="opponent-name"></h3>
+
+	<h6 id="countdown" class="mt-5"></h6>
 </div>

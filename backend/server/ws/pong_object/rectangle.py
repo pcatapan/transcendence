@@ -1,5 +1,8 @@
 from abc import ABC, abstractmethod
 from typing import Dict, Optional
+import logging
+
+logger = logging.getLogger(__name__)
 
 class MovingRectangle(ABC):
     
@@ -12,18 +15,21 @@ class MovingRectangle(ABC):
         position: Optional[Dict[str, int]] = None, 
         speed: Optional[Dict[str, int]] = None, 
         size: Optional[Dict[str, int]] = None, 
-        enclousure: Optional[Dict[str, int]] = None
+        enclosure: Optional[Dict[str, int]] = None
     ):
-        self._position = position if position else {"x": 0, "y": 0}
-        self._speed = speed if speed else {"x": 0, "y": 0}
-        self._size = size if size else {"x": 0, "y": 0}
-        self._enclousure = enclousure if enclousure else {"xl": 0, "xh": 858, "yl": 0, "yh": 525}
-        
-        self._dictCanvas = dictCanvas
-        self._name = name
-        self._dictCanvas[name] = {}
-        
-        self.updateCorners()
+        try :
+            self._position = position if position else {"x": 0, "y": 0}
+            self._speed = speed if speed else {"x": 0, "y": 0}
+            self._size = size if size else {"x": 0, "y": 0}
+            self._enclosure = enclosure if enclosure else {"xl": 0, "xh": 858, "yl": 0, "yh": 525}
+            
+            self._dictCanvas = dictCanvas
+            self._name = name
+            self._dictCanvas[name] = {}
+            
+            self.updateCorners()
+        except Exception as e:
+            logger.error(f"Error in MovingRectangle.initialize: {e}")
 
     @property
     def position(self) -> Dict[str, int]:
@@ -64,8 +70,8 @@ class MovingRectangle(ABC):
         return self._corners
     
     @property
-    def enclousure(self) -> Dict[str, int]:
-        return self._enclousure
+    def enclosure(self) -> Dict[str, int]:
+        return self._enclosure
 
     def updateCorners(self) -> None:
         self._corners = {

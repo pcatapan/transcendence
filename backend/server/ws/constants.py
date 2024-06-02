@@ -7,6 +7,8 @@ ELO_DIFF = 300
 ELO_BASE = 25
 ELO_MOLTIPLIER = 2.5
 SECOND_WAIT = 10
+AI_REACTION = 0.1
+BASE_FPS = 60
 
 # Endpoints and commands (Client -> Server)
 # LOBBY
@@ -16,6 +18,8 @@ JOIN_QUEUE = 'join_queue'
 LEAVE_QUEUE = 'leave_queue'
 FOUND_OPPONENT = 'found_opponent'
 CONFIRM_MATCH = 'confirm_match'
+IA_OPPONENT = 'ia_opponent'
+IA_FOUND = 'ia_found'
 # END LOBBY
 
 # GAME

@@ -101,9 +101,18 @@ class MatchManager():
 			winner_id = match_obj.winner.id
 			loser_id = match_obj.loser().id
 
-			self.winner = CustomUser.objects.get(winner_id)
-			self.loser = CustomUser.objects.get(loser_id)
+			if not winner_id or not loser_id:
+				logger.error("Winner or loser is None. Cannot update ELO.")
+				return
 
+			self.winner = CustomUser.objects.get(id=winner_id)
+			self.loser = CustomUser.objects.get(id=loser_id)
+			if not self.loser:
+				logger.error("Loser is None. Cannot update ELO.")
+				return
+			
+			logger.info(f"Winner: {self.winner.username} - Loser: {self.loser.username}")
+		
 			winner_score = match_obj.player1_score if winner_id == player1_id else match_obj.player2_score
 			loser_score = match_obj.player2_score if winner_id == player1_id else match_obj.player1_score
 			score_margin = (winner_score - loser_score) * constants.ELO_MOLTIPLIER
@@ -115,5 +124,9 @@ class MatchManager():
 
 			self.winner.save()
 			self.loser.save()
+		except AttributeError as e:
+			logger.error(f"Error in update_elo - AttributeError: {e}")
+		except CustomUser.DoesNotExist as e:
+			logger.error(f"Error in update_elo - CustomUser.DoesNotExist: {e}")
 		except Exception as e:
 			logger.error(f"Error in update_elo: {e}")

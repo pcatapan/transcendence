@@ -1,9 +1,12 @@
 html,
 body {
+    background-color: #000 !important;
+    color: #fff !important;
     font-family: sans-serif;
     margin: 0;
     height: 100%;
 }
+
 
 
 /* SNACKBAR */
@@ -43,3 +46,67 @@ body {
 .snackbar.info {
     background-color: #17a2b8;
 }
+/* SNACKBAR END */
+
+
+
+/* MODAL */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 9999;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-show {
+    display: block !important;
+}
+/* MODAL END */
+
+
+
+/* FONT */
+.light {
+    font-weight: 100;
+}
+/* FONT END */
+
+
+
+/* SIZING */
+.min-w-25 {
+    min-width: 25%;
+}
+
+.min-w-50 {
+    min-width: 50%;
+}
+/* SIZING END */
+
+
+
+/* BUTTON */
+.disabled {
+    pointer-events: none;
+    opacity: 0.6;
+}
+/* BUTTON END */
+
+
+
+/* ANIMATION */
+.transition-3 {
+    transition: all 0.3s;
+}
+
+.transition-5 {
+    transition: all 0.5s;
+}
+/* ANIMATION END */

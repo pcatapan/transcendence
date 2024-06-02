@@ -1,6 +1,6 @@
 import { showSnackbar } from '../../utils/snackbar.js';
 import { authService } from '../../services/auth.js';
-import { initializeWebSocket } from '../../websocket.js';
+import { initializeWebSocket } from '../../websocket/Lobby.js'; 
 
 const Login = () => {
 
@@ -16,10 +16,10 @@ const Login = () => {
 
                 initializeWebSocket();
                 localStorage.setItem('user', response.body['data']['id']);
-                
+
                 setTimeout(() =>{
                     window.navigateTo('/');
-                }, 500)
+                }, 1500)
             }
             else if (response.status === 206) {
                 // Open OTP modal

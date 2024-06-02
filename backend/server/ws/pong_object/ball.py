@@ -7,14 +7,14 @@ logger = logging.getLogger(__name__)
 
 class Ball(MovingRectangle):
 	
-	# enclousure avrà valori che non sono nel altezza e larghezza del canvas 
+	# enclosure avrà valori che non sono nel altezza e larghezza del canvas 
 	def __init__(self,
 		dictCanvas: dict,
 		name: str,
 		position: Optional[Dict[str, int]] = None,
 		speed: Optional[Dict[str, int]] = None,
 		size: Optional[Dict[str, int]] = None,
-		enclousure: Optional[Dict[str, int]] = None
+		enclosure: Optional[Dict[str, int]] = None
 	) -> None:
 		
 		if position is None:
@@ -30,7 +30,7 @@ class Ball(MovingRectangle):
 			position = position,
 			speed = speed, 
 			size = size,
-			enclousure = enclousure
+			enclosure = enclosure
 		)
 
 		self._collide = []
@@ -91,7 +91,7 @@ class Ball(MovingRectangle):
 
 	def updatePosition(self) -> int:
 		# Controlla se la palla ha superato il bordo destro dell'enclosure
-		if self.position["x"] + self.size["x"] >= self.enclousure["xh"]:
+		if self.position["x"] + self.size["x"] >= self.enclosure["xh"]:
 			# Inverte la direzione della palla
 			self.speed = {
 				"x": -self.speed["x"],
@@ -100,7 +100,7 @@ class Ball(MovingRectangle):
 			return 1
 		
 		# Controlla se la palla ha superato il bordo sinistro dell'enclosure
-		if self.position["x"] < self.enclousure["xl"]:
+		if self.position["x"] < self.enclosure["xl"]:
 			# Inverte la direzione della palla
 			self.speed = {
 				"x": -self.speed["x"],
@@ -109,8 +109,8 @@ class Ball(MovingRectangle):
 			return -1
 	
 		# Controlla se la palla ha superato il bordo superiore o inferiore dell'enclosure
-		if self.position["y"] + self.size["y"] > self.enclousure["yh"] \
-			or self.position["y"] < self.enclousure["yl"]\
+		if self.position["y"] + self.size["y"] > self.enclosure["yh"] \
+			or self.position["y"] < self.enclosure["yl"]\
 		:
 			# Inverte la direzione della palla
 			self.speed = {
@@ -131,4 +131,7 @@ class Ball(MovingRectangle):
 		return 0
 	
 	def addColider(self, colider: MovingRectangle):
-		self._collide.append(colider)
+		try :
+			self._collide.append(colider)
+		except Exception as e:
+			logger.error(f"Error in Ball.addColider: {e}")

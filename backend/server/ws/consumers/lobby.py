@@ -89,6 +89,8 @@ class Lobby(AsyncWebsocketConsumer, Message):
 				constants.LEAVE_QUEUE: self.handle_leave_queue, # Fatto
 
 				constants.CONFIRM_MATCH: self.handle_confirm_match, # Fatto
+
+				constants.IA_OPPONENT: self.handle_ia_opponent, # Fatto
 			}
 
 			handler = handlers.get(command, self.handle_unknown_command)
@@ -136,6 +138,31 @@ class Lobby(AsyncWebsocketConsumer, Message):
 	
 	async def handle_confirm_match(self, data):
 		await self.queue_manager.confirm_match(data['match'], self)
+
+	async def handle_ia_opponent(self, data):
+		import time
+		import re
+
+		match_id = f"{self.client_id}_vs_ia_{int(time.time() * 1000)}"
+    
+		match_id = re.sub(r'[^a-zA-Z0-9_\-\.]', '_', match_id)
+
+		message = {
+			'match_id': match_id,
+			'palyer_1': self.client_id,
+			'player_2': 'IA',
+		}
+
+		await self.channel_layer.send(self.channel_name, {
+			'status': 200,
+			'type': "unicast",
+			'command': constants.IA_FOUND,
+			'content': message,
+			'meta': {
+				"channel": "lobby",
+				"priority": 'normal',
+			}
+		})
 
 	async def handle_unknown_command(self, data):
 		await self.send_json({'error': 'Unknown command'})

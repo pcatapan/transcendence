@@ -44,6 +44,8 @@ class QueueManager():
 			await consumer.send_layer('Queue not found', command=constants.LEAVE_QUEUE, status='404')
 
 	async def find_opponent(self, queue_name, consumer):
+		logger.info(f"Finding opponent for {consumer.user.username}")
+		logger.info(f"Queue: {self.queues[queue_name]}")
 		if len(self.queues[queue_name]) < 2:
 			await consumer.send_layer(
 				'Not enough players in the queue, waiting for more players',
@@ -134,7 +136,7 @@ class QueueManager():
 			match = Match.objects.create(
 				player1=user,
 				player2=opponent,
-				active=True
+				active=False
 			)
 
 			match.save()
