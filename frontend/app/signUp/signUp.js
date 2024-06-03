@@ -22,7 +22,7 @@ const SignUp = () => {
 		}
 
         authService.signUp(email, password, username, fullname).then((response) => {
-            if (response.status === 200) {
+            if (response.status === 201) {
                 showSnackbar(`${response.body['message']}`, 'success');
                 setTimeout(() =>{
                     window.navigateTo('/');

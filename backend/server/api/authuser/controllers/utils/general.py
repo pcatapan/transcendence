@@ -3,7 +3,7 @@ import json
 
 from django.http import JsonResponse
 
-def set_token(user, jwt_token, message):
+def set_token(user, jwt_token, message, code = 200):
 	response = JsonResponse({
 		'message': message,
 		'data' : user.to_json()
