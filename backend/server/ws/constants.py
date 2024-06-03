@@ -21,6 +21,8 @@ FOUND_OPPONENT = 'found_opponent'
 CONFIRM_MATCH = 'confirm_match'
 IA_OPPONENT = 'ia_opponent'
 IA_FOUND = 'ia_found'
+LOCAL_OPPONENT = 'local_opponent'
+LOCAL_FOUND = 'local_found'
 # END LOBBY
 
 # GAME

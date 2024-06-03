@@ -92,6 +92,7 @@ class Lobby(AsyncWebsocketConsumer, Message):
 				constants.CONFIRM_MATCH: self.handle_confirm_match, # Fatto
 
 				constants.IA_OPPONENT: self.handle_ia_opponent, # Fatto
+				constants.LOCAL_OPPONENT: self.handle_local_opponent, # Fatto
 			}
 
 			handler = handlers.get(command, self.handle_unknown_command)
@@ -158,6 +159,30 @@ class Lobby(AsyncWebsocketConsumer, Message):
 			'status': 200,
 			'type': "unicast",
 			'command': constants.IA_FOUND,
+			'content': message,
+			'meta': {
+				"channel": "lobby",
+				"priority": 'normal',
+			}
+		})
+
+	async def handle_local_opponent(self, data):
+		import time
+		import re
+
+		match_id = f"{self.client_id}_vs_local_{int(time.time() * 1000)}"
+		match_id = re.sub(r'[^a-zA-Z0-9_\-\.]', '_', match_id)
+
+		message = {
+			'match_id': match_id,
+			'palyer_1': self.client_id,
+			'player_2': 'Guest',
+		}
+
+		await self.channel_layer.send(self.channel_name, {
+			'status': 200,
+			'type': "unicast",
+			'command': constants.LOCAL_FOUND,
 			'content': message,
 			'meta': {
 				"channel": "lobby",
