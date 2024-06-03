@@ -27,8 +27,8 @@
 }
 
 .avatar {
-    width: 100px;
-    height: 100px;
+    width: 64px;
+    height: 64px;
     border-radius: 50%;
     margin-bottom: 20px;
 }
@@ -42,4 +42,34 @@
         opacity: 1;
         transform: translateY(0);
     }
+}
+
+.btn {
+	z-index: 9999;
+    margin-top: 20px;
+    padding: 10px 15px;
+    color: var(--button-text-color);
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+	border: 1px solid transparent;
+}
+
+.btn:hover {
+    color: var(--button-background-color);
+	border: 1px solid #00ff00;
+}
+
+.icons{
+	width: 30px;
+}
+
+.button-home{
+    width: 100%;
+    justify-content: end;
+    align-items: end;  
+	padding-right: 2rem;
+    margin-bottom: 3rem;
+    display: flex;
 }

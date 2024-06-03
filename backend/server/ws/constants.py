@@ -11,7 +11,7 @@ AI_PREFIX_MATCH = '_vs_ia_'
 LOCAL_PREFIX_MATCH = '_vs_local_'
 AI_REACTION = 0.03
 BASE_FPS = 60
-SCORE_LIMIT = 2
+SCORE_LIMIT = 200
 
 # Endpoints and commands (Client -> Server)
 # LOBBY
