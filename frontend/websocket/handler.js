@@ -11,6 +11,7 @@ const commandHandlers = {
 
 	[commands.start_ball]: handler_startBall,
 	[commands.update_game]: handler_updateGame,
+	[commands.finish_match]: handler_finishMatch,
 	[commands.confirm_match]: (response) => console.log("Match confirmed:", response.content),
 	[commands.send_prv_msg]: () => {}, // Funzione vuota, da definire se necessario,
 	[commands.leave_queue]: (response) => console.log("Left queue:", response.content),
@@ -142,6 +143,28 @@ function handler_IAOpponentFound(res) {
 	setTimeout(() => {
 		window.navigateTo('/game');
 	}, 1500)
+}
+
+function handler_finishMatch(res) {
+	console.log('Match finished:', res.content)
+
+	// Svuoto l'oggetto game
+	window.game.match_id = null
+	window.game.mode = null
+	window.game.isActive = false
+	window.game.opponent = null
+
+	// Salvo i dati di chi ha vinto
+	window.game.endGame = {
+		winner : res.content.winner_username,
+		winner_score : res.content.player1_score > res.content.player2_score ? res.content.player1_score : res.content.player2_score,
+		loser : res.content.player1_username === res.content.winner_username ? res.content.player2_username : res.content.player1_username,
+		loser_score : res.content.player1_score < res.content.player2_score ? res.content.player1_score : res.content.player2_score,
+	}
+
+	setTimeout(() => {
+		window.navigateTo('/end-game');
+	}, 500)
 }
 
 export { parserRespons }

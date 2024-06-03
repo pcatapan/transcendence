@@ -9,7 +9,8 @@ window.game = {
     mode : null,
     match_id : null,
     opponent : null,
-    isActive : true
+    isActive : true,
+    endGame : {}
 };
 
 if (APP_ENV === 'development' && false) {

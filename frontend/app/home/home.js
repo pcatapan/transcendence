@@ -36,12 +36,20 @@ const Home = () => {
 
     document.getElementById('button-game-online').addEventListener('click', function(event) {
         window.game.mode = gameMode.online;
+        window.game.endGame = {};
+        window.game.isActive = true;
+        window.game.opponent = null;
+        window.game.match_id = null;
 
         window.navigateTo('/waiting-room');
     });
 
     document.getElementById('button-ai-opponent').addEventListener('click', function(event) {
         window.game.mode = gameMode.ia_opponent;
+        window.game.endGame = {};
+        window.game.isActive = true;
+        window.game.opponent = null;
+        window.game.match_id = null;
 
         window.navigateTo('/waiting-room');
     });

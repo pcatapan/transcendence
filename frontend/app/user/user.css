@@ -1,28 +1,9 @@
 :root {
-    --background-color: #000;
-    --panel-background-color: #101010;
-    --panel-shadow-blue: 0 0 10px rgb(0, 217, 255);
-    --panel-shadow-green: 0 0 10px rgb(0, 255, 13);
-    --form-background-color: rgb(0 0 0 / 72%);
-    --form-border-color: rgba(255, 255, 255, 0.1);
-    --form-shadow: 0 0 10px rgb(255, 255, 255);
-    --font-family: 'Poppins', sans-serif;
-    --font-color: #ffffff;
 	--avatar-size: 64px;
-	--shape-gradient-1: linear-gradient(#060ba6, #23a2f6);
-    --shape-gradient-2: linear-gradient(to right, #fe6d25, #b80000);
-    --shape-gradient-3: linear-gradient(#ff8c00, #ff0080);
-    --shape-gradient-4: linear-gradient(#00ff00, #00ffff);
-    --shape-gradient-5: linear-gradient(#ff00ff, #800080);
-    --shape-gradient-6: linear-gradient(#ff0000, #ffff00);
 }
 
 body {
-    background-color: var(--background-color);
     padding: 20px;
-	width: 100%;
-    font-family: var(--font-family);
-    color: var(--font-color);
     height: 100vh;
 }
 
