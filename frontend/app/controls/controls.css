@@ -7,7 +7,7 @@
     --input-background-color: rgba(255, 255, 255, 0.07);
     --input-placeholder-color: #e5e5e5;
     --button-background-color: #ffffff;
-    --button-text-color: #ffffff;
+    --button-text-color: #080710;
     --shape-gradient-1: linear-gradient(#060ba6, #23a2f6);
     --shape-gradient-2: linear-gradient(to right, #fe6d25, #b80000);
     --shape-gradient-3: linear-gradient(#ff8c00, #ff0080);
@@ -109,15 +109,41 @@ body {
 .panel {
     background-color: var(--panel-background-color);
     border-radius: 30px;
-    width: 500px;
+    width: 600px;
     padding: 2rem;
     height: fit-content;
     text-align: center;
-	margin: 0px 5rem;
+}
+
+.panel h3 {
+    font-size: 32px;
+    font-weight: 500;
+    line-height: 42px;
 }
 
 .shadow-blue{
 	box-shadow: 0 0 20px #00e1ff;
+}
+
+.shadow-green{
+	box-shadow: 0 0 20px #00ff00;
+}
+
+.shadow-red{
+	box-shadow: 0 0 20px #ff0000;
+}
+
+.avatar-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+	gap: 15px;
+}
+
+.avatar {
+    width: var(--avatar-size);
+    height: var(--avatar-size);
+    border-radius: 50%;
 }
 
 .btn {
@@ -135,6 +161,10 @@ body {
 .btn:hover {
     color: var(--button-background-color);
 	border: 1px solid #00ff00;
+}
+
+.icons{
+	width: 30px;
 }
 
 .button-home{

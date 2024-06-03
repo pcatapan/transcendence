@@ -1,6 +1,7 @@
 import { initializeGameSocket, sendMessage } from "../../websocket/Game.js";
 import { commands } from "../../websocket/command.js";
 import { APP_ENV } from "../../enviroments.js";
+import { userService } from "../../services/user-service.js";
 
 const Game = () => {
     console.log("Game component loaded");
@@ -44,10 +45,19 @@ const Game = () => {
 function animationFoundOpponent() {
     let opponent = window.game.opponent;
 
+    let user
+    userService.userProfile(localStorage.getItem('user')).then((response) => {
+        if (response.status === 200) {
+            user = response.body.data;
+        }else {
+            showSnackbar(`${response.body.message}`, 'error');
+        }
+    })
+
     console.log('Found opponent:', opponent);
 
-    document.getElementById('opponent-avatar').src = opponent.avatar;
-    document.getElementById('opponent-name').textContent = opponent.username;
+    document.getElementById('opponent-avatar').src = opponent['avatar'];
+    document.getElementById('opponent-name').textContent = opponent['name'];
 
     // Countdown
     let countdown = 5;
@@ -78,6 +88,21 @@ function animationFoundOpponent() {
                 document.getElementById('opponent-info').setAttribute('hidden', true);
                 // rimuovo d-flex
                 document.getElementById('opponent-info').classList.remove('d-flex');
+
+                document.getElementById('player2-avatar').src = opponent['avatar'];
+
+                document.getElementById('player2-name').textContent = opponent['name'];
+
+                document.getElementById('player1-avatar').src = user['avatar'];
+
+                document.getElementById('player1-name').textContent = user['username'];
+
+                console.log(window.game)
+                if (window.game['mode'] == 'ia_opponent') {
+                    document.getElementById('button-home').style.display = 'flex';
+                } else {
+                    document.getElementById('button-home').style.display = 'none';
+                }
 
                 startGame();
             }, 500);

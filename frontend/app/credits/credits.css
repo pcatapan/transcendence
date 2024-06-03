@@ -171,5 +171,6 @@ body {
     width: 100%;
     display: flex;
     justify-content: end;
-    align-items: end;  
+    align-items: end;
+    padding-right: 2rem;
 }

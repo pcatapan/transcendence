@@ -9,7 +9,7 @@ ELO_MOLTIPLIER = 2.5
 SECOND_WAIT = 10
 AI_REACTION = 0.03
 BASE_FPS = 60
-SCORE_LIMIT = 2
+SCORE_LIMIT = 200
 
 # Endpoints and commands (Client -> Server)
 # LOBBY

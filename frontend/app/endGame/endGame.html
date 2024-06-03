@@ -1,11 +1,23 @@
-<div class="d-flex flex-column justify-content-center align-items-center h-100 w-100">
-	<h1 class="display-4">Game Over</h1>
-	<div id="end-game-info" class="mt-4">
-		<!-- Dati del vincitore e del perdente saranno inseriti qui -->
+<div class="h-100 w-100">
+	<div class="background">
+		<div class="shape"></div>
+		<div class="shape"></div>
+		<div class="shape"></div>
+		<div class="shape"></div>
+		<div class="shape"></div>
+		<div class="shape"></div>
 	</div>
-	<div class="mt-4 d-flex gap-4">
-		<a href="/" data-link class="btn btn-primary">Back to lobby</a>
-
-		<button id="play-again" class="btn btn-primary">Play again</button>
+	<div class="panels-container">
+		<div class="d-flex flex-column justify-content-center align-items-center z-3 position-relative panel shadow-blue">
+			<h1 class="display-4">Game Over</h1>
+			<div id="end-game-info" class="mt-4">
+				<!-- Dati del vincitore e del perdente saranno inseriti qui -->
+			</div>
+			<div class="mt-4 d-flex gap-4">
+				<a href="/" data-link id="button-home" class="btn w-auto">Back to lobby</a>
+	
+				<button id="play-again" class="btn">Play again</button>
+			</div>
+		</div>
 	</div>
 </div>
