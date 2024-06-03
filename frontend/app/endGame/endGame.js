@@ -5,7 +5,7 @@ const EndGame = () => {
 
 	let endGameInfo = window.game && window.game.endGame;
 
-	if (APP_ENV === 'development') {
+	if (APP_ENV === 'development' && false) {
 		window.game = {
 			endGame : {
 				winner: 'Player 1',

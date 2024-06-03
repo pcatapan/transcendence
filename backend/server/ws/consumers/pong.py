@@ -32,7 +32,7 @@ class Pong(AsyncWebsocketConsumer, Message):
 	shared_game = {}
 	run_game = {}
 	finished = {}
-	scorelimit = 10
+	scorelimit = constants.SCORE_LIMIT
 
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
@@ -305,6 +305,21 @@ class Pong(AsyncWebsocketConsumer, Message):
 	@database_sync_to_async
 	@transaction.atomic
 	def save_models(self, disconnect: bool = False, close_code: int = 1000) -> Optional[Dict[str, Any]]:
+		
+		if self.isAi:
+			game = Pong.shared_game[self.match_id]
+			winner = self.player_2_id if game._rightPlayer.score > game._leftPlayer.score else self.player_1_id
+			return {
+				"winner_id": winner,
+				"winner_username": "AI" if winner == self.player_2_id else self.player_object.username,
+				"loser_id": "AI" if winner == self.player_1_id else self.player_object.id,
+
+				"player1_username": self.player_object.username,
+				"player1_score": game._leftPlayer.score,
+				"player2_username": "AI",
+				"player2_score": game._rightPlayer.score,
+			}
+
 		User = import_string('api.authuser.models.CustomUser')
 
 		if Pong.finished.get(self.match_id):

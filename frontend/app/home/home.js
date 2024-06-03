@@ -34,6 +34,7 @@ const Home = () => {
         })
     });
 
+    // Gestisco le partite online
     document.getElementById('button-game-online').addEventListener('click', function(event) {
         window.game.mode = gameMode.online;
         window.game.endGame = {};
@@ -44,6 +45,7 @@ const Home = () => {
         window.navigateTo('/waiting-room');
     });
 
+    // Gstisco le partite con l'IA
     document.getElementById('button-ai-opponent').addEventListener('click', function(event) {
         window.game.mode = gameMode.ia_opponent;
         window.game.endGame = {};

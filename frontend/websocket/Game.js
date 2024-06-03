@@ -29,6 +29,7 @@ async function initializeGameSocket(matchId) {
             };
 
             window.ws_game.onclose = function (event) {
+                window.ws_game = null;
                 console.log('WebSocketGame connection closed', event);
             };
         }
