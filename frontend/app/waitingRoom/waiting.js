@@ -64,7 +64,7 @@ function defineModeOfPlay() {
 			break;
 		default:
 			showSnackbar('Unknown game mode', 'error');
-			window.navigateTo('/home');
+			window.navigateTo('/');
 
 			console.log('Unknown game mode:', window.game.mode);
 			break;

@@ -9,7 +9,7 @@ from .consumers.pong import Pong
 websocket_urlpatterns = [
 	re_path(r"^ws/lobby", Lobby.as_asgi()),
 	re_path(r"^ws/pong/(?P<match_id>\w+)", Pong.as_asgi(), name='pong'),
-	re_path(r"^ws/ai/(?P<match_id>\w+)", Pong.as_asgi(), name='pong_ai'),
+
 	#re_path(r"^ws/tournament/(?P<tournament_id>\w+)/$", Tournament.as_asgi()),
 	#re_path(r"^ws/pong/(?P<match_id>\w+)/$", Pong.as_asgi()),
 ]

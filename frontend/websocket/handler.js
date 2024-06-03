@@ -8,6 +8,7 @@ const commandHandlers = {
 	[commands.found_opponent]: handler_foundOpponent,
 	[commands.waiting_for_opponent]: handler_WaitingForOpponent,
 	[commands.ia_found]: handler_IAOpponentFound,
+	[commands.local_found]: handler_LocalOpponentFound,
 
 	[commands.start_ball]: handler_startBall,
 	[commands.update_game]: handler_updateGame,
@@ -150,7 +151,6 @@ function handler_finishMatch(res) {
 
 	// Svuoto l'oggetto game
 	window.game.match_id = null
-	window.game.mode = null
 	window.game.isActive = false
 	window.game.opponent = null
 
@@ -165,6 +165,21 @@ function handler_finishMatch(res) {
 	setTimeout(() => {
 		window.navigateTo('/end-game');
 	}, 500)
+}
+
+function handler_LocalOpponentFound(res) {
+	console.log('Local Opponent found:', res.content)
+
+	// Salvo i dati della partita
+	window.game.match_id = res.content.match_id
+	window.game.opponent = {
+		name : 'Player 2',
+		avatar : 'https://www.gravatar.com/avatar/' + Math.floor(Math.random() * 1000000) + '?d=identicon'
+	}
+
+	setTimeout(() => {
+		window.navigateTo('/game');
+	}, 1500)
 }
 
 export { parserRespons }

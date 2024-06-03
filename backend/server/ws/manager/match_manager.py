@@ -69,14 +69,27 @@ class MatchManager():
 			logger.error(f"Error in get_match_atomic: {e}")
 			return None
 	
-	def get_defoult_keyboard(self, player_id):
-		return {
-			'up': f"up.{player_id}",
-			'down': f"down.{player_id}",
-			'left': False,
-			'right': False,
-			'space': False,
-		}
+	def get_defoult_keyboard(self, player_id, local=False):
+		try :
+			if local:
+				return {
+					"up": f"w.{player_id}",
+					"down": f"s.{player_id}",
+					'left': False,
+					'right': False,
+					'space': False,
+				}
+			
+			return {
+				"up": f"up.{player_id}",
+				"down": f"down.{player_id}",
+				'left': False,
+				'right': False,
+				'space': False,
+			}
+		except Exception as e:
+			logger.error(f"Error in get_defoult_keyboard: {e}")
+			return None
 	
 	def player_in_list(self, player_id, match_id):
 		try :

@@ -145,7 +145,7 @@ class Lobby(AsyncWebsocketConsumer, Message):
 		import time
 		import re
 
-		match_id = f"{self.client_id}_vs_ia_{int(time.time() * 1000)}"
+		match_id = f"{self.client_id}{constants.AI_PREFIX_MATCH}{int(time.time() * 1000)}"
     
 		match_id = re.sub(r'[^a-zA-Z0-9_\-\.]', '_', match_id)
 
@@ -170,7 +170,7 @@ class Lobby(AsyncWebsocketConsumer, Message):
 		import time
 		import re
 
-		match_id = f"{self.client_id}_vs_local_{int(time.time() * 1000)}"
+		match_id = f"{self.client_id}{constants.LOCAL_PREFIX_MATCH}{int(time.time() * 1000)}"
 		match_id = re.sub(r'[^a-zA-Z0-9_\-\.]', '_', match_id)
 
 		message = {

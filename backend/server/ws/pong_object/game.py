@@ -36,6 +36,7 @@ class Game:
 			self._scoreReporter = {}
 
 			self._enclosure = enclosure if enclosure else {"xl": 0, "xh": 850, "yl": 0, "yh": 520}
+			enclosure_height = self._enclosure["yh"] - self._enclosure["yl"]
 
 			self._ball = Ball(
 				dictCanvas = self._dictCanvas, 
@@ -49,7 +50,7 @@ class Game:
 				keyboard=self._dictKeyboard,
 				dictCanvas = self._dictCanvas,
 				name = "leftPaddle",
-				position= {"x" : self._enclosure["xl"] + 30, "y" : self._enclosure["yl"]},
+				position= {"x" : self._enclosure["xl"] + 30, "y" : (enclosure_height - 100) / 2}, 
 				speed = {"x" : 10, "y": 10}, 
 				size = {"x":10, "y":100},
 				binds = self._leftPlayer.binds,
@@ -60,7 +61,7 @@ class Game:
 				keyboard=self._dictKeyboard,
 				dictCanvas = self._dictCanvas,
 				name = "rightPaddle",
-				position= {"x" : self._enclosure["xh"] - 30, "y" : self._enclosure["yl"]},
+				position= {"x" : self._enclosure["xh"] - 30, "y" : (enclosure_height - 100) / 2},
 				speed = {"x" : 10, "y": 10}, 
 				size = {"x":10, "y":100},
 				binds = self._rightPlayer.binds,

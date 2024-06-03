@@ -1,6 +1,6 @@
 import { initializeGameSocket, sendMessage } from "../../websocket/Game.js";
 import { commands } from "../../websocket/command.js";
-import { APP_ENV } from "../../enviroments.js";
+import { APP_ENV, gameMode } from "../../enviroments.js";
 
 const Game = () => {
     console.log("Game component loaded");
@@ -16,7 +16,6 @@ const Game = () => {
 
     // Gestisci il rilascio dei tasti
 	document.addEventListener('keyup', (event) => {
-        console.log('Game isActive:', window.game.isActive, "keyup event: ", event.key);
         if (window.game.isActive === false)
             return;
 
@@ -25,11 +24,21 @@ const Game = () => {
 		} else if (event.key === 'ArrowDown') {
 			sendMessageKeyboard('down', 'on_release');
 		}
+
+        if (window.game.mode !== gameMode.offline) {
+            return;
+        }
+
+        if (event.key === 'w') {
+            sendMessageKeyboard('w', 'on_release');
+        }
+        else if (event.key === 's') {
+            sendMessageKeyboard('s', 'on_release');
+        }
 	});
 
     // Gestisci la pressione dei tasti
 	document.addEventListener('keydown', (event) => {
-        console.log('Game isActive:', window.game.isActive, "keydown event: ", event.key);
         if (window.game.isActive === false)
             return;
 
@@ -38,6 +47,17 @@ const Game = () => {
 		} else if (event.key === 'ArrowDown') {
 			sendMessageKeyboard('down', 'on_press');
 		}
+
+        if (window.game.mode !== gameMode.offline) {
+            return;
+        }
+
+        if (event.key === 'w') {
+            sendMessageKeyboard('w', 'on_press');
+        }
+        else if (event.key === 's') {
+            sendMessageKeyboard('s', 'on_press');
+        }
 	});
 };
 

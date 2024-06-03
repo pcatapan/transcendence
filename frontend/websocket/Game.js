@@ -8,13 +8,7 @@ async function initializeGameSocket(matchId) {
         let isAuthorized = await authService.checkAuthorization();
         if (isAuthorized.status === 201) {
 
-            if (window.game.mode === gameMode.online) {
-                window.ws_game = new WebSocket(`${webSocketUrl}/pong/${matchId}`);
-            }
-
-            if (window.game.mode === gameMode.ia_opponent) {
-                window.ws_game = new WebSocket(`${webSocketUrl}/ai/${matchId}`);
-            }
+            window.ws_game = new WebSocket(`${webSocketUrl}/pong/${matchId}`);
             
 			window.ws_game.onmessage = function (event) {
                 parserRespons(event.data);

@@ -47,6 +47,7 @@ class Pong(AsyncWebsocketConsumer, Message):
 		self.match_object = None
 		self.match_id = None
 		self.isAi = False
+		self.isLocal = False
 		self.client_id = None
 
 	async def connect(self):
@@ -63,7 +64,7 @@ class Pong(AsyncWebsocketConsumer, Message):
 
 			self.match_id = self.scope['url_route']['kwargs']['match_id']
 			# se il march_id contiene la stringa '_vs_ia_' allora si tratta di una partita contro l'IA
-			if '_vs_ia_' in self.match_id:
+			if constants.AI_PREFIX_MATCH in self.match_id:
 				self.isAi = True
 				logger.info(f"Match ID: {self.match_id}")
 				await self.channel_layer.group_add(f"{self.match_id}", self.channel_name)
@@ -78,6 +79,20 @@ class Pong(AsyncWebsocketConsumer, Message):
 				)
 				return
 			
+			if constants.LOCAL_PREFIX_MATCH in self.match_id:
+				self.isLocal = True
+				logger.info(f"Match ID: {self.match_id}")
+				await self.channel_layer.group_add(f"{self.match_id}", self.channel_name)
+				await self.load_models()
+				
+				await self.accept()
+
+				await self.broadcast_layer(
+					content="Game Ready",
+					command=constants.START_BALL,
+					channel=f"{self.match_id}"
+				)
+				return
 			#self.room_group_name = f'match_{self.match_id}'
 
 			self.match_object = await self.match_manager.get_match_and_player(self.match_id)
@@ -207,6 +222,7 @@ class Pong(AsyncWebsocketConsumer, Message):
 	async def handle_keyboard_input(self, data):
 		
 		if not Pong.run_game[self.match_id]:
+			logger.error(f"Game not started")
 			await self.send_json({'error': 'Game not started'})
 			return
 
@@ -215,13 +231,16 @@ class Pong(AsyncWebsocketConsumer, Message):
 			key = data.get('key')
 			formatted_key = f'{key}.{self.client_id}'
 
+			if self.isLocal:
+				if key in ['w', 's']:
+					formatted_key = f'{key}.Guest'
+
 			key_status_map = {
 				'on_press': True,
 				'on_release': False,
 			}
 
 			await asyncio.sleep(0.01)
-
 			if key_status in key_status_map:
 				Pong.shared_game_keyboard[self.match_id][formatted_key] = key_status_map[key_status]
 			else:
@@ -247,18 +266,20 @@ class Pong(AsyncWebsocketConsumer, Message):
 # -------------------------------------- Methods ----------------------------------------
 	async def load_models(self):
 		try:
+			self.player_1_id = self.client_id
 			if self.isAi :
-				self.player_1_id = self.client_id
 				self.player_2_id = 'AI'
+			elif self.isLocal :
+				self.player_2_id = 'Guest'
 			else :
 				self.player_1_id = self.match_object.player1.id
 				self.player_2_id = self.match_object.player2.id
 			
-			if not self.isAi :
+			if not self.isAi and not self.isLocal:
 				# Inizializza o aggiorna la lista dei giocatori per il match corrente
 				self.match_manager.inzialize_list_of_players(self.match_id, self.client_id, self)
 
-			if not self.isAi :
+			if not self.isAi and not self.isLocal:
 				# Carica gli oggetti User per entrambi i giocatori
 				self.match_manager.add_player(self.match_object.player1)
 				self.match_manager.add_player(self.match_object.player2)
@@ -266,7 +287,7 @@ class Pong(AsyncWebsocketConsumer, Message):
 			# Configura i binding della tastiera per entrambi i giocatori
 			self.keyboard = {
 				self.player_1_id: self.match_manager.get_defoult_keyboard(self.player_1_id),
-				self.player_2_id: self.match_manager.get_defoult_keyboard(self.player_2_id),
+				self.player_2_id: self.match_manager.get_defoult_keyboard(self.player_2_id, self.isLocal)
 			}
 
 			self.left_player = Player(
@@ -279,13 +300,25 @@ class Pong(AsyncWebsocketConsumer, Message):
 				binds = self.keyboard[self.player_2_id]
 			)
 
-			# Inizializza la tastiera condivisa del gioco
-			Pong.shared_game_keyboard[self.match_id] = {
+			multipalyer_keyboard = {
 				f'up.{self.player_1_id}': False,
 				f'down.{self.player_1_id}': False,
 				f'up.{self.player_2_id}': False,
 				f'down.{self.player_2_id}': False,
 			}
+
+			local_keyboard = {
+				# Tastiera per giocatore 1
+				f'up.{self.client_id}': False,
+				f'down.{self.client_id}': False,
+
+				# Tastiera per giocatore 2
+				f"w.{self.client_id}": False,
+				f"s.{self.client_id}": False,
+			}
+
+			# Inizializza la tastiera condivisa del gioco
+			Pong.shared_game_keyboard[self.match_id] = multipalyer_keyboard if not self.isLocal else local_keyboard
 
 			Pong.run_game[self.match_id] = False
 
@@ -317,6 +350,20 @@ class Pong(AsyncWebsocketConsumer, Message):
 				"player1_username": self.player_object.username,
 				"player1_score": game._leftPlayer.score,
 				"player2_username": "AI",
+				"player2_score": game._rightPlayer.score,
+			}
+		
+		if self.isLocal:
+			game = Pong.shared_game[self.match_id]
+			winner = self.player_2_id if game._rightPlayer.score > game._leftPlayer.score else self.player_1_id
+			return {
+				"winner_id": winner,
+				"winner_username": "Guest" if winner == self.player_2_id else self.player_object.username,
+				"loser_id": "Guest" if winner == self.player_1_id else self.player_object.id,
+
+				"player1_username": self.player_object.username,
+				"player1_score": game._leftPlayer.score,
+				"player2_username": "Guest",
 				"player2_score": game._rightPlayer.score,
 			}
 

@@ -9,6 +9,7 @@ const commands = {
     ia_opponent : 'ia_opponent',
     ia_found : 'ia_found',
     local_opponent : 'local_opponent',
+    local_found : 'local_found',
 
     // Game commands
     waiting_for_opponent : 'waiting_for_opponent',
