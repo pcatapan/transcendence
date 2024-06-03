@@ -7,7 +7,7 @@ ELO_DIFF = 300
 ELO_BASE = 25
 ELO_MOLTIPLIER = 2.5
 SECOND_WAIT = 10
-AI_REACTION = 0.1
+AI_REACTION = 0.03
 BASE_FPS = 60
 
 # Endpoints and commands (Client -> Server)

@@ -1,6 +1,5 @@
 import time
 import random
-import threading
 import logging
 from typing import Dict, Optional, Callable, Any, List, Tuple
 
@@ -103,13 +102,13 @@ class Game:
 
 			# Assegna una nuova velocità alla palla basata sul valore casuale generato
 			if ran < 0.25:
-				self._ball.speed = {"x": 3, "y": 1}
+				self._ball.speed = {"x": 4, "y": 1}
 			elif ran < 0.5:
-				self._ball.speed = {"x": -3, "y": 1}
+				self._ball.speed = {"x": -4, "y": 1}
 			elif ran < 0.75:
-				self._ball.speed = {"x": 3, "y": -1}
+				self._ball.speed = {"x": 4, "y": -1}
 			else:
-				self._ball.speed = {"x": -3, "y": -1}
+				self._ball.speed = {"x": -4, "y": -1}
 		except Exception as e:
 			logger.error(f"Error in Game.resetPosition: {e}")
 
@@ -135,11 +134,11 @@ class Game:
 			self._leftPaddle.draw()
 			self._leftPaddle.updatePosition()
 
-			#if self._ia_opponent:
-			#	self.update_ai_paddle()  # Aggiorna la posizione della paletta dell'IA
-			#else:
 			self._rightPaddle.draw()
-			self._rightPaddle.updatePosition()
+			if self._ia_opponent:
+				self.update_ai_paddle()  # Aggiorna la posizione della paletta dell'IA
+			else:
+				self._rightPaddle.updatePosition()
 
 		self._frame += 1
 
@@ -162,7 +161,6 @@ class Game:
 
 	def update_ai_paddle(self):
 		try:
-			# Logica per seguire la palla con tempi di reazione
 			current_time = time.time()
 			if current_time - self._last_update_time < self._reaction_time:
 				return  # Aspetta fino al prossimo aggiornamento
@@ -171,15 +169,36 @@ class Game:
 			paddle_pos = self._rightPaddle.position
 			paddle_size = self._rightPaddle.size
 
-			# Previsione della posizione futura della palla
-			predicted_y = ball_pos["y"] + self._ball.speed["y"] * self._reaction_time * constants.BASE_FPS
+			# Previsione della posizione futura della palla con riflessioni sui muri
+			predicted_y = ball_pos["y"]
+			predicted_speed_y = self._ball.speed["y"]
+			while not (0 <= predicted_y <= self._enclosure["yh"]):
+				predicted_y += predicted_speed_y * self._reaction_time
+				if predicted_y < 0:
+					predicted_y = -predicted_y
+					predicted_speed_y *= -1
+				elif predicted_y > self._enclosure["yh"]:
+					predicted_y = 2 * self._enclosure["yh"] - predicted_y
+					predicted_speed_y *= -1
 
-			if predicted_y > paddle_pos["y"] + paddle_size["y"] // 2:
-				self._rightPaddle.speed = {"x": 0, "y": 10}
-			elif predicted_y < paddle_pos["y"] - paddle_size["y"] // 2:
-				self._rightPaddle.speed = {"x": 0, "y": -10}
+			paddle_center_y = paddle_pos["y"] + paddle_size["y"] // 2
+
+			# Se la palla è già in traiettoria, il paddle non si muove
+			if paddle_pos["y"] <= predicted_y <= paddle_pos["y"] + paddle_size["y"]:
+				self._dictKeyboard[self._rightPaddle._binds["up"]] = False
+				self._dictKeyboard[self._rightPaddle._binds["down"]] = False
 			else:
-				self._rightPaddle.speed = {"x": 0, "y": 0}
+				speed_factor = min(1, abs(paddle_center_y - predicted_y) / paddle_size["y"])
+
+				# Aggiunta della logica per evitare di fermarsi in attesa della collisione
+				if predicted_y < paddle_center_y:
+					self._rightPaddle.speed = {"x": 0, "y": int(-10 * speed_factor)}
+					self._dictKeyboard[self._rightPaddle._binds["up"]] = True
+					self._dictKeyboard[self._rightPaddle._binds["down"]] = False
+				elif predicted_y > paddle_center_y:
+					self._rightPaddle.speed = {"x": 0, "y": int(10 * speed_factor)}
+					self._dictKeyboard[self._rightPaddle._binds["up"]] = False
+					self._dictKeyboard[self._rightPaddle._binds["down"]] = True
 
 			self._rightPaddle.updatePosition()
 			self._last_update_time = current_time

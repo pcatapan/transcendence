@@ -68,7 +68,9 @@ class Pong(AsyncWebsocketConsumer, Message):
 				logger.info(f"Match ID: {self.match_id}")
 				await self.channel_layer.group_add(f"{self.match_id}", self.channel_name)
 				await self.load_models()
+				
 				await self.accept()
+
 				await self.broadcast_layer(
 					content="Game Ready",
 					command=constants.START_BALL,
@@ -252,12 +254,14 @@ class Pong(AsyncWebsocketConsumer, Message):
 				self.player_1_id = self.match_object.player1.id
 				self.player_2_id = self.match_object.player2.id
 			
-			# Inizializza o aggiorna la lista dei giocatori per il match corrente
-			self.match_manager.inzialize_list_of_players(self.match_id, self.client_id, self)
+			if not self.isAi :
+				# Inizializza o aggiorna la lista dei giocatori per il match corrente
+				self.match_manager.inzialize_list_of_players(self.match_id, self.client_id, self)
 
-			# Carica gli oggetti User per entrambi i giocatori
-			self.match_manager.add_player(self.match_object.player1)
-			self.match_manager.add_player(self.match_object.player2)
+			if not self.isAi :
+				# Carica gli oggetti User per entrambi i giocatori
+				self.match_manager.add_player(self.match_object.player1)
+				self.match_manager.add_player(self.match_object.player2)
 
 			# Configura i binding della tastiera per entrambi i giocatori
 			self.keyboard = {
@@ -266,6 +270,7 @@ class Pong(AsyncWebsocketConsumer, Message):
 			}
 
 			self.left_player = Player(
+				name = self.player_1_id,
 				binds = self.keyboard[self.player_1_id]
 			)
 

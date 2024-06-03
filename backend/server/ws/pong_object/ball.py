@@ -43,14 +43,10 @@ class Ball(MovingRectangle):
 
 		# Controllo se ci sono collisioni tra i due oggetti
 		return (
-			(colider_corners["xl"] <= corners["xl"] <= colider_corners["xh"] and
-			 colider_corners["yl"] <= corners["yl"] <= colider_corners["yh"]) or
-			(colider_corners["xl"] <= corners["xh"] <= colider_corners["xh"] and
-			 colider_corners["yl"] <= corners["yl"] <= colider_corners["yh"]) or
-			(colider_corners["xl"] <= corners["xl"] <= colider_corners["xh"] and
-			 colider_corners["yl"] <= corners["yh"] <= colider_corners["yh"]) or
-			(colider_corners["xl"] <= corners["xh"] <= colider_corners["xh"] and
-			 colider_corners["yl"] <= corners["yh"] <= colider_corners["yh"])
+			corners["xl"] < colider_corners["xh"] and
+			corners["xh"] > colider_corners["xl"] and
+			corners["yl"] < colider_corners["yh"] and
+			corners["yh"] > colider_corners["yl"]
 		)
 	
 	def collisionHandler(self, colider: MovingRectangle):
