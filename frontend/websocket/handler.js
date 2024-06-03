@@ -11,7 +11,8 @@ const commandHandlers = {
 
 	[commands.start_ball]: handler_startBall,
 	[commands.update_game]: handler_updateGame,
-	[commands.confirm_match]: () => {}, // Funzione vuota, da definire se necessario
+	[commands.finish_match]: handler_finishMatch,
+	[commands.confirm_match]: (response) => console.log("Match confirmed:", response.content),
 	[commands.send_prv_msg]: () => {}, // Funzione vuota, da definire se necessario,
 	[commands.leave_queue]: (response) => console.log("Left queue:", response.content),
 	null: (response) => console.log(response.content)
@@ -38,8 +39,6 @@ function handler_joinQueue(res) {
 		return;
 	}
 
-	console.log(res.content)
-
 	showSnackbar(res.content, 'info')
 }
 
@@ -53,7 +52,7 @@ function handler_foundOpponent(res) {
 
 	// Salvo i dati della partita
 	window.game.match_id = res.content.match_id
-	window.game.opponent = res.sender
+	window.game.opponent = res.content.opponent
 
 	setTimeout(() => {
 		window.navigateTo('/game');
@@ -120,12 +119,15 @@ function handler_updateGame(res) {
 }
 
 function handler_startBall(res) {
-	console.log('Ball started:', res.content)
-
 	window.game.isActive = true;
-	setTimeout(() => {
+
+	if (!window.ws_game) {
+		setTimeout(() => {
+			sendMessage(window.ws_game, commands.start_ball);
+		}, 1500)
+	} else {
 		sendMessage(window.ws_game, commands.start_ball);
-	}, 1500)
+	}
 }
 
 function handler_IAOpponentFound(res) {
@@ -141,6 +143,28 @@ function handler_IAOpponentFound(res) {
 	setTimeout(() => {
 		window.navigateTo('/game');
 	}, 1500)
+}
+
+function handler_finishMatch(res) {
+	console.log('Match finished:', res.content)
+
+	// Svuoto l'oggetto game
+	window.game.match_id = null
+	window.game.mode = null
+	window.game.isActive = false
+	window.game.opponent = null
+
+	// Salvo i dati di chi ha vinto
+	window.game.endGame = {
+		winner : res.content.winner_username,
+		winner_score : res.content.player1_score > res.content.player2_score ? res.content.player1_score : res.content.player2_score,
+		loser : res.content.player1_username === res.content.winner_username ? res.content.player2_username : res.content.player1_username,
+		loser_score : res.content.player1_score < res.content.player2_score ? res.content.player1_score : res.content.player2_score,
+	}
+
+	setTimeout(() => {
+		window.navigateTo('/end-game');
+	}, 500)
 }
 
 export { parserRespons }

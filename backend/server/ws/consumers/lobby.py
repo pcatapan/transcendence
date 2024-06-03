@@ -26,6 +26,7 @@ class Lobby(AsyncWebsocketConsumer, Message):
 				self.client_id = str(user.id)
 				await self.accept()
 			else:
+				logger.error('User not authenticated')
 				await self.close()
 			
 			#check if user is already connected

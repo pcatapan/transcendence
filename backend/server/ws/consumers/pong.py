@@ -32,9 +32,9 @@ class Pong(AsyncWebsocketConsumer, Message):
 	shared_game = {}
 	run_game = {}
 	finished = {}
-	scorelimit = 10
+	scorelimit = constants.SCORE_LIMIT
 
-	def __init__(self, scope, *args, **kwargs):
+	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
 		self.client_object = None
 		self.keyboard = {}
@@ -45,8 +45,8 @@ class Pong(AsyncWebsocketConsumer, Message):
 		self.player_1_score = 0
 		self.player_2_score = 0
 		self.match_object = None
-		self.match_id = scope.get('match_id', None)
-		self.isAi = scope.get('ai', False)
+		self.match_id = None
+		self.isAi = False
 		self.client_id = None
 
 	async def connect(self):
@@ -61,11 +61,14 @@ class Pong(AsyncWebsocketConsumer, Message):
 			
 			self.client_id = str(user.id)
 
-			if self.isAi :
+			self.match_id = self.scope['url_route']['kwargs']['match_id']
+			# se il march_id contiene la stringa '_vs_ia_' allora si tratta di una partita contro l'IA
+			if '_vs_ia_' in self.match_id:
+				self.isAi = True
+				logger.info(f"Match ID: {self.match_id}")
 				await self.channel_layer.group_add(f"{self.match_id}", self.channel_name)
-
 				await self.load_models()
-
+				
 				await self.accept()
 
 				await self.broadcast_layer(
@@ -75,13 +78,13 @@ class Pong(AsyncWebsocketConsumer, Message):
 				)
 				return
 			
-			self.match_id = self.scope['url_route']['kwargs']['match_id']
 			#self.room_group_name = f'match_{self.match_id}'
 
 			self.match_object = await self.match_manager.get_match_and_player(self.match_id)
 			if not self.match_object:
 				await self.close()
 				return
+			logger.info(f"Match obj : {self.match_object}")
 			
 			if user.id not in {self.match_object.player1.id, self.match_object.player2.id}:
 				logger.info(f"User {self.client_id} is in the match {self.match_id}")
@@ -138,25 +141,27 @@ class Pong(AsyncWebsocketConsumer, Message):
 	async def disconnect(self, code=1000):
 
 		logger.info(f"Client {self.client_id} disconnected with code {code}")
-		if (code == 4001 or self.match_id is None or self.isAi):
+		if (code == 4001 or self.match_id is None or self.isAi or code == 1001):
 			return
 
 		if self.match_manager.player_in_list(self.client_id, self.match_id):
 			self.match_manager.remove_player(self.match_id, self.client_id)
 
 		Pong.run_game[self.match_id] = False
-		await self.check_reconnect()
 
-		try:
-			res = await self.save_models(disconnect=True)
-			if res:
-				await self.broadcast_layer(
-					command=constants.FINISH_MATCH,
-					content="Opponent disconnected",
-					channel=f"{self.match_id}"
-				)
-		except Exception as e:
-			logger.error(f"Error during disconnect: {e}")
+		if not Pong.finished[self.match_id]:
+			await self.check_reconnect()
+
+			try:
+				res = await self.save_models(disconnect=True)
+				if res:
+					await self.broadcast_layer(
+						command=constants.FINISH_MATCH,
+						content="Opponent disconnected",
+						channel=f"{self.match_id}"
+					)
+			except Exception as e:
+				logger.error(f"Error during disconnect: {e}")
 
 		await self.discard_channels()
 
@@ -171,8 +176,7 @@ class Pong(AsyncWebsocketConsumer, Message):
 			logger.error(f"Error during close: {e}")
 
 	async def receive(self, text_data):
-		logger.info('receive')
-		logger.info(f"Text data: {text_data}")
+		logger.info(f"Receive: {text_data}")
 		try:
 			data = json.loads(text_data)
 			command = data.get('command')
@@ -243,14 +247,18 @@ class Pong(AsyncWebsocketConsumer, Message):
 # -------------------------------------- Methods ----------------------------------------
 	async def load_models(self):
 		try:
-			self.player_1_id = self.isAi if self.client_id else str(self.match_object.player1.id)
-			self.player_2_id = self.isAi if 'AI' else str(self.match_object.player2.id)
-
-			if not self.isAi:
+			if self.isAi :
+				self.player_1_id = self.client_id
+				self.player_2_id = 'AI'
+			else :
+				self.player_1_id = self.match_object.player1.id
+				self.player_2_id = self.match_object.player2.id
+			
+			if not self.isAi :
 				# Inizializza o aggiorna la lista dei giocatori per il match corrente
 				self.match_manager.inzialize_list_of_players(self.match_id, self.client_id, self)
 
-			if not self.isAi:
+			if not self.isAi :
 				# Carica gli oggetti User per entrambi i giocatori
 				self.match_manager.add_player(self.match_object.player1)
 				self.match_manager.add_player(self.match_object.player2)
@@ -262,6 +270,7 @@ class Pong(AsyncWebsocketConsumer, Message):
 			}
 
 			self.left_player = Player(
+				name = self.player_1_id,
 				binds = self.keyboard[self.player_1_id]
 			)
 
@@ -296,6 +305,21 @@ class Pong(AsyncWebsocketConsumer, Message):
 	@database_sync_to_async
 	@transaction.atomic
 	def save_models(self, disconnect: bool = False, close_code: int = 1000) -> Optional[Dict[str, Any]]:
+		
+		if self.isAi:
+			game = Pong.shared_game[self.match_id]
+			winner = self.player_2_id if game._rightPlayer.score > game._leftPlayer.score else self.player_1_id
+			return {
+				"winner_id": winner,
+				"winner_username": "AI" if winner == self.player_2_id else self.player_object.username,
+				"loser_id": "AI" if winner == self.player_1_id else self.player_object.id,
+
+				"player1_username": self.player_object.username,
+				"player1_score": game._leftPlayer.score,
+				"player2_username": "AI",
+				"player2_score": game._rightPlayer.score,
+			}
+
 		User = import_string('api.authuser.models.CustomUser')
 
 		if Pong.finished.get(self.match_id):

@@ -45,7 +45,7 @@ def signup(request):
 	Friendship.objects.create(user=user)
 	jwt_token = create_jwt_token(user.id, user.username)
 
-	return set_token(user, jwt_token, 'User created successfully')
+	return set_token(user, jwt_token, 'User created successfully', 201)
 
 
 @require_POST

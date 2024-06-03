@@ -13,7 +13,8 @@ const commands = {
     waiting_for_opponent : 'waiting_for_opponent',
     update_game : 'update_game',
     start_ball : 'start_ball',
-    keyboard : 'keyboard'
+    keyboard : 'keyboard',
+    finish_match : 'finish_match',
 };
 
 export { commands };

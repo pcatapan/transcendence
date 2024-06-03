@@ -43,14 +43,10 @@ class Ball(MovingRectangle):
 
 		# Controllo se ci sono collisioni tra i due oggetti
 		return (
-			(colider_corners["xl"] <= corners["xl"] <= colider_corners["xh"] and
-			 colider_corners["yl"] <= corners["yl"] <= colider_corners["yh"]) or
-			(colider_corners["xl"] <= corners["xh"] <= colider_corners["xh"] and
-			 colider_corners["yl"] <= corners["yl"] <= colider_corners["yh"]) or
-			(colider_corners["xl"] <= corners["xl"] <= colider_corners["xh"] and
-			 colider_corners["yl"] <= corners["yh"] <= colider_corners["yh"]) or
-			(colider_corners["xl"] <= corners["xh"] <= colider_corners["xh"] and
-			 colider_corners["yl"] <= corners["yh"] <= colider_corners["yh"])
+			corners["xl"] <= colider_corners["xh"] and
+			corners["xh"] >= colider_corners["xl"] and
+			corners["yl"] <= colider_corners["yh"] and
+			corners["yh"] >= colider_corners["yl"]
 		)
 	
 	def collisionHandler(self, colider: MovingRectangle):
@@ -60,23 +56,26 @@ class Ball(MovingRectangle):
 		# Calcolo l'intersezione tra i due oggetti
 		leftInter = max(corners["xl"], colider_corners["xl"])
 		rightInter = min(corners["xh"], colider_corners["xh"])
+		topInter = max(corners["yl"], colider_corners["yl"])
+		bottomInter = min(corners["yh"], colider_corners["yh"])
 
 		# Calcolo la proporzione del movimento che si sovrappone
-		adj = abs(leftInter - rightInter) / abs(self.speed["x"])
+		adj_x = abs(leftInter - rightInter) / abs(self.speed["x"]) if self.speed["x"] != 0 else 0
+		adj_y = abs(topInter - bottomInter) / abs(self.speed["y"]) if self.speed["y"] != 0 else 0
 
 		# Annulla il movimento della palla per rimuovere la sovrapposizione
 		self.position = dict(
-			x=self.position["x"] - adj * self.speed["x"],
-			y=self.position["y"] - adj * self.speed["y"]
+			x=self.position["x"] - adj_x * self.speed["x"],
+			y=self.position["y"] - adj_y * self.speed["y"]
 		)
-	
+
 		# Calcolo la direzione della collisione
 		# determinando quale lato del rettangolo è stato colpito
 		x1 = abs(corners["xl"] - colider_corners["xh"])
 		x2 = abs(corners["xh"] - colider_corners["xl"])
 		y1 = abs(corners["yl"] - colider_corners["yh"])
 		y2 = abs(corners["yh"] - colider_corners["yl"])
-	
+
 		# In base al lato colpito, inverto la direzione della palla
 		if min(x2, x1) < min(y1, y2):
 			self.speed = dict(
@@ -87,7 +86,7 @@ class Ball(MovingRectangle):
 			self.speed = dict(
 				x=self.speed["x"] + 0.5 * colider.speed["x"],
 				y=-self.speed["y"]
-			)
+        )
 
 	def updatePosition(self) -> int:
 		# Controlla se la palla ha superato il bordo destro dell'enclosure

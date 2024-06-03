@@ -21,6 +21,7 @@ async function initializeWebSocket() {
             };
 
             window.ws.onclose = function (event) {
+                window.ws = null;
                 console.log('WebSocket connection closed', event);
             };
         }

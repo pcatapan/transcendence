@@ -8,11 +8,13 @@ async function initializeGameSocket(matchId) {
         let isAuthorized = await authService.checkAuthorization();
         if (isAuthorized.status === 201) {
 
-            if (window.game.mode === gameMode.online)
+            if (window.game.mode === gameMode.online) {
                 window.ws_game = new WebSocket(`${webSocketUrl}/pong/${matchId}`);
+            }
 
-            if (window.game.mode === gameMode.ia_opponent)
+            if (window.game.mode === gameMode.ia_opponent) {
                 window.ws_game = new WebSocket(`${webSocketUrl}/ai/${matchId}`);
+            }
             
 			window.ws_game.onmessage = function (event) {
                 parserRespons(event.data);
@@ -27,6 +29,7 @@ async function initializeGameSocket(matchId) {
             };
 
             window.ws_game.onclose = function (event) {
+                window.ws_game = null;
                 console.log('WebSocketGame connection closed', event);
             };
         }
@@ -35,9 +38,8 @@ async function initializeGameSocket(matchId) {
 }
 
 async function sendMessage(ws, command, obj = null) {
-
     if (!ws) {
-        console.log('WebSocketGame not initialized');
+        console.log('WebSocketGame not initialized! try send message:', command);
         return;
     }
 
@@ -51,6 +53,7 @@ async function sendMessage(ws, command, obj = null) {
         }
     }
 
+    console.log('Sending message:', message);
     if (ws.readyState === WebSocket.OPEN)
         ws.send(JSON.stringify(message));
     else {

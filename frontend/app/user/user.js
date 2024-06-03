@@ -4,7 +4,6 @@ import { baseUrl } from '../../enviroments.js';
 
 const User = () => {
     userService.userProfile(localStorage.getItem('user')).then((response) => {
-        console.log(response);
         if (response.status === 200) {
             const user = response.body.data;
             

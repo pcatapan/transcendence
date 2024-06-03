@@ -6,6 +6,7 @@ import User from './app/user/user.js';
 import Game from './app/game/game.js';
 import WaitingRoom from './app/waitingRoom/waiting.js';
 import Credits from './app/credits/credits.js';
+import EndGame from './app/endGame/endGame.js';
 
 const loadHTML = async (url) => {
     const response = await fetch(url);
@@ -20,7 +21,8 @@ const routes = [
     { path: "/game", component: Game, html: '/app/game/game.html', css: '/app/game/game.css'},
     { path: "/waiting-room", component: WaitingRoom, html: '/app/waitingRoom/waiting.html', css: '/app/waitingRoom/waiting.css'},
     { path: "/credits", component: Credits, html: '/app/credits/credits.html', css: '/app/credits/credits.css'},
-    { path: "/404",component: PageNotFound, html: '/app/404/404.html', css: '/app/404/404.css'}
+    { path: "/end-game", component: EndGame, html: '/app/endGame/endGame.html', css: '/app/endGame/endGame.css'},
+    { path: "/404",component: PageNotFound, html: '/app/404/404.html', css: null}
 ];
 
 export { routes, loadHTML };

@@ -9,14 +9,15 @@ window.game = {
     mode : null,
     match_id : null,
     opponent : null,
-    isActive : true
+    isActive : true,
+    endGame : {}
 };
 
-if (APP_ENV === 'development') {
+if (APP_ENV === 'development' && false) {
     window.game.mode = 'online';
     window.game.match_id = 27;
     window.game.opponent = {
-        name: 'Opponent',
+        username: 'Opponent',
         avatar: 'https://www.gravatar.com/avatar/' + Math.floor(Math.random() * 1000000) + '?d=identicon'
     };
 }

@@ -16,6 +16,12 @@ const Home = () => {
     }); 
     
     document.getElementById('button-signout').addEventListener('click', function(event) {
+
+        if (window.ws) {
+            window.ws.close();
+            window.ws = null;
+        }
+
         authService.logout().then((response) => {
             if (response.status === 200) {
                 localStorage.clear();
@@ -28,14 +34,24 @@ const Home = () => {
         })
     });
 
+    // Gestisco le partite online
     document.getElementById('button-game-online').addEventListener('click', function(event) {
         window.game.mode = gameMode.online;
+        window.game.endGame = {};
+        window.game.isActive = true;
+        window.game.opponent = null;
+        window.game.match_id = null;
 
         window.navigateTo('/waiting-room');
     });
 
+    // Gstisco le partite con l'IA
     document.getElementById('button-ai-opponent').addEventListener('click', function(event) {
         window.game.mode = gameMode.ia_opponent;
+        window.game.endGame = {};
+        window.game.isActive = true;
+        window.game.opponent = null;
+        window.game.match_id = null;
 
         window.navigateTo('/waiting-room');
     });
