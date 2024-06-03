@@ -55,6 +55,17 @@ const Home = () => {
 
         window.navigateTo('/waiting-room');
     });
+
+    // Gestisco le partite locali
+    document.getElementById('button-game-local').addEventListener('click', function(event) {
+        window.game.mode = gameMode.offline;
+        window.game.endGame = {};
+        window.game.isActive = true;
+        window.game.opponent = null;
+        window.game.match_id = null;
+
+        window.navigateTo('/waiting-room');
+    });
 };
 
 export default Home;

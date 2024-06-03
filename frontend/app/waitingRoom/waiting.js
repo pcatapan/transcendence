@@ -1,6 +1,7 @@
 import { initializeWebSocket, sendMessage } from '../../websocket/Lobby.js';
 import { commands } from '../../websocket/command.js';
 import { APP_ENV } from '../../enviroments.js';
+import {showSnackbar} from '../../utils/snackbar.js';
 
 const waitingMessages = [
 	"Sharpening the paddles...",
@@ -58,9 +59,15 @@ function defineModeOfPlay() {
 		case 'ia_opponent':
 			startIAOpponentGame();
 			break;
+		case 'offline':
+			startLocalGame();
+			break;
 		default:
+			showSnackbar('Unknown game mode', 'error');
+			window.navigateTo('/home');
+
 			console.log('Unknown game mode:', window.game.mode);
-	
+			break;
 	}
 }
 
@@ -74,6 +81,10 @@ function joinGlobalQueue() {
 
 function startIAOpponentGame() {
 	sendMessage(window.ws, commands.ia_opponent);
+}
+
+function startLocalGame() {
+	sendMessage(window.ws, commands.local_opponent);
 }
 
 export default WaitingRoom;

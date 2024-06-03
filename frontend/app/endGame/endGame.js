@@ -35,7 +35,6 @@ const EndGame = () => {
     }
 
     document.getElementById('play-again').addEventListener('click', function(event) {
-        window.game.mode = gameMode.online;
         window.game.endGame = {};
         window.game.isActive = true;
         window.game.opponent = null;
