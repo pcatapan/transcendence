@@ -23,7 +23,7 @@ const Login = () => {
             }
             else if (response.status === 206) {
                 // Open OTP modal
-                document.getElementById('otp-modal').style.display = 'block';
+                document.getElementById('otp-modal').style.display = 'flex';
                 const user_id = response['body']['data'];
 
                 document.getElementById('otp-submit').addEventListener('click', () => {

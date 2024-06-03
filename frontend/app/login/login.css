@@ -188,6 +188,11 @@ h1 {
     text-align: center;
 }
 
+#otp-modal {
+    align-items: center;
+    align-content: center;
+}
+
 .modal {
     display: none;
     position: fixed;
