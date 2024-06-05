@@ -265,7 +265,6 @@ def user_blocked_add(request):
         friendship = Friendship.objects.get(user=user)
         friendship.blocked_users.add(blocked_user)
 
-        friendship = Friendship.objects.get(user=user)
         if blocked_user in friendship.friends.all():
             friendship.friends.remove(blocked_user)
             friendship.save()
@@ -303,6 +302,9 @@ def user_blocked_remove(request):
     try:
         friendship = Friendship.objects.get(user=user)
         friendship.blocked_users.remove(blocked_user)
+
+        friendship.friends.add(blocked_user)
+        friendship.save()
         return JsonResponse({
             'message': 'User unblocked successfully',
             'data': friendship.to_json()

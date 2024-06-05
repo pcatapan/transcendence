@@ -2,31 +2,31 @@ from django.db import models
 from api.authuser.models.custom_user import CustomUser as User
 
 class Tournament(models.Model):
-    name = models.CharField(
+	name = models.CharField(
 		max_length=100
 	)
 
-    type = models.CharField(
+	type = models.CharField(
 		max_length=100,
 		blank=True,
 		null=True
 	)
 
-    start_date = models.DateField(
+	start_date = models.DateField(
 		blank=True,
 		null=True
 	)
 
-    end_date = models.DateField(
+	end_date = models.DateField(
 		blank=True,
 		null=True
 	)
 
-    round = models.IntegerField(
+	round = models.IntegerField(
 		default=0
 	)
 
-    winner = models.ForeignKey(
+	winner = models.ForeignKey(
 		User,
 		on_delete=models.CASCADE,
 		related_name='winner_tournament',
@@ -34,7 +34,7 @@ class Tournament(models.Model):
 		null=True
 	)
 
-    tournament_admin = models.ForeignKey(
+	tournament_admin = models.ForeignKey(
 		User,
 		on_delete=models.CASCADE,
 		related_name='tournament_admin',
@@ -42,24 +42,24 @@ class Tournament(models.Model):
 		null=True
 	)
 
-    players = models.ManyToManyField(
+	players = models.ManyToManyField(
 		User,
 		blank=True
 	)
 
-    observers = models.ManyToManyField(
+	observers = models.ManyToManyField(
 		User,
 		blank=True,
 		related_name='observers'
 	)
 
-    joinable = models.BooleanField(
+	joinable = models.BooleanField(
 		default=True
 	)
 
-    public = models.BooleanField(
+	public = models.BooleanField(
 		default=True
 	)
 
-    def __str__(self):
-        return f"Tournament {self.id} - {self.name}"
+	def __str__(self):
+		return f"Tournament {self.id} - {self.name}"
