@@ -211,9 +211,9 @@ class CustomUser(AbstractUser):
 		goal_scored = sum([match.player1_score for match in matches if match.player1 == self]) + sum([match.player2_score for match in matches if match.player2 == self])
 		goal_conceded = sum([match.player2_score for match in matches if match.player1 == self]) + sum([match.player1_score for match in matches if match.player2 == self])
 
-		win_rate = round((wins / total_matches) * 100, 2)
-		loss_rate = round((losses / total_matches) * 100, 2)
-		tie_rate = round((tie / total_matches) * 100, 2)
+		win_rate = (wins / total_matches) * 100
+		loss_rate = (losses / total_matches) * 100
+		tie_rate = (tie / total_matches) * 100
 
 		return {
 			'total_matches': total_matches,
