@@ -129,7 +129,13 @@ def user_friends_list(request):
 @require_POST
 def user_friends_add(request):
 
-    user_id = request.GET.get('user_id')
+    if not request.body:
+        return JsonResponse({
+            'message': 'Empty payload'
+        }, status=400)
+    
+    data = json.loads(request.body)
+    user_id = data.get('user_id')
     if not user_id:
         return JsonResponse({
             'message': 'Missing user_id in request'
@@ -168,7 +174,13 @@ def user_friends_add(request):
 @require_POST
 def user_friends_remove(request):
 
-    user_id = request.GET.get('user_id')
+    if not request.body:
+        return JsonResponse({
+            'message': 'Empty payload'
+        }, status=400)
+    
+    data = json.loads(request.body)
+    user_id = data.get('user_id')
     if not user_id:
         return JsonResponse({
             'message': 'Missing user_id in request'
@@ -234,7 +246,13 @@ def user_blocked_list(request):
 @require_POST
 def user_blocked_add(request):
 
-    user_id = request.GET.get('user_id')
+    if not request.body:
+        return JsonResponse({
+            'message': 'Empty payload'
+        }, status=400)
+    
+    data = json.loads(request.body)
+    user_id = data.get('user_id')
     if not user_id:
         return JsonResponse({
             'message': 'Missing user_id in request'
@@ -261,7 +279,13 @@ def user_blocked_add(request):
     
 @require_POST
 def user_blocked_remove(request):
-    user_id = request.GET.get('user_id')
+    if not request.body:
+        return JsonResponse({
+            'message': 'Empty payload'
+        }, status=400)
+    
+    data = json.loads(request.body)
+    user_id = data.get('user_id')
     if not user_id:
         return JsonResponse({
             'message': 'Missing user_id in request'
