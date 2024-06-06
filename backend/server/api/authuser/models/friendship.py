@@ -18,6 +18,9 @@ class Friendship(models.Model):
 			'user': self.user.to_json(),
 			'friends': [friend.to_json() for friend in self.friends.all()],
 		}
+	
+	def to_list(self):
+		return [friend.to_json() for friend in self.friends.all()]
 
 	def __str__(self):
 		return f'{self.user.id} {self.user.username}\'s friends'
