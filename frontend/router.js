@@ -7,8 +7,9 @@ import Game from './app/game/game.js';
 import WaitingRoom from './app/waitingRoom/waiting.js';
 import Credits from './app/credits/credits.js';
 import EndGame from './app/endGame/endGame.js';
-import Controls from './app/controls/controls.js'
-import Istructions from './app/istructions/istructions.js'
+import Controls from './app/controls/controls.js';
+import Istructions from './app/istructions/istructions.js';
+import Tournament from './app/tournament/tournament.js';
 
 const loadHTML = async (url) => {
     const response = await fetch(url);
@@ -26,6 +27,7 @@ const routes = [
     { path: "/end-game", component: EndGame, html: '/app/endGame/endGame.html', css: '/app/endGame/endGame.css'},
     { path: "/controls", component: Controls, html: "/app/controls/controls.html", css: "/app/controls/controls.css"},
     { path: "/istructions", component: Istructions, html: "/app/istructions/istructions.html", css: "/app/istructions/istructions.css"},
+    { path: "/tournaments", component: Tournament, html: "/app/tournament/tournament.html", css: "/app/tournament/tournament.css"},
     { path: "/404",component: PageNotFound, html: '/app/404/404.html', css: null}
 ];
 
