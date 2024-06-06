@@ -13,7 +13,7 @@
 		</div>
 		<div class="user-info-content">
 			<div class="avatar-container">
-				<img id="avatar" src="" alt="Avatar" class="avatar">
+				<img id="avatar" src="" alt="Avatar" class="avatar-user">
 				<div class="elo-container">
 					<img src="../../assets/icons/elo.png" alt="Trophy" class="trophy-icon">
 					<span id="elo" class="elo-info"></span>
@@ -23,7 +23,11 @@
 				<p><span id="username"></span></p>
 				<p><span id="fullname"></span></p>
 				<p><span id="email"></span></p>
-				<p><strong>2FA:</strong> <span id="2fa"></span></p>
+				<div class="d-flex col gap-3 justify-content-center">
+					<p class="w-100 d-flex col gap-1 align-items-center"><strong>2FA:</strong> <span id="2fa"></span></p>
+					<button class="btn" id="btn-2fa">
+					</button>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -52,10 +56,6 @@
 					<span id="won-games-number"></span>
 				</div>
 			</div>
-			<div class="stats tournament">
-				<h4>Tournament</h4>
-				<span id="tournament-games"></span>
-			</div>
 		</div>
 	</div>
 	<div class="profile-panel user-friends">
@@ -69,5 +69,35 @@
 	<div class="profile-panel match-history">
 		<h3>Match History</h3>
 		<!-- Add match history here -->
+		<table id="match-history">
+			<thead>
+				<tr>
+					<th>Date</th>
+					<th>Status</th>
+					<th>Opponent</th>
+					<th>Score</th>
+				</tr>
+			</thead>
+			<tbody>
+				<!-- Match history will be populated here -->
+			</tbody>
+		</table>
 	</div>
 </div>
+
+<!-- Modal HTML Structure -->
+<div id="qrCodeModal" class="modal">
+	<div class="modal-content">
+	  <span class="close">&times;</span>
+	  <h2>Scan the QR Code</h2>
+	  <img id="qrCodeImage" src="" alt="QR Code">
+	  <p id="qrCodeMessage"></p>
+	  <button id="continueButton">Continua</button>
+  
+	  <!-- OTP Verification Elements -->
+	  <div id="otpVerification" style="display:none;">
+		<input type="text" id="otpCode" placeholder="Inserisci il codice OTP">
+		<button id="verifyOtpButton">Conferma</button>
+	  </div>
+	</div>
+  </div>

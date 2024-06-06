@@ -8,7 +8,7 @@
     --form-shadow: 0 0 10px rgb(255, 255, 255);
     --font-family: 'Poppins', sans-serif;
     --font-color: #ffffff;
-	--avatar-size: 64px;
+	--avatar-size: 48px;
 	--shape-gradient-1: linear-gradient(#060ba6, #23a2f6);
     --shape-gradient-2: linear-gradient(to right, #fe6d25, #b80000);
     --shape-gradient-3: linear-gradient(#ff8c00, #ff0080);
@@ -23,7 +23,7 @@ body {
 	width: 100%;
     font-family: var(--font-family);
     color: var(--font-color);
-    height: 100vh;
+    height: 100%;
 }
 
 .profile-container {
@@ -32,7 +32,6 @@ body {
     flex-direction: column;
     gap: 20px;
     width: 100%;
-    max-height: 800px;
 	gap: 50px;
 }
 
@@ -40,7 +39,6 @@ body {
     background-color: var(--panel-background-color);
     border-radius: 10px;
     padding: 20px;
-    overflow: auto;
 }
 
 h3 {
@@ -69,13 +67,14 @@ h3 {
 .user-friends {
     grid-column: 1 / 2;
     grid-row: 2 / 3;
-	box-shadow: var(--panel-shadow-green);
+	box-shadow: var(--panel-shadow-blue);
 }
 
 .match-history {
     grid-column: 2 / 3;
     grid-row: 2 / 3;
-	box-shadow: var(--panel-shadow-green);
+	box-shadow: var(--panel-shadow-blue);
+    margin-bottom: 5rem;
 }
 
 .user-info-content {
@@ -98,6 +97,12 @@ h3 {
     border-radius: 50%;
 }
 
+.avatar-user {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+}
+
 .trophy-icon {
     width: 24px;
     height: 24px;
@@ -110,24 +115,22 @@ h3 {
 .btn {
     margin-top: 20px;
     padding: 10px 15px;
-    background-color: var(--button-background-color);
-    color: var(--button-text-color);
+    background-color: transparent;
+    color: white;
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    transition: background-color 0.3s;
+    border: 1px solid transparent;
 }
 
 .btn:hover {
-    background-color: var(--button-text-color);
-    color: var(--button-background-color);
+   border: 1px solid #00ff00;
 }
 
 .edit-btn {
     background: none;
     border: none;
     cursor: pointer;
-    padding: 0;
     width: fit-content;
     border: 1px solid transparent;
     border-radius: 10px;
@@ -146,32 +149,6 @@ h3 {
 	margin-bottom: 10px;
 }
 
-.friend-avatar {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    margin-right: 10px;
-    position: relative;
-}
-
-.status-indicator {
-    width: var(--status-size);
-    height: var(--status-size);
-    border-radius: 50%;
-    position: absolute;
-    bottom: 0;
-    right: 0;
-    border: 2px solid var(--panel-background-color);
-}
-
-.online {
-    background-color: var(--online-color);
-}
-
-.offline {
-    background-color: var(--offline-color);
-}
-
 #friends-table {
     width: 100%;
     border-collapse: collapse;
@@ -187,69 +164,6 @@ h3 {
     text-align: center;
     font-style: italic;
     color: #888;
-}
-
-.background {
-    width: 430px;
-    height: 520px;
-    position: absolute;
-    transform: translate(-50%, -50%);
-    left: 50%;
-    top: 50%;
-	z-index: -1;
-}
-
-.background .shape {
-    height: 200px;
-    width: 200px;
-    position: absolute;
-    border-radius: 50%;
-    animation: moveShapes 3s infinite alternate ease-in-out;
-}
-
-.shape:nth-child(1) {
-    background: var(--shape-gradient-1);
-    left: -200px;
-    top: -200px;
-}
-
-.shape:nth-child(2) {
-    background: var(--shape-gradient-2);
-    right: -200px;
-    bottom: -200px;
-}
-
-.shape:nth-child(3) {
-    background: var(--shape-gradient-3);
-    left: 200px;
-    top: 250px;
-}
-
-.shape:nth-child(4) {
-    background: var(--shape-gradient-4);
-    right: 250px;
-    top: 150px;
-}
-
-.shape:nth-child(5) {
-    background: var(--shape-gradient-5);
-    left: -250px;
-    bottom: 250px;
-}
-
-.shape:nth-child(6) {
-    background: var(--shape-gradient-6);
-    right: -200px;
-    top: -200px;
-}
-
-@keyframes moveShapes {
-    0% {
-        transform: translate(0, 0);
-    }
-    100% {
-        transform: translate(calc(150px * var(--random-x, 1)), calc(150px * var(--random-y, 1)));
-    }
 }
 
 .button-home{
@@ -279,15 +193,6 @@ button {
     width: 30px;
     height: 30px;
     padding: 5px;
-}
-
-.btn{
-    border: 1px solid transparent;
-    background-color: transparent;
-}
-
-.btn:hover{
-	border: 1px solid #00ff00;
 }
 
 .first-row-sts {
@@ -341,3 +246,249 @@ button {
     align-items: center;
     gap: 10px;
 }
+
+.button-table{
+    width: 50%;
+}
+
+.friend-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 10px;
+    vertical-align: middle;
+}
+
+.status-indicator {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-left: 5px;
+    vertical-align: middle;
+}
+
+.avatar-username-cell {
+    display: flex;
+    align-items: center;
+}
+
+.action-cell {
+    display: flex;
+    align-items: center;
+}
+
+.btn {
+    padding: 5px 10px;
+    margin: 0 5px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s;
+    border: 1px solid transparent;
+}
+
+.button-table {
+    width: 10px;
+    max-width: 150px;
+}
+
+.block-btn {
+    background-color: #ff4d4d;
+    color: white;
+}
+
+.block-btn:hover {
+    background-color: #ff0000;
+}
+
+.chat-btn {
+    background-color: #4caf50;
+    color: white;
+}
+
+.chat-btn:hover {
+    background-color: #45a049;
+}
+
+.avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    margin-right: 10px;
+    vertical-align: middle;
+}
+.action-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: end;
+}
+.action-buttons button {
+    flex: 1;
+    padding: 5px 10px;
+}
+
+.status-indicator {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-left: 10px;
+}
+
+.online {
+    background-color: green;
+}
+
+.offline {
+    background-color: red;
+}
+
+.button-icon {
+    width: 24px;
+    height: 24px;
+    margin-right: 5px; 
+}
+
+.button-icon-add{
+    margin: 5px;
+    width: 28px;
+    height: 28px;
+}
+
+p.no-friends-message {
+    padding-top: 2rem;
+    color: gray;
+}
+
+#match-history-container {
+    margin: 20px auto;
+    max-width: 800px;
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #f9f9f9;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    overflow: scroll;
+}
+
+#match-history thead {
+    color: white;
+    text-align: left;
+    font-size: 16px;
+}
+
+#match-history th, #match-history td {
+    padding: 12px 15px;
+}
+
+
+
+#match-history .action-buttons {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+
+#match-history .btn img.button-icon {
+    width: 16px;
+    height: 16px;
+}
+
+
+.no-matches-message {
+    text-align: center;
+    padding: 20px;
+    font-size: 18px;
+    color: #333;
+}
+
+
+/* The Modal (background) */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+  }
+  
+  /* Modal Content/Box */
+  .modal-content {
+    background-color: #fefefe;
+    margin: 15% auto; /* 15% from the top and centered */
+    padding: 20px;
+    border: 1px solid #888;
+    width: 30%; /* Could be more or less, depending on screen size */
+  }
+  
+  /* The Close Button */
+  .close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+  }
+  
+  .close:hover,
+  .close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  
+  .modal img {
+    max-width: 100%;
+    height: auto;
+  }
+
+  #continueButton {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    margin-top: 20px;
+  }
+  
+  #continueButton:hover {
+    background-color: #45a049;
+  }
+
+  p#qrCodeMessage {
+    color: black;
+}
+
+  #otpVerification {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  #otpCode {
+    padding: 10px;
+    margin-bottom: 10px;
+    font-size: 16px;
+    width: 100%;
+  }
+  
+  #verifyOtpButton {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+  }
+  
+  #verifyOtpButton:hover {
+    background-color: #45a049;
+  }

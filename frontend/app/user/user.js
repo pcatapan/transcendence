@@ -1,12 +1,13 @@
 import { userService } from "../../services/user-service.js";
 import { showSnackbar } from '../../utils/snackbar.js';
 import { baseUrl } from '../../enviroments.js';
+import { authService } from "../../services/auth.js";
 
 const User = () => {
     userService.userProfile(localStorage.getItem('user')).then((response) => {
         if (response.status === 200) {
             const user = response.body.data;
-            
+
             const avatarElem = document.getElementById('avatar');
             if (avatarElem) avatarElem.src = baseUrl + user.avatar;
 
@@ -20,7 +21,94 @@ const User = () => {
             if (emailElem) emailElem.innerHTML = user.email;
 
             const faElem = document.getElementById('2fa');
-            if (faElem) faElem.innerHTML = (user['2FA'] === true) ? 'Attivo' : 'Disattivo';
+            if (faElem) faElem.innerHTML = (user['2FA'] === true) ? 'Enabled' : 'Disabled';
+
+            const btn2FA = document.getElementById('btn-2fa');
+            if (btn2FA){
+                if (user['2FA'] === true) {
+                    btn2FA.style.backgroundColor = '#ff0000';
+                    btn2FA.style.color = 'white';
+                    btn2FA.style.border = 'none';
+                    btn2FA.textContent = 'Disable 2FA';
+                }
+                else {
+                    btn2FA.style.backgroundColor = '#00ff00';
+                    btn2FA.style.color = 'black';
+                    btn2FA.textContent = 'Enable 2FA';
+                    btn2FA.style.border = 'none';
+                }
+
+                btn2FA.onclick = () => {
+                    if (user['2FA'] === true){
+                        userService.disable2FA().then((response) => {
+                            if (response.status === 200) {
+                                showSnackbar(`${response.body.message}`, 'success');
+                                User();
+                            } else {
+                                showSnackbar(`${response.body.message}`, 'error');
+                            }
+                        });
+                    }
+                    else {
+                        userService.enable2FA().then((response) => {
+                            if (response.status === 206) {
+                                showSnackbar(`${response.body.message}`, 'success');
+                                // Show the modal with the QR code
+                                const qrCodeModal = document.getElementById('qrCodeModal');
+                                const qrCodeImage = document.getElementById('qrCodeImage');
+                                const qrCodeMessage = document.getElementById('qrCodeMessage');
+                                const closeModal = document.querySelector('.modal .close');
+                                const continueButton = document.getElementById('continueButton');
+                                const otpVerification = document.getElementById('otpVerification');
+
+                                qrCodeImage.src = response.body.data;
+                                qrCodeMessage.textContent = response.body.message;
+
+                                qrCodeModal.style.display = 'block';
+
+                                closeModal.onclick = () => {
+                                    qrCodeModal.style.display = 'none';
+                                };
+
+                                window.onclick = (event) => {
+                                    if (event.target === qrCodeModal) {
+                                        qrCodeModal.style.display = 'none';
+                                    }
+                                };
+
+                                continueButton.onclick = () => {
+                                    // Hide the QR code and continue button
+                                    qrCodeImage.style.display = 'none';
+                                    continueButton.style.display = 'none';
+                                    // Show the OTP input and verify button
+                                    otpVerification.style.display = 'flex';
+                                    qrCodeMessage.textContent = 'Enter the OTP code from the Authenticator app';
+                                };
+
+                                const verifyOtpButton = document.getElementById('verifyOtpButton');
+                                verifyOtpButton.onclick = () => {
+                                    const otpCode = document.getElementById('otpCode').value;
+                                    authService.verifyOtp(user.id, otpCode).then((response) => {
+                                        if (response.status === 200) {
+                                            showSnackbar(`${response.body.message}`, 'success');
+                                            qrCodeModal.style.display = 'none';
+                                            User();  // Reload user data
+                                        } else {
+                                            showSnackbar(`${response.body.message}`, 'error');
+                                        }
+                                    }).catch(error => {
+                                        console.error('Error verifying OTP:', error);
+                                    });
+                                };
+                                // User();
+                            } else {
+                                showSnackbar(`${response.body.message}`, 'error');
+                            }
+                        });
+                    
+                    }
+                }
+            } 
 
             const eloElem = document.getElementById('elo');
             if (eloElem) eloElem.innerHTML = user.elo;
@@ -46,41 +134,162 @@ const User = () => {
             const drawGameNumerElem = document.getElementById('draw-games-number');
             if (drawGameNumerElem) drawGameNumerElem.innerHTML = user.user_stats.tie +'/'+user.user_stats.total_matches;
 
-            const friendsTableBody = document.querySelector('#friends-table tbody');
-            if (friendsTableBody) {
-                if (user.friends && user.friends.length > 0) {
-                    user.friends.forEach(friend => {
-                        const row = document.createElement('tr');
-                        const avatarCell = document.createElement('td');
-                        const usernameCell = document.createElement('td');
+            const friendsTable = document.getElementById("friends-table").getElementsByTagName('tbody')[0];
+            friendsTable.innerHTML = ''; 
+            const onlineUsers = JSON.parse(localStorage.getItem('onlineUsers')) || [];
+            
+            const noFriendsMessageElem = document.querySelector(".no-friends-message");
+            if (noFriendsMessageElem) noFriendsMessageElem.remove();
 
-                        const avatar = document.createElement('img');
-                        avatar.src = friend.avatar;
-                        avatar.alt = 'Friend Avatar';
-                        avatar.classList.add('friend-avatar');
+            if (user.friends.length > 0) {
+                user.friends.forEach(friend => {
+                    const row = friendsTable.insertRow();
 
-                        const statusIndicator = document.createElement('span');
-                        statusIndicator.classList.add('status-indicator');
-                        statusIndicator.classList.add(friend.isOnline ? 'online' : 'offline');
+                    // Friend cell (Avatar + Username)
+                    const friendCell = row.insertCell(0);
+                    const avatarImg = document.createElement("img");
+                    avatarImg.src = friend.avatar;
+                    avatarImg.alt = friend.username;
+                    avatarImg.classList.add("avatar");
+                    friendCell.appendChild(avatarImg);
 
-                        avatarCell.appendChild(avatar);
-                        avatarCell.appendChild(statusIndicator);
-                        usernameCell.textContent = friend.username;
+                    const usernameText = document.createElement("span");
+                    usernameText.textContent = friend.username;
+                    friendCell.appendChild(usernameText);
 
-                        row.appendChild(avatarCell);
-                        row.appendChild(usernameCell);
+                    // Online/Offline status indicator
+                    const statusIndicator = document.createElement("span");
+                    const isOnline = onlineUsers.some(onlineUser => onlineUser.id === friend.id);
+                    statusIndicator.classList.add('status-indicator');
+                    statusIndicator.classList.add(isOnline ? 'online' : 'offline');
+                    friendCell.appendChild(statusIndicator);
 
-                        friendsTableBody.appendChild(row);
-                    });
-                } else {
-                    const noFriendsRow = document.createElement('tr');
-                    const noFriendsCell = document.createElement('td');
-                    noFriendsCell.colSpan = 2;
-                    noFriendsCell.textContent = 'No friends found';
-                    noFriendsCell.style.textAlign = 'center';
-                    noFriendsRow.appendChild(noFriendsCell);
-                    friendsTableBody.appendChild(noFriendsRow);
-                }
+                    // Actions cell
+                    const actionsCell = row.insertCell(1);
+                    const actionDiv = document.createElement("div");
+                    actionDiv.classList.add("action-buttons");
+
+                    // Block/Unblock button
+                    const removeButton = document.createElement("button");
+                    removeButton.classList.add('btn');
+                    removeButton.classList.add('button-table');
+
+                    const removeIcon = document.createElement("img");
+                    removeIcon.src = '../../assets/icons/trash.png';
+                    removeIcon.alt = 'Remove';
+                    removeIcon.classList.add('button-icon');
+
+                    removeButton.appendChild(removeIcon);
+
+                    removeButton.onclick = () => {
+                        userService.removeFriend(friend.id).then((response) => {
+                            if (response.status === 200) {
+                                showSnackbar(`${response.body.message}`, 'success');
+                                User();  // Reload the DOM to update friend list
+                            } else {
+                                showSnackbar(`${response.body.message}`, 'error');
+                            }
+                        });
+                    };
+                    actionDiv.appendChild(removeButton);
+
+                    actionsCell.appendChild(actionDiv);
+                });
+            } else {
+                const noFriendsMessage = document.createElement("p");
+                noFriendsMessage.textContent = "Non ci sono amici";
+                noFriendsMessage.classList.add("no-friends-message");
+                document.getElementById("friends-table").appendChild(noFriendsMessage);
+            }
+            const matchHistoryTable = document.getElementById("match-history").getElementsByTagName('tbody')[0];
+            matchHistoryTable.innerHTML = '';  // Clear existing rows
+
+            if (user.match_history.length > 0) {
+                user.match_history.forEach(match => {
+                    const row = matchHistoryTable.insertRow();
+                    
+                    // Date cell
+                    const dateCell = row.insertCell(0);
+                    const date = match.date_played ? new Date(match.date_played).toLocaleDateString() : '';
+                    dateCell.textContent = date;
+
+                   // Result cell
+                    const resultCell = row.insertCell(1);
+                    const result = document.createElement("span");
+
+                    if (match.loser === null) {
+                        result.innerText = 'Draw';
+                        result.style.color = 'yellow';
+                    } else if (match.loser === user.username) {
+                        result.innerText = 'You Lose';
+                        result.style.color = 'red';
+                    } else {
+                        result.innerText = 'You Won';
+                        result.style.color = 'green';
+                    }
+
+                    resultCell.appendChild(result);
+
+                    // Opponent cell
+                    const opponentCell = row.insertCell(2);
+                    const opponent = document.createElement("span");
+
+                    if (match.loser === null) {
+                        opponent.innerText = match.player1 === user.username ? match.player2 : match.player1;
+                    } else if (match.loser === user.username) {
+                        opponent.innerText = match.player1 === user.username ? match.player2 : match.player1;
+                    } else {
+                        opponent.innerText = match.player1 === user.username ? match.player2 : match.player1;
+                    }
+
+                    opponentCell.appendChild(opponent);
+            
+                    // Score cell
+                    const scoreCell = row.insertCell(3);
+                    const score = `${match.player1_score} vs ${match.player2_score}`;
+                    scoreCell.textContent = score;
+            
+
+                    // Add friend button cell
+                    const actionCell = row.insertCell(4);
+                    const actionDiv = document.createElement("div");
+                    actionDiv.classList.add("action-buttons");
+
+                    const addButton = document.createElement("button");
+                    addButton.classList.add('btn');
+
+                    const addIcon = document.createElement("img");
+                    addIcon.src = '../../assets/icons/addFriends.png';
+                    addIcon.alt = 'ADD';
+                    addIcon.classList.add('button-icon-add');
+
+                    addButton.appendChild(addIcon);
+
+                    const isFriend = user.friends.some(friend => friend.id === (user.id == match.player1_id ? match.player2_id : match.player1_id));
+                    if (!isFriend) {
+                        addButton.style.display = 'block';
+                        addButton.onclick = () => {
+                            userService.addFriend(user.id == match.player1_id ? match.player2_id : match.player1_id).then(response => {
+                                if (response.status === 200) {
+                                    showSnackbar(`${response.body.message}`, 'success');
+                                    User();  // Reload the DOM to update friend list
+                                } else {
+                                    showSnackbar(`${response.body.message}`, 'error');
+                                }
+                            });
+                        };
+                    } else {
+                        addButton.style.display = 'none';
+                    }
+
+                    actionDiv.appendChild(addButton);
+                    actionCell.appendChild(actionDiv);
+                });
+            } else {
+                const noMatchesMessage = document.createElement("p");
+                noMatchesMessage.textContent = "No match history available.";
+                noMatchesMessage.classList.add("no-matches-message");
+                document.getElementById("match-history-container").appendChild(noMatchesMessage);
             }
         } else {
             showSnackbar(`${response.body.message}`, 'error');
@@ -93,6 +302,6 @@ const User = () => {
     }); 
 };
 
-document.addEventListener('DOMContentLoaded', User);
+document.addEventListener('load', User);
 
 export default User;
