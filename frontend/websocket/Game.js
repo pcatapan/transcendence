@@ -31,6 +31,33 @@ async function initializeGameSocket(matchId) {
     return window.ws_game;
 }
 
+async function initializeTournamentGameSocket(tournament_id, match_id) {
+    if (!window.ws_game) {
+        let isAuthorized = await authService.checkAuthorization();
+        if (isAuthorized.status === 201) {
+            window.ws_game = new WebSocket(`${webSocketUrl}/tournament/${tournament_id}/${match_id}`);
+            
+            window.ws_game.onmessage = function (event) {
+                parserRespons(event.data);
+            };
+
+            window.ws_game.onopen = function (event) {
+                console.log('WebSocketTournamentGame connection opened');
+            };
+
+            window.ws_game.onerror = function (error) {
+                console.error('WebSocketTournamentGame Error', error);
+            };
+
+            window.ws_game.onclose = function (event) {
+                window.ws_game = null;
+                console.log('WebSocketTournamentGame connection closed', event);
+            };
+        }
+    }
+    return window.ws_game;
+}
+
 async function sendMessage(ws, command, obj = null) {
     if (!ws) {
         console.log('WebSocketGame not initialized! try send message:', command);
@@ -55,4 +82,4 @@ async function sendMessage(ws, command, obj = null) {
     }
 }
 
-export {sendMessage, initializeGameSocket };
+export {sendMessage, initializeGameSocket, initializeTournamentGameSocket };

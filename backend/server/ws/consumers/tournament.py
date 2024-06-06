@@ -255,6 +255,7 @@ class Tournament(AsyncWebsocketConsumer, Message, GameBase):
 		match_object.winner = Player.objects.get(id=winner_name) if winner_name else None
 		match_object.date_played = timezone.now()
 		match_object.active = False
+		match_object.played = True
 		match_object.save()
 
 		Tournament.finished[self.match_id] = True

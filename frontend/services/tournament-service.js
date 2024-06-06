@@ -16,4 +16,12 @@ export const tournamentService = {
 		});
 		return {status : response.status, body: await response.json()};
 	},
+	nextRound: async (tournamentId) => {
+		const response = await fetch(`${BASE_URL}/tournament/next-round`, {
+			method: 'POST',
+			headers: headers,
+			body: JSON.stringify({tournament_id : tournamentId}),
+		});
+		return {status : response.status, body: await response.json()};
+	},
 };
