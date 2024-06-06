@@ -1,12 +1,13 @@
 import { showSnackbar } from "../../utils/snackbar.js";
 import { tournamentService } from "../../services/tournament-service.js";
+import { gameMode } from "../../enviroments.js";
 
 const Tournament = () => {
 
 	document.querySelectorAll('.shape').forEach(shape => {
-        shape.style.setProperty('--random-x', (Math.random() * 2 - 1).toFixed(2));
-        shape.style.setProperty('--random-y', (Math.random() * 2 - 1).toFixed(2));
-    }); 
+		shape.style.setProperty('--random-x', (Math.random() * 2 - 1).toFixed(2));
+		shape.style.setProperty('--random-y', (Math.random() * 2 - 1).toFixed(2));
+	}); 
 
 	// Riferimenti agli elementi del DOM
 	const modal = document.getElementById('tournamentModal');
@@ -88,6 +89,22 @@ const Tournament = () => {
 			participants = [];
 			updateParticipantList();
 			closeModalFunc();
+
+			const tournament = response.body['data']['tournament'];
+    		const matches = response.body['data']['matches'];
+
+			console.log('Tournament created successfully.');
+			console.log(tournament);
+			console.log(matches);
+
+			// Salva i dati del torneo e delle partite nel localStorage
+			localStorage.setItem('tournament', JSON.stringify(tournament));
+			localStorage.setItem('matches', JSON.stringify(matches));
+
+			window.game.mode = gameMode.tournament;
+
+			window.navigateTo('/waiting-room');
+
 		  } else {
 			showSnackbar(`${response.body['message']}`, "error");
 		  }
@@ -97,7 +114,6 @@ const Tournament = () => {
 	  }
 	};
   
-	// Esempio di apertura della modale per test (da rimuovere in produzione)
 	openModal();
   };
   

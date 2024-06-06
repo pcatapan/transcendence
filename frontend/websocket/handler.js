@@ -1,6 +1,8 @@
 import { commands } from "./command.js"
 import { showSnackbar } from "../utils/snackbar.js"
+import { gameMode } from "../enviroments.js";
 import { sendMessage } from "./Game.js";
+import { generateRandomAvatar } from "../utils/utils.js";
 
 const commandHandlers = {
 	[commands.list_of_users]: handler_setUsersList,
@@ -120,6 +122,12 @@ function handler_updateGame(res) {
 }
 
 function handler_startBall(res) {
+
+	if (window.game.mode == gameMode.tournament) {
+		// Se è un torneo, non inizio la partita
+		return;
+	}
+
 	window.game.isActive = true;
 
 	if (!window.ws_game) {
@@ -138,7 +146,7 @@ function handler_IAOpponentFound(res) {
 	window.game.match_id = res.content.match_id
 	window.game.opponent = {
 		name : 'IA',
-		avatar : 'https://www.gravatar.com/avatar/' + Math.floor(Math.random() * 1000000) + '?d=identicon'
+		avatar : generateRandomAvatar()
 	}
 
 	setTimeout(() => {
@@ -148,6 +156,17 @@ function handler_IAOpponentFound(res) {
 
 function handler_finishMatch(res) {
 	console.log('Match finished:', res.content)
+
+	if (window.game.mode === gameMode.tournament) {
+		// Salvo i dati di chi ha vinto
+		window.game.endGame = {
+			winner : res.content.winner_username,
+			winner_score : res.content.player1_score > res.content.player2_score ? res.content.player1_score : res.content.player2_score,
+			loser : res.content.player1_username === res.content.winner_username ? res.content.player2_username : res.content.player1_username,
+			loser_score : res.content.player1_score < res.content.player2_score ? res.content.player1_score : res.content.player2_score,
+		}
+		return;
+	}
 
 	// Svuoto l'oggetto game
 	window.game.match_id = null
@@ -174,7 +193,7 @@ function handler_LocalOpponentFound(res) {
 	window.game.match_id = res.content.match_id
 	window.game.opponent = {
 		name : 'Player 2',
-		avatar : 'https://www.gravatar.com/avatar/' + Math.floor(Math.random() * 1000000) + '?d=identicon'
+		avatar : generateRandomAvatar()
 	}
 
 	setTimeout(() => {

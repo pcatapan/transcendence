@@ -5,7 +5,7 @@ const EndGame = () => {
 
 	let endGameInfo = window.game && window.game.endGame;
 
-	if (APP_ENV === 'development') {
+	if (APP_ENV === 'development' && false) {
 		window.game = {
 			endGame : {
 				winner: 'Player 1',
@@ -34,6 +34,13 @@ const EndGame = () => {
         `;
     }
 
+    if (window.game.mode === 'tournament') {
+        document.getElementById('play-again').classList.add('d-none');
+        document.getElementById('button-home').classList.add('d-none');
+
+        document.getElementById('button-next-match').classList.remove('d-none');
+    }
+
     document.getElementById('play-again').addEventListener('click', function(event) {
         window.game.endGame = {};
         window.game.isActive = true;
@@ -42,7 +49,31 @@ const EndGame = () => {
 
         window.navigateTo('/waiting-room');
     });
+
+    document.getElementById('button-next-match').addEventListener('click', tournamentNextMatch);
     
 };
+
+function tournamentNextMatch() {
+    if (window.game.mode !== 'tournament') {
+        return;
+    }
+
+    // chiudo il socket
+    window.ws_game.close();
+
+    const currentMatchIndex = localStorage.getItem('currentMatchIndex') + 1;
+    const matches = JSON.parse(localStorage.getItem('matches'));
+
+    if (currentMatchIndex > matches.length) {
+
+    }
+
+    let currentMatch = matches[currentMatchIndex];
+
+    localStorage.setItem('currentMatch', JSON.stringify(currentMatch));
+
+
+}
 
 export default EndGame;

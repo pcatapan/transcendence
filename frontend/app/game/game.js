@@ -8,12 +8,17 @@ const Game = () => {
     
     initializeGameSocket(window.game.match_id);
 
-    let data = {
-        'match': window.game.match_id
-    }
-    sendMessage(window.ws, commands.confirm_match, data);
+    console.log('Game mode:', window.game.mode);
+    if (window.game.mode !== gameMode.tournament) {
+        let data = {
+            'match': window.game.match_id
+        }
+        sendMessage(window.ws, commands.confirm_match, data);
 
-    animationFoundOpponent();
+        animationFoundOpponent();
+    } else {
+        showInfoMatch();
+    }
 
     // Gestisci il rilascio dei tasti
 	document.addEventListener('keyup', (event) => {
@@ -26,7 +31,7 @@ const Game = () => {
 			sendMessageKeyboard('down', 'on_release');
 		}
 
-        if (window.game.mode !== gameMode.offline) {
+        if (window.game.mode !== gameMode.offline && window.game.mode !== gameMode.tournament) {
             return;
         }
 
@@ -49,7 +54,7 @@ const Game = () => {
 			sendMessageKeyboard('down', 'on_press');
 		}
 
-        if (window.game.mode !== gameMode.offline) {
+        if (window.game.mode !== gameMode.offline && window.game.mode !== gameMode.tournament) {
             return;
         }
 
@@ -97,25 +102,11 @@ function animationFoundOpponent() {
             countdownElement.textContent = 'GO!';
 
             setTimeout(() => {
-                // opacity 0
-                document.getElementById('opponent-info').style.opacity = 0;
                 countdownElement.style.opacity = 0;
-
-                // Rimuovo attribbuto hidden
-                document.getElementById('game-container').removeAttribute('hidden');
-                
-                // Aggiungo attributo hidden
-                document.getElementById('opponent-info').setAttribute('hidden', true);
-                // rimuovo d-flex
-                document.getElementById('opponent-info').classList.remove('d-flex');
-
-                document.getElementById('player2-avatar').src = opponent['avatar'];
-
-                document.getElementById('player2-name').textContent = opponent['name'];
-
-                document.getElementById('player1-avatar').src = user['avatar'];
-
-                document.getElementById('player1-name').textContent = user['username'];
+                preparingMatch({
+                    name: user.username,
+                    avatar: user.avatar
+                }, opponent);
 
                 console.log(window.game)
                 if (window.game['mode'] == 'ia_opponent' || window.game['mode'] == 'offline') {
@@ -123,8 +114,6 @@ function animationFoundOpponent() {
                 } else {
                     document.getElementById('button-home').style.display = 'none';
                 }
-
-                startGame();
             }, 500);
         }
     }, 1000);
@@ -139,8 +128,48 @@ function sendMessageKeyboard(key, status) {
     window.ws_game.send(JSON.stringify(message));
 }
 
-function startGame() {
-    console.log('Game started');
+function showInfoMatch() {
+    // Aggiungo attributo hidden
+    document.getElementById('opponent-info').classList.add('d-none');
+
+    document.getElementById('match-info').removeAttribute('hidden');
+
+    console.log(window.game.player1);
+    document.getElementById('player1').textContent = window.game.player1.name;
+    document.getElementById('player1-avatar-info').src = window.game.player1.avatar;
+
+    console.log(window.game.opponent);
+    document.getElementById('player2').textContent = window.game.opponent.name;
+    document.getElementById('player2-avatar-info').src = window.game.opponent.avatar;
+
+    document.getElementById('button-start-game').onclick = () => {
+        document.getElementById('match-info').setAttribute('hidden', true);
+        
+        preparingMatch(window.game.player1, window.game.opponent);
+
+        window.game.isActive = true;
+        sendMessage(window.ws_game, commands.start_ball);
+    }
+}
+
+function preparingMatch(player1, player2) {
+    // opacity 0
+    document.getElementById('opponent-info').style.opacity = 0;
+
+    // Rimuovo attribbuto hidden
+    document.getElementById('game-container').removeAttribute('hidden');
+    
+    // Aggiungo attributo hidden
+    document.getElementById('opponent-info').setAttribute('hidden', true);
+
+    // rimuovo d-flex
+    document.getElementById('opponent-info').classList.remove('d-flex');
+
+    document.getElementById('player2-avatar').src = player2['avatar'];
+    document.getElementById('player2-name').textContent = player2['name'];
+
+    document.getElementById('player1-avatar').src = player1['avatar'];
+    document.getElementById('player1-name').textContent = player1['name'];
 }
 
 export default Game;

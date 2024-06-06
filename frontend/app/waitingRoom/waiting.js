@@ -1,6 +1,8 @@
 import { initializeWebSocket, sendMessage } from '../../websocket/Lobby.js';
+import { initializeTournamentGameSocket } from '../../websocket/Game.js';
 import { commands } from '../../websocket/command.js';
 import { APP_ENV } from '../../enviroments.js';
+import { defineOpponentTournament } from '../../utils/utils.js';
 import {showSnackbar} from '../../utils/snackbar.js';
 
 const waitingMessages = [
@@ -62,6 +64,9 @@ function defineModeOfPlay() {
 		case 'offline':
 			startLocalGame();
 			break;
+		case 'tournament':
+			startTournamentGame();
+			break;
 		default:
 			showSnackbar('Unknown game mode', 'error');
 			window.navigateTo('/');
@@ -85,6 +90,45 @@ function startIAOpponentGame() {
 
 function startLocalGame() {
 	sendMessage(window.ws, commands.local_opponent);
+}
+
+async function startTournamentGame() {
+
+	// In torneo nascondo il bottone di uscita dalla coda
+	let quit = document.getElementById('button-leave-queue')
+	quit.classList.add('d-none');
+
+	// Cambio il titolo della pagina
+	document.getElementById('waiting-room-title').textContent = 'We are preparing the tournament...';
+
+	// Aggiungo pulsante per avviare il torneo
+	let startTournamentButton = document.createElement('a');
+	startTournamentButton.textContent = 'Start Tournament';
+	startTournamentButton.classList.add('btn', 'btn-primary');
+	startTournamentButton.onclick = async () => {
+		window.navigateTo('/game');
+	};
+	document.getElementById('waiting-room-container').appendChild(startTournamentButton);
+
+	window.game.tournament = {};
+	window.game.endGame = {};
+
+	let tournament = JSON.parse(localStorage.getItem('tournament'));
+	window.game.tournament.tournament = tournament;
+
+	let matches = JSON.parse(localStorage.getItem('matches'));
+	window.game.tournament.matches = matches;
+
+	window.game.tournament.currentMatch = matches[0];
+	let currentMatch = matches[0];
+	localStorage.setItem('currentMatch', JSON.stringify(matches[0]));
+	
+	window.game.tournament.currentMatchIndex = 0;
+	localStorage.setItem('currentMatchIndex', 0);
+
+	defineOpponentTournament(currentMatch);
+
+	await initializeTournamentGameSocket(tournament.id, matches[0].id);
 }
 
 export default WaitingRoom;

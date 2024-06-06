@@ -21,6 +21,9 @@ class MatchManager():
 
 	def inzialize_list_of_players(self, match_id, client_id, consumer):
 		try :
+			if not isinstance(self.list_of_players, dict):
+				self.list_of_players = {}
+		
 			if not self.list_of_players.get(match_id):
 				self.list_of_players[match_id] = {}
 			self.list_of_players[match_id][client_id] = consumer

@@ -2,6 +2,7 @@ import { showSnackbar } from '/utils/snackbar.js';
 import { routes, loadHTML } from '/router.js';
 import { authService } from '/services/auth.js';
 import { APP_ENV } from '/enviroments.js';
+import { generateRandomAvatar } from './utils/utils.js';
 
 const notAuthorizedRoutes = ["/login", "/sign-up"];
 
@@ -10,6 +11,8 @@ window.game = {
     match_id : null,
     opponent : null,
     isActive : true,
+    tournament : {},
+    player1 : {}, // Usato nel torneo indica il giocatore corrente
     endGame : {}
 };
 
@@ -18,7 +21,7 @@ if (APP_ENV === 'development' && false) {
     window.game.match_id = 27;
     window.game.opponent = {
         username: 'Opponent',
-        avatar: 'https://www.gravatar.com/avatar/' + Math.floor(Math.random() * 1000000) + '?d=identicon'
+        avatar: generateRandomAvatar()
     };
 }
 
