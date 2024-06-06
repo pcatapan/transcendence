@@ -15,7 +15,7 @@ class TournamentManager:
 		try:	
 			match = LocalMatch.objects.select_related('player1', 'player2').get(id=match_id)
 		except Exception as e:
-			logger.error(f"Error in get_match_and_player: {e}")
+			logger.error(f"Error in TournamentManager - get_match_and_player: {e}")
 
 		if match:
 			return match
@@ -30,10 +30,24 @@ class TournamentManager:
 		try:
 			tournament = Tournament.objects.get(id=tournament_id)
 		except Exception as e:
-			logger.error(f"Error in get_tournament: {e}")
+			logger.error(f"Error in TournamentManager - get_tournament: {e}")
 
 		if tournament:
 			return tournament
 		
 		logger.error(f"Tournament not found")
 		return None
+	
+	def get_match_atomic(self, match_id):
+		try :
+			from api.tournament.models import LocalMatch
+
+			match = LocalMatch.objects.select_for_update().get(id=match_id)
+
+			if match:
+				return match
+
+			return None
+		except Exception as e:
+			logger.error(f"Error in TournamentManager - get_match_atomic: {e}")
+			return None
