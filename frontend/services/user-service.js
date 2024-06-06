@@ -45,5 +45,20 @@ export const userService = {
 		});
 		return {status : response.status, body: await response.json()};
 	},
+	updateUserProfile: async (username, fullname, email) => {
+		const response = await fetch(`${BASE_URL}/user/update`, {
+			method: 'POST',
+			headers: headers,
+			body: JSON.stringify({username: username, fullname:fullname, email:email}),
+		});
+		return {status : response.status, body: await response.json()};
+	},
+	updateAvatar: async (formData) => {
+		const response = await fetch(`${BASE_URL}/user/update-avatar`, {
+			method: 'POST',
+			body: formData,
+		});
+		return {status : response.status, body: await response.json()};
+	}
 
 };

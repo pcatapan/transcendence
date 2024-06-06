@@ -164,3 +164,30 @@
 .btn:hover {
    border: 1px solid #00ff00 !important;
 }
+
+.button-home{
+    width: 100%;
+    display: flex;
+    justify-content: end;
+    align-items: end;
+    z-index: 2;
+    position: relative;
+}
+
+.icons{
+    width: 30px;
+}
+
+.butt {
+    padding: 5px 10px;
+    margin: 0 5px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s;
+    border: 1px solid transparent;
+}
+
+.butt:hover{
+    border: 1px solid #00ff00;
+}
