@@ -173,6 +173,10 @@ h3 {
     align-items: end;
 }
 
+.icons{
+    width: 30px;
+}
+
 button {
     margin-top: 20px;
     width: 100%;
@@ -185,9 +189,6 @@ button {
     cursor: pointer;
 }
 
-.icons{
-	width: 30px;
-}
 
 .icon{
     width: 30px;
@@ -398,10 +399,8 @@ p.no-friends-message {
 
 
 .no-matches-message {
-    text-align: center;
-    padding: 20px;
-    font-size: 18px;
-    color: #333;
+    padding-top: 2rem;
+    color: gray;
 }
 
 
@@ -491,4 +490,44 @@ p.no-friends-message {
   
   #verifyOtpButton:hover {
     background-color: #45a049;
+  }
+
+  .form-group {
+    margin-bottom: 15px;
+  }
+  
+  .form-group label {
+    display: block;
+    margin-bottom: 5px;
+  }
+  
+  .form-group input {
+    width: 100%;
+    padding: 8px;
+    box-sizing: border-box;
+  }
+  
+  #saveUserInfoBtn {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+  }
+  
+  #saveUserInfoBtn:hover {
+    background-color: #45a049;
+  }
+
+  .modal-edit {
+    background-color: #000;
+    margin: 15% auto; /* 15% from the top and centered */
+    padding: 20px;
+    border: 1px solid #888;
+    width: 50%; /* Could be more or less, depending on screen size */
+  }
+
+  .hidden {
+    display: none;
   }

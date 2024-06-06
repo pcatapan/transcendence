@@ -96,9 +96,7 @@ const User = () => {
                                         } else {
                                             showSnackbar(`${response.body.message}`, 'error');
                                         }
-                                    }).catch(error => {
-                                        console.error('Error verifying OTP:', error);
-                                    });
+                                    })
                                 };
                                 // User();
                             } else {
@@ -109,6 +107,83 @@ const User = () => {
                     }
                 }
             } 
+
+            const editInfoBtn = document.getElementById('edit-info');
+            const editUserInfoModal = document.getElementById('editUserInfoModal');
+            const closeModal = document.querySelector('#editUserInfoModal .close');
+            const editAvatarInput = document.getElementById('editAvatar');
+            const editUsernameInput = document.getElementById('editUsername');
+            const editFullnameInput = document.getElementById('editFullname');
+            const editEmailInput = document.getElementById('editEmail');
+            const saveUserInfoBtn = document.getElementById('saveUserInfoBtn');
+
+            // Funzione per aprire la modale di modifica
+            const openEditUserInfoModal = () => {
+                // Carica i dati utente attuali nei campi di input
+                editAvatarInput.value = ''; // Il campo file deve essere vuoto
+                editUsernameInput.value = user.username;
+                editFullnameInput.value = user.fullname;
+                editEmailInput.value = user.email;
+
+                editUserInfoModal.style.display = 'block';
+            };
+
+            // Funzione per chiudere la modale di modifica
+            const closeEditUserInfoModal = () => {
+                editUserInfoModal.style.display = 'none';
+            };
+
+            // Aggiungi event listener per aprire la modale di modifica
+            if (editInfoBtn) {
+                editInfoBtn.onclick = openEditUserInfoModal;
+            }
+
+            // Aggiungi event listener per chiudere la modale di modifica
+            if (closeModal) {
+                closeModal.onclick = closeEditUserInfoModal;
+                window.onclick = (event) => {
+                    if (event.target === editUserInfoModal) {
+                        closeEditUserInfoModal();
+                    }
+                };
+            
+                // Funzione per salvare le modifiche
+                saveUserInfoBtn.onclick = (event) => {
+                    event.preventDefault();
+            
+                    const newUsername = editUsernameInput.value.trim();
+                    const newFullname = editFullnameInput.value.trim();
+                    const newEmail = editEmailInput.value.trim();
+                    const newAvatarFile = editAvatarInput.files[0];
+
+                    // Crea un oggetto FormData per inviare i dati del form, inclusi i file
+                    if (newAvatarFile) {
+                        const formData = new FormData();
+                        formData.append('avatar', newAvatarFile);
+                        userService.updateAvatar(formData).then((response) => {
+                            if (response.status === 200) {
+                                showSnackbar('Avatar updated successfully', 'success');
+                                User();  // Reload the DOM to update avatar
+                            } else {
+                                showSnackbar(`${response.body.message}`, 'error');
+                            }
+                        })
+                    }
+          
+                    // Effettua la chiamata API per aggiornare i dati dell'utente
+                    userService.updateUserProfile(newUsername, newFullname, newEmail).then((response) => {
+                        if (response.status === 200) {
+                            showSnackbar('User profile updated successfully', 'success');
+                            // Chiudi la modale dopo aver salvato le modifiche
+                            closeEditUserInfoModal();
+                            User()
+                        } else {
+                            showSnackbar(`${response.body.message}`, 'error');
+                        }
+                    })
+                };
+            };
+            
 
             const eloElem = document.getElementById('elo');
             if (eloElem) eloElem.innerHTML = user.elo;
@@ -197,100 +272,114 @@ const User = () => {
                 });
             } else {
                 const noFriendsMessage = document.createElement("p");
-                noFriendsMessage.textContent = "Non ci sono amici";
+                noFriendsMessage.textContent = "There are no friends.";
                 noFriendsMessage.classList.add("no-friends-message");
                 document.getElementById("friends-table").appendChild(noFriendsMessage);
             }
-            const matchHistoryTable = document.getElementById("match-history").getElementsByTagName('tbody')[0];
-            matchHistoryTable.innerHTML = '';  // Clear existing rows
 
-            if (user.match_history.length > 0) {
-                user.match_history.forEach(match => {
-                    const row = matchHistoryTable.insertRow();
+            const matchHistoryTable = document.getElementById("match-history");
+            const matchHistoryBody = matchHistoryTable.getElementsByTagName('tbody')[0];
+            const matchHistoryHead = matchHistoryTable.getElementsByTagName('thead')[0];
+            const matchHistoryContainer = document.getElementById("match-history-container");
+
+            if (matchHistoryTable) {
+                matchHistoryTable.innerHTML = '';  // Clear existing rows
+            
+                if (user.match_history && user.match_history.length > 0) {
+
+                    if (matchHistoryHead) {
+                        matchHistoryHead.classList.remove('hidden');
+                    }
+                    user.match_history.forEach(match => {
+                        const row = matchHistoryTable.insertRow();
+                        
+                        // Date cell
+                        const dateCell = row.insertCell(0);
+                        const date = match.date_played ? new Date(match.date_played).toLocaleDateString() : '';
+                        dateCell.textContent = date;
+            
+                        // Result cell
+                        const resultCell = row.insertCell(1);
+                        const result = document.createElement("span");
+            
+                        if (match.loser === null) {
+                            result.innerText = 'Draw';
+                            result.style.color = 'yellow';
+                        } else if (match.loser === user.username) {
+                            result.innerText = 'You Lose';
+                            result.style.color = 'red';
+                        } else {
+                            result.innerText = 'You Won';
+                            result.style.color = 'green';
+                        }
+            
+                        resultCell.appendChild(result);
+            
+                        // Opponent cell
+                        const opponentCell = row.insertCell(2);
+                        const opponent = document.createElement("span");
+            
+                        if (match.loser === null) {
+                            opponent.innerText = match.player1 === user.username ? match.player2 : match.player1;
+                        } else if (match.loser === user.username) {
+                            opponent.innerText = match.player1 === user.username ? match.player2 : match.player1;
+                        } else {
+                            opponent.innerText = match.player1 === user.username ? match.player2 : match.player1;
+                        }
+            
+                        opponentCell.appendChild(opponent);
                     
-                    // Date cell
-                    const dateCell = row.insertCell(0);
-                    const date = match.date_played ? new Date(match.date_played).toLocaleDateString() : '';
-                    dateCell.textContent = date;
-
-                   // Result cell
-                    const resultCell = row.insertCell(1);
-                    const result = document.createElement("span");
-
-                    if (match.loser === null) {
-                        result.innerText = 'Draw';
-                        result.style.color = 'yellow';
-                    } else if (match.loser === user.username) {
-                        result.innerText = 'You Lose';
-                        result.style.color = 'red';
-                    } else {
-                        result.innerText = 'You Won';
-                        result.style.color = 'green';
-                    }
-
-                    resultCell.appendChild(result);
-
-                    // Opponent cell
-                    const opponentCell = row.insertCell(2);
-                    const opponent = document.createElement("span");
-
-                    if (match.loser === null) {
-                        opponent.innerText = match.player1 === user.username ? match.player2 : match.player1;
-                    } else if (match.loser === user.username) {
-                        opponent.innerText = match.player1 === user.username ? match.player2 : match.player1;
-                    } else {
-                        opponent.innerText = match.player1 === user.username ? match.player2 : match.player1;
-                    }
-
-                    opponentCell.appendChild(opponent);
+                        // Score cell
+                        const scoreCell = row.insertCell(3);
+                        const score = `${match.player1_score} vs ${match.player2_score}`;
+                        scoreCell.textContent = score;
+                    
+                        // Add friend button cell
+                        const actionCell = row.insertCell(4);
+                        const actionDiv = document.createElement("div");
+                        actionDiv.classList.add("action-buttons");
             
-                    // Score cell
-                    const scoreCell = row.insertCell(3);
-                    const score = `${match.player1_score} vs ${match.player2_score}`;
-                    scoreCell.textContent = score;
+                        const addButton = document.createElement("button");
+                        addButton.classList.add('btn');
             
-
-                    // Add friend button cell
-                    const actionCell = row.insertCell(4);
-                    const actionDiv = document.createElement("div");
-                    actionDiv.classList.add("action-buttons");
-
-                    const addButton = document.createElement("button");
-                    addButton.classList.add('btn');
-
-                    const addIcon = document.createElement("img");
-                    addIcon.src = '../../assets/icons/addFriends.png';
-                    addIcon.alt = 'ADD';
-                    addIcon.classList.add('button-icon-add');
-
-                    addButton.appendChild(addIcon);
-
-                    const isFriend = user.friends.some(friend => friend.id === (user.id == match.player1_id ? match.player2_id : match.player1_id));
-                    if (!isFriend) {
-                        addButton.style.display = 'block';
-                        addButton.onclick = () => {
-                            userService.addFriend(user.id == match.player1_id ? match.player2_id : match.player1_id).then(response => {
-                                if (response.status === 200) {
-                                    showSnackbar(`${response.body.message}`, 'success');
-                                    User();  // Reload the DOM to update friend list
-                                } else {
-                                    showSnackbar(`${response.body.message}`, 'error');
-                                }
-                            });
-                        };
-                    } else {
-                        addButton.style.display = 'none';
+                        const addIcon = document.createElement("img");
+                        addIcon.src = '../../assets/icons/addFriends.png';
+                        addIcon.alt = 'ADD';
+                        addIcon.classList.add('button-icon-add');
+            
+                        addButton.appendChild(addIcon);
+            
+                        const isFriend = user.friends.some(friend => friend.id === (user.id == match.player1_id ? match.player2_id : match.player1_id));
+                        if (!isFriend) {
+                            addButton.style.display = 'block';
+                            addButton.onclick = () => {
+                                userService.addFriend(user.id == match.player1_id ? match.player2_id : match.player1_id).then(response => {
+                                    if (response.status === 200) {
+                                        showSnackbar(`${response.body.message}`, 'success');
+                                        User();  // Reload the DOM to update friend list
+                                    } else {
+                                        showSnackbar(`${response.body.message}`, 'error');
+                                    }
+                                });
+                            };
+                        } else {
+                            addButton.style.display = 'none';
+                        }
+            
+                        actionDiv.appendChild(addButton);
+                        actionCell.appendChild(actionDiv);
+                    });
+                } else {
+                    if (matchHistoryHead) {
+                        matchHistoryHead.classList.add('hidden');
                     }
-
-                    actionDiv.appendChild(addButton);
-                    actionCell.appendChild(actionDiv);
-                });
-            } else {
-                const noMatchesMessage = document.createElement("p");
-                noMatchesMessage.textContent = "No match history available.";
-                noMatchesMessage.classList.add("no-matches-message");
-                document.getElementById("match-history-container").appendChild(noMatchesMessage);
+                    const noMatchesMessage = document.createElement("p");
+                    noMatchesMessage.textContent = "No match history available.";
+                    noMatchesMessage.classList.add("no-matches-message");
+                    document.getElementById("match-history").appendChild(noMatchesMessage);
+                }
             }
+            
         } else {
             showSnackbar(`${response.body.message}`, 'error');
         }

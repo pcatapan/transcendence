@@ -34,4 +34,4 @@ secret_key.txt  # file containing secret key
 # PyCharm IDE
 .idea/
 
-frontend/environment.js
+frontend/enviroments.js

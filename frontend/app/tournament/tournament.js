@@ -10,7 +10,6 @@ const Tournament = () => {
 
 	// Riferimenti agli elementi del DOM
 	const modal = document.getElementById('tournamentModal');
-	const closeModal = document.querySelector('.close');
 	const addParticipantBtn = document.getElementById('addParticipantBtn');
 	const participantNameInput = document.getElementById('participantName');
 	const participantList = document.getElementById('participantList');
@@ -18,7 +17,7 @@ const Tournament = () => {
   
 	let participants = [];
   
-	if (!modal || !closeModal || !addParticipantBtn || !participantNameInput || !participantList || !submitTournamentBtn) {
+	if (!modal || !addParticipantBtn || !participantNameInput || !participantList || !submitTournamentBtn) {
 	  return;
 	}
   
@@ -26,19 +25,6 @@ const Tournament = () => {
 	function openModal() {
 	  modal.style.display = 'block';
 	}
-  
-	// Funzione per chiudere la modale
-	function closeModalFunc() {
-	  modal.style.display = 'none';
-	}
-  
-	// Aggiungi event listener per chiudere la modale
-	closeModal.onclick = closeModalFunc;
-	window.onclick = (event) => {
-	  if (event.target === modal) {
-		closeModalFunc();
-	  }
-	};
   
 	// Funzione per aggiungere un partecipante
 	addParticipantBtn.onclick = () => {
@@ -87,7 +73,6 @@ const Tournament = () => {
 			document.getElementById('tournamentTitle').value = '';
 			participants = [];
 			updateParticipantList();
-			closeModalFunc();
 		  } else {
 			showSnackbar(`${response.body['message']}`, "error");
 		  }
