@@ -61,8 +61,8 @@ def post(request):
 
 	return response
 
-@transaction.atomic
-@require_GET
+
+
 def create_matches_round_1(tournament, players):
 	random.shuffle(players)
 
@@ -87,6 +87,8 @@ def create_matches_round_1(tournament, players):
 	
 	return matches
 
+@transaction.atomic
+@require_GET
 def createNextRound(tournament_id):
 	tournament = Tournament.objects.get(id=tournament_id)
 
