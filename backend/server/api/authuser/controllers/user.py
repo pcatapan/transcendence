@@ -140,15 +140,18 @@ def user_friends_add(request):
             'message': 'Missing user_id in request'
         }, status=400)
     
+    # Controllo che l'id differisca dall'id dell'utente loggato
+    if user_id == request.user.id:
+        return JsonResponse({
+            'message': 'Cannot add yourself as a friend'
+        }, status=400)
+    
     user = request.user
     friend = get_object_or_404(CustomUser, pk=user_id)
 
     try:
         friendship, created = Friendship.objects.get_or_create(user=user)
-        if user in friendship.blocked_users.all() or friend in friendship.blocked_users.all():
-            return JsonResponse({
-                'message': 'User is blocked'
-            }, status=403)
+
     except Exception as e:
         return JsonResponse({
             'message': str(e)
@@ -183,6 +186,12 @@ def user_friends_remove(request):
     if not user_id:
         return JsonResponse({
             'message': 'Missing user_id in request'
+        }, status=400)
+    
+    # Controllo che l'id differisca dall'id dell'utente loggato
+    if user_id == request.user.id:
+        return JsonResponse({
+            'message': 'Cannot remove yourself as a friend'
         }, status=400)
 
     user = request.user
