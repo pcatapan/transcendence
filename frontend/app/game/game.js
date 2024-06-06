@@ -118,7 +118,7 @@ function animationFoundOpponent() {
                 document.getElementById('player1-name').textContent = user['username'];
 
                 console.log(window.game)
-                if (window.game['mode'] == 'ia_opponent') {
+                if (window.game['mode'] == 'ia_opponent' || window.game['mode'] == 'offline') {
                     document.getElementById('button-home').style.display = 'flex';
                 } else {
                     document.getElementById('button-home').style.display = 'none';
