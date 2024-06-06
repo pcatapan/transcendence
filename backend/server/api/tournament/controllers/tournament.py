@@ -47,7 +47,6 @@ def post(request):
 		# Create rounds and matches
 		matches = create_matches_round_1(tournament, players)
 	except Exception as e:
-		tournament.delete()
 		return JsonResponse({'message': str(e)}, status=400)
 
 	response = JsonResponse({
