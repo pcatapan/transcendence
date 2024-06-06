@@ -73,3 +73,10 @@
     margin-bottom: 3rem;
     display: flex;
 }
+
+div#match-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 100%;
+}

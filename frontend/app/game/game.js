@@ -5,6 +5,13 @@ import { userService } from "../../services/user-service.js";
 
 const Game = () => {
     console.log("Game component loaded");
+
+    console.log("game",window.game)
+    if (window.game['mode'] !== 'online' && window.game['mode'] !== 'tournament') {
+        document.getElementById('button-home').style.display = 'flex';
+    } else {
+        document.getElementById('button-home').style.display = 'none';
+    }
     
     initializeGameSocket(window.game.match_id);
 
@@ -108,12 +115,6 @@ function animationFoundOpponent() {
                     avatar: user.avatar
                 }, opponent);
 
-                console.log(window.game)
-                if (window.game['mode'] == 'ia_opponent' || window.game['mode'] == 'offline') {
-                    document.getElementById('button-home').style.display = 'flex';
-                } else {
-                    document.getElementById('button-home').style.display = 'none';
-                }
             }, 500);
         }
     }, 1000);
