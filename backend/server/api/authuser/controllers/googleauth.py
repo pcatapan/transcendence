@@ -56,8 +56,7 @@ def display_qr_code(request):
 def enable_2fa(request):
 	user = request.user
 
-	print("enable secret key: ", user.secret_key)
-	if user.is_2fa_enabled:
+	if user.is_2fa_enabled and user.is_2fa_setup_complete:
 		return JsonResponse({
 			'message': '2FA is already enabled.'
 		}, status=200)
@@ -111,12 +110,8 @@ def verify_totp_code(request):
 				'message': '2FA is not enabled for this user.'
 			}, status=400)
 		
-		print("secret key: ", user.secret_key)
 		totp = pyotp.TOTP(user.secret_key)
 		is_valid = totp.verify(totp_code)
-
-		print("secret key: ", user.secret_key)
-		print("Is valid: ", is_valid)
 
 		if is_valid:
 			user.is_2fa_setup_complete = True
@@ -129,7 +124,7 @@ def verify_totp_code(request):
 				'message': 'Invalid TOTP'
 			}, status=400)
 
-	except pyotp.OTPError as e:
+	except Exception as e: 
 		return JsonResponse({
 			'message': f'Error: {str(e)}'
 		}, status=400)
