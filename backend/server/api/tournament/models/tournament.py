@@ -27,7 +27,7 @@ class Tournament(models.Model):
 	)
 
 	winner = models.ForeignKey(
-		User,
+		'Player',
 		on_delete=models.CASCADE,
 		related_name='winner_tournament',
 		blank=True,
@@ -42,24 +42,30 @@ class Tournament(models.Model):
 		null=True
 	)
 
-	players = models.ManyToManyField(
-		User,
-		blank=True
-	)
-
-	observers = models.ManyToManyField(
-		User,
-		blank=True,
-		related_name='observers'
-	)
-
 	joinable = models.BooleanField(
-		default=True
-	)
-
-	public = models.BooleanField(
 		default=True
 	)
 
 	def __str__(self):
 		return f"Tournament {self.id} - {self.name}"
+	
+	@property
+	def is_ongoing(self):
+		return self.start_date and not self.end_date
+
+	@property
+	def is_concluded(self):
+		return bool(self.end_date)
+	
+	def to_json(self):
+		return {
+			'id': self.id,
+			'name': self.name,
+			'type': self.type,
+			'start_date': self.start_date,
+			'end_date': self.end_date,
+			'round': self.round,
+			'winner': self.winner.name if self.winner else None,
+			'tournament_admin': self.tournament_admin.username if self.tournament_admin else None,
+			'joinable': self.joinable
+		}

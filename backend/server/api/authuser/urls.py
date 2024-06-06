@@ -3,7 +3,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 from .controllers.user import show, update_avatar, update, user_friends_list, \
-	user_friends_add, user_friends_remove, user_blocked_list, user_blocked_add, user_blocked_remove
+	user_friends_add, user_friends_remove
 from .controllers.auth import signup, login, authenticate, logout
 from .controllers.googleauth import enable_2fa, disable_2fa, display_qr_code, verify_totp_code, user_2fa_setup_complete
 from .controllers.auth import oauth_start, oauth_login
@@ -20,10 +20,6 @@ urlpatterns = [
 	path('user/friendlist', user_friends_list, name='user_friendlist'),
 	path('user/friend/add', user_friends_add, name='user_friend_add'),
 	path('user/friend/remove', user_friends_remove, name='user_friend_remove'),
-
-	path('user/blockedlist', user_blocked_list, name='user_blockedlist'),
-	path('user/blocked/add', user_blocked_add, name='user_blocked_add'),
-	path('user/blocked/remove', user_blocked_remove, name='user_blocked_remove'),
 
 	path('user/login', login, name="login"),
 	path('enable_2fa', enable_2fa, name='enable_2fa'),

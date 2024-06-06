@@ -44,9 +44,10 @@ class Match(models.Model):
 	
 	def to_json(self):
 		return {
-			'id': self.id,
 			'player1': self.player1.username,
+			'player1_id': self.player1.id,
 			'player2': self.player2.username,
+			'player2_id': self.player2.id,
 			'player1_score': self.player1_score,
 			'player2_score': self.player2_score,
 			'date_played': self.date_played,

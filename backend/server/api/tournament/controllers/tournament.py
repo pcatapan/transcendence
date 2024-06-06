@@ -1,79 +1,88 @@
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
-from django.contrib.auth.decorators import login_required
-from django.utils.decorators import method_decorator
 from django.views import View
+import math
 import json
-from ..models import Tournament
-from api.authuser.models.custom_user import CustomUser 
+import random
+from ..models import Tournament, Player, LocalMatch
 
-@method_decorator([login_required, require_POST], name='dispatch')
-class TournamentCreateView(View):
-	def post(self, request):
-		if not request.body:
-			return JsonResponse({'message': 'Empty payload'}, status=400)
+@require_POST
+def post(request):
+	if not request.body:
+		return JsonResponse({'message': 'Empty payload'}, status=400)
 
-		try:
-			data = json.loads(request.body)
-		except json.JSONDecodeError:
-			return JsonResponse({'message': 'Invalid JSON'}, status=400)
+	try:
+		data = json.loads(request.body)
+	except json.JSONDecodeError:
+		return JsonResponse({'message': 'Invalid JSON'}, status=400)
 
-		name = data.get('name')
-		if not name:
-			return JsonResponse({'message': "The 'name' field is required"}, status=422)
+	name = data.get('name')
+	if not name:
+		return JsonResponse({'message': "The 'name' field is required"}, status=422)
 
-		type = data.get('type', '1v1')
-		end_date = data.get('end_date', None)
-		round_number = data.get('round', 0)
-		players_ids = data.get('players', [request.user.id])
-		observers_ids = data.get('observers', [])
+	type = data.get('type', '1v1')
+	player_names = data.get('player_names', [])
 
-		valid_players, player_errors = validate_users_existence(players_ids)
-		if not valid_players:
-			return player_errors
-
-		valid_observers, observer_errors = validate_users_existence(observers_ids)
-		if not valid_observers:
-			return observer_errors
-
-		tournament = Tournament(
-			name=name,
-			type=type,
-			end_date=end_date,
-			round=round_number,
-			tournament_admin=request.user
-		)
-
-		try:
-			tournament.save()
-			tournament.players.set(valid_players)
-			tournament.observers.set(valid_observers)
-		except Exception as e:
-			return JsonResponse({'message': str(e)}, status=400)
-
-		response = JsonResponse({
-			'status': 'ok',
-			'tournament_id': tournament.id,
-			'message': 'Tournament created successfully'
-		})
-		response['Access-Control-Allow-Methods'] = 'POST, OPTIONS'
-		response['Access-Control-Allow-Headers'] = 'Content-Type'
-		response['Access-Control-Allow-Origin'] = '*'
-
-		return response
-
-def validate_users_existence(user_ids):
-	users = []
-	errors = []
-
-	for user_id in user_ids:
-		try:
-			user = CustomUser.objects.get(id=user_id)
-			users.append(user)
-		except CustomUser.DoesNotExist:
-			errors.append(f"User with id {user_id} does not exist.")
-
-	if errors:
-		return False, JsonResponse({'status': 'error', 'message': errors}, status=404)
+	if not player_names:
+		return JsonResponse({'message': "At least one player name is required"}, status=422)
 	
-	return True, users
+	player_names.append(request.user.username)
+	
+	# controllo che i valori di player_names siano univoci
+	if len(player_names) != len(set(player_names)):
+		return JsonResponse({'message': "Player names must be unique"}, status=422)
+
+	tournament = Tournament(
+		name=name,
+		type=type,
+		tournament_admin=request.user
+	)
+
+	try:
+		tournament.save()
+
+		# Create players
+		players = [Player.objects.create(name=player_name, tournament=tournament) for player_name in player_names]
+
+		# Create rounds and matches
+		matches = create_matches_round_1(tournament, players)
+	except Exception as e:
+		tournament.delete()
+		return JsonResponse({'message': str(e)}, status=400)
+
+	response = JsonResponse({
+		'data': {
+			'tournament': tournament.to_json(),
+			'players': [player.name for player in players],
+			'matches': [match.to_json() for match in matches]
+		},
+		'message': 'Tournament created successfully'
+	})
+
+	return response
+
+def create_matches_round_1(tournament, players):
+	random.shuffle(players)
+
+	# Creazione dei match del primo round
+	round_number = 1
+	matches = []
+	for i in range(0, len(players), 2):
+		if i + 1 < len(players):
+			player1 = players[i]
+			player2 = players[i + 1]
+		else:
+			player1 = players[i]
+			player2 = None
+
+		match = LocalMatch.objects.create(
+			player1=player1,
+			player2=player2,
+			tournament=tournament,
+			round=round_number
+		)
+		matches.append(match)
+	
+	return matches
+
+	

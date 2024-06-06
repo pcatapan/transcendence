@@ -169,7 +169,7 @@ class CustomUser(AbstractUser):
 			'avatar'    	: self.avatar.url if self.avatar else default_avatar,
 			'elo'       	: self.ELO,
 			'2FA'			: self.is_2fa_enabled and self.is_2fa_setup_complete,
-			'friends'   	: frindship.get_all() if frindship else [],
+			'friends'   	: frindship.to_json() if frindship else [],
 			'match_history' : self.get_match_history(),
 			'user_stats'	: self.user_stats()
 		}
@@ -185,10 +185,8 @@ class CustomUser(AbstractUser):
 	
 	def user_stats(self):
 		from api.tournament.models.match import Match
-		from api.tournament.models.tournament import Tournament
 
 		matches = Match.objects.filter(Q(player1=self) | Q(player2=self))
-		tournament_wins = Tournament.objects.filter(winner=self)
 
 		if not matches:
 			return {
@@ -201,7 +199,6 @@ class CustomUser(AbstractUser):
 				'win_rate': 0,
 				'loss_rate': 0,
 				'tie_rate': 0,
-				'tournaments_won': 0
 			}
 
 		total_matches = matches.count()
@@ -224,7 +221,6 @@ class CustomUser(AbstractUser):
 			'goal_conceded': goal_conceded,
 			'win_rate': win_rate,
 			'loss_rate': loss_rate,
-			'tie_rate': tie_rate,
-			'tournaments_won': len(tournament_wins)
+			'tie_rate': tie_rate
 		}
  
