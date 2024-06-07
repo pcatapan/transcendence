@@ -66,7 +66,9 @@ def login(request):
 	email = data.get('email')
 	password = data.get('password')
 
-	user = get_object_or_404(CustomUser, email=email)
+	user = CustomUser.objects.filter(email=email).first()
+	if not user:
+		return JsonResponse({'message': 'Invalid credentials'}, status=401)
 	
 	if user.check_password(password):
 		if user.is_2fa_enabled and user.is_2fa_setup_complete:

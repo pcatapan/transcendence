@@ -3,6 +3,7 @@ from django.db import transaction
 from django.views.decorators.http import require_POST, require_GET
 from django.views import View
 import math
+from django.utils import timezone
 import json
 import random
 from ..models import Tournament, Player, LocalMatch
@@ -75,13 +76,24 @@ def create_matches_round_1(tournament, players):
 			player1 = players[i]
 			player2 = None
 
-		match = LocalMatch.objects.create(
-			player1=player1,
-			player2=player2,
-			tournament=tournament,
-			round=round_number
-		)
-		matches.append(match)
+		if player2:
+			match = LocalMatch.objects.create(
+				player1=player1,
+				player2=player2,
+				tournament=tournament,
+				round=round_number
+			)
+			matches.append(match)
+		else :
+			LocalMatch.objects.create(
+				player1=player1,
+				player2=None,
+				tournament=tournament,
+				round=round_number,
+				played=True,
+				winner=player1,
+				date_played=timezone.now()
+			)
 	
 	return matches
 
@@ -136,13 +148,24 @@ def createNextRound(request):
 			player1 = winners[i]
 			player2 = None
 
-		match = LocalMatch.objects.create(
-			player1=player1,
-			player2=player2,
-			tournament=tournament,
-			round=next_round
-		)
-		next_round_matches.append(match)
+		if player2:
+			match = LocalMatch.objects.create(
+				player1=player1,
+				player2=player2,
+				tournament=tournament,
+				round=next_round
+			)
+			next_round_matches.append(match)
+		else :
+			LocalMatch.objects.create(
+				player1=player1,
+				player2=None,
+				tournament=tournament,
+				round=next_round,
+				played=True,
+				winner=player1,
+				date_played=timezone.now()
+			)
 
 	return JsonResponse({
 		'data': {
