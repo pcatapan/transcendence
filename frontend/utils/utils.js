@@ -31,24 +31,24 @@ export async function defineOpponentTournament() {
 			avatar: user.avatar
 		}
 	} else if (user.username === match.player2) {
-		window.game.opponent = {
+		window.game.player1 = {
 			name: match.player1,
 			avatar: generateRandomAvatar()
 		}
 
-		window.game.player1 = {
+		window.game.opponent = {
 			name: user.username,
 			avatar: user.avatar
 		}
 	} else {
 		// Partita tra due utenti non autenticati
 		window.game.opponent = {
-			name:  match.player1,
+			name:  match.player2,
 			avatar: generateRandomAvatar()
 		}
 
 		window.game.player1 = {
-			name : match.player2,
+			name : match.player1,
 			avatar : generateRandomAvatar()
 		}
 	}

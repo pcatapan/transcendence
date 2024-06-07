@@ -61,8 +61,6 @@ def post(request):
 
 	return response
 
-
-
 def create_matches_round_1(tournament, players):
 	random.shuffle(players)
 
@@ -88,8 +86,18 @@ def create_matches_round_1(tournament, players):
 	return matches
 
 @transaction.atomic
-@require_GET
-def createNextRound(tournament_id):
+@require_POST
+def createNextRound(request):
+	if not request.body:
+		return JsonResponse({'message': 'Empty payload'}, status=400)
+	
+	try:
+		data = json.loads(request.body)
+	except json.JSONDecodeError:
+		return JsonResponse({'message': 'Invalid JSON'}, status=400)
+	
+	tournament_id = data.get('tournament_id')
+
 	tournament = Tournament.objects.get(id=tournament_id)
 
 	current_round = tournament.round
@@ -107,9 +115,10 @@ def createNextRound(tournament_id):
 		return JsonResponse({
 			'message': 'The tournament has finished',
 			'data': {
-				'winner': winners[0].name
-			}
-		}, status=422)
+				'winner': winners[0].name,
+				"finish": True
+			},
+		}, status=200)
 	
 	if len(winners) == 0:
 		return JsonResponse({'message': 'No winners found'}, status=422)
@@ -139,8 +148,9 @@ def createNextRound(tournament_id):
 		'data': {
 			'round': next_round,
 			'tournament': tournament.to_json(),
-			'matches': [match.to_json() for match in next_round_matches]
+			'matches': [match.to_json() for match in next_round_matches],
+			"finish": False,
 		},
-		'message': 'Next round created successfully'
+		'message': f"Round {next_round}, matches!"
 	})
 	

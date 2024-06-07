@@ -16,6 +16,7 @@ export const tournamentService = {
 		});
 		return {status : response.status, body: await response.json()};
 	},
+
 	nextRound: async (tournamentId) => {
 		const response = await fetch(`${BASE_URL}/tournament/next-round`, {
 			method: 'POST',

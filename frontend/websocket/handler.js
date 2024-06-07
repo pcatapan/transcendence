@@ -165,6 +165,11 @@ function handler_finishMatch(res) {
 			loser : res.content.player1_username === res.content.winner_username ? res.content.player2_username : res.content.player1_username,
 			loser_score : res.content.player1_score < res.content.player2_score ? res.content.player1_score : res.content.player2_score,
 		}
+
+		setTimeout(() => {
+			window.navigateTo('/end-game');
+		}, 500)
+
 		return;
 	}
 

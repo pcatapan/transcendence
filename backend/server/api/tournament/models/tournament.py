@@ -23,7 +23,7 @@ class Tournament(models.Model):
 	)
 
 	round = models.IntegerField(
-		default=0
+		default=1
 	)
 
 	winner = models.ForeignKey(

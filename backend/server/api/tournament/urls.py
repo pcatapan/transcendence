@@ -5,5 +5,5 @@ from .controllers.tournament import post, createNextRound
 urlpatterns = [
 	path('tournament/create', post, name='tournament_create'),
 
-	path('tournament/next-round/<int:tournament_id>', createNextRound, name='tournament_next_round'),
+	path('tournament/next-round', createNextRound, name='tournament_next_round'),
 ]

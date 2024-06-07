@@ -119,9 +119,9 @@ async function startTournamentGame() {
 	let matches = JSON.parse(localStorage.getItem('matches'));
 	window.game.tournament.matches = matches;
 
-	window.game.tournament.currentMatch = matches[0];
 	let currentMatch = matches[0];
-	localStorage.setItem('currentMatch', JSON.stringify(matches[0]));
+	window.game.tournament.currentMatch = currentMatch;
+	localStorage.setItem('currentMatch', JSON.stringify(currentMatch));
 	
 	window.game.tournament.currentMatchIndex = 0;
 	localStorage.setItem('currentMatchIndex', 0);

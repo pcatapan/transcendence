@@ -14,8 +14,12 @@ migrations/
 staticfiles/
 
 # Ignore django avatar imgs and qrcodes
+!backend/server/static/.gitkeep
 backend/server/static/*
+
 !backend/server/media/avatars/default.png
+!backend/server/media/avatars/
+!backend/server/media/.gitkeep
 backend/server/media/*
 
 # Ignore the virtual environment directory
