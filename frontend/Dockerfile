@@ -138,6 +138,17 @@ RUN GPG_KEYS="B0F4253373F8F6F510D42178520A9993A1C052F8 13C82A63B603576156E30A4EA
     && ln -sf /dev/stderr /var/log/nginx/error.log
 
 COPY nginx.conf /etc/nginx/nginx.conf
+COPY app /usr/share/nginx/html/app
+COPY app.js /usr/share/nginx/html/app.js
+COPY assets /usr/share/nginx/html/assets
+COPY error.html /usr/share/nginx/html/error.html
+COPY index.html /usr/share/nginx/html/index.html
+COPY router.js /usr/share/nginx/html/router.js
+COPY services /usr/share/nginx/html/services
+COPY styles.css /usr/share/nginx/html/styles.css
+COPY utils /usr/share/nginx/html/utils
+COPY websocket /usr/share/nginx/html/websocket
+COPY enviroments.js /usr/share/nginx/html/enviroments.js
 
 EXPOSE 80
 

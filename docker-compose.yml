@@ -47,10 +47,8 @@ services:
     container_name: 'nginx'
     ports:
       - "${NGINX_PORT}:80"
-      - "443:443"
     volumes:
       - ./nginx:/etc/nginx/conf.d
-      - ./frontend:/usr/share/nginx/html:ro
     networks:
       - transcendence
     depends_on:
