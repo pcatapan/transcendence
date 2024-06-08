@@ -76,7 +76,7 @@ RUN GPG_KEYS="B0F4253373F8F6F510D42178520A9993A1C052F8 13C82A63B603576156E30A4EA
     for server in \
         hkp://keyserver.ubuntu.com:80 \
     ; do \
-        echo "Fetching GPG key $GPG_KEYS from $server"; \
+        echo "Fetching GPG key $key from $server"; \
         for key in $GPG_KEYS; do \
             gpg --keyserver "$server" --keyserver-options timeout=10 --recv-keys "$key" && found=yes; \
         done; \
