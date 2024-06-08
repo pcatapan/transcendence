@@ -7,7 +7,6 @@ import { userService } from "../../services/user-service.js";
 const Game = () => {
     console.log("Game component loaded");
 
-    console.log("game",window.game)
     if (window.game['mode'] !== 'online' && window.game['mode'] !== 'tournament') {
         document.getElementById('button-home').style.display = 'flex';
     } else {
@@ -16,7 +15,6 @@ const Game = () => {
     
     initializeGameSocket(window.game.match_id);
 
-    console.log('Game mode:', window.game.mode);
     if (window.game.mode !== gameMode.tournament) {
         let data = {
             'match': window.game.match_id
@@ -87,8 +85,6 @@ function animationFoundOpponent() {
         }
     })
 
-    console.log('Found opponent:', opponent);
-
     document.getElementById('opponent-avatar').src = opponent['avatar'];
     document.getElementById('opponent-name').textContent = opponent['name'];
 
@@ -136,11 +132,9 @@ function showInfoMatch() {
 
     document.getElementById('match-info').removeAttribute('hidden');
 
-    console.log(window.game.player1);
     document.getElementById('player1').textContent = window.game.player1.name;
     document.getElementById('player1-avatar-info').src = window.game.player1.avatar;
 
-    console.log(window.game.opponent);
     document.getElementById('player2').textContent = window.game.opponent.name;
     document.getElementById('player2-avatar-info').src = window.game.opponent.avatar;
 

@@ -78,10 +78,6 @@ const Tournament = () => {
 			const tournament = response.body['data']['tournament'];
     		const matches = response.body['data']['matches'];
 
-			console.log('Tournament created successfully.');
-			console.log(tournament);
-			console.log(matches);
-
 			// Salva i dati del torneo e delle partite nel localStorage
 			localStorage.setItem('tournament', JSON.stringify(tournament));
 			localStorage.setItem('matches', JSON.stringify(matches));

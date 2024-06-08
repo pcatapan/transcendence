@@ -11,7 +11,6 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
 import os
-import logging.config
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -43,7 +42,6 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    #'corsheaders',
 	'api',
 	'api.authuser',
 	'api.tournament',
@@ -140,7 +138,6 @@ USE_I18N = True
 
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
@@ -156,37 +153,4 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-#CSRF_COOKIE_NAME = 'csrftoken'
-#CSRF_COOKIE_USE_SESSIONS = True
-
 AUTH_USER_MODEL = 'authuser.CustomUser'
-
-#CORS_ALLOWED_ORIGINS = [
-#    "http://localhost:3000",
-#    "http://127.0.0.1:3000",
-#    os.getenv('FRONTEND_URL')
-#]
-
-#CORS_ALLOW_CREDENTIALS = True
-
-#CORS_ALLOW_HEADERS = (
-#    "accept",
-#    "authorization",
-#    "content-type",
-#    "user-agent",
-#    "x-csrftoken",
-#    "x-requested-with",
-#)
-
-#CORS_ALLOW_METHODS = [
-#    'DELETE',
-#    'GET',
-#    'OPTIONS',
-#    'PATCH',
-#    'POST',
-#    'PUT',
-#]
-
-#CSRF_COOKIE_SAMESITE = 'None'
-#SESSION_COOKIE_SAMESITE = 'None'
-#CSRF_COOKIE_SECURE = True
