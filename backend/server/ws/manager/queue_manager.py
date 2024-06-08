@@ -92,7 +92,7 @@ class QueueManager():
 			'palyer_1': user_id,
 			#'player_1_elo': consumer.user.ELO,
 			'player_2': opponent['id'],
-			'opponent': consumer.user_manager.get_user(opponent['id']),
+			'opponent': consumer.user_manager.get_user(str(opponent['id'])),
 			#'player_2_elo': opponent['elo'],
 		}
 
