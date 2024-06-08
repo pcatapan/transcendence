@@ -168,7 +168,7 @@ class Pong(AsyncWebsocketConsumer, Message, GameBase):
 				if res:
 					await self.broadcast_layer(
 						command=constants.FINISH_MATCH,
-						content="Opponent disconnected",
+						content=res,
 						channel=f"{self.match_id}"
 					)
 			except Exception as e:
