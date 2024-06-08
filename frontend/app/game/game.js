@@ -1,6 +1,7 @@
 import { initializeGameSocket, sendMessage } from "../../websocket/Game.js";
 import { commands } from "../../websocket/command.js";
 import { APP_ENV, gameMode } from "../../enviroments.js";
+import { showSnackbar } from "../../utils/snackbar.js";
 import { userService } from "../../services/user-service.js";
 
 const Game = () => {

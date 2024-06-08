@@ -25,9 +25,9 @@
 
 	<canvas id="game-canvas" width="850" height="520"></canvas>
 	<span class="text-left d-block mt-3 w-100 pt-3">
+		<p class="m-0">Win the game by reaching 10 points first!</p>
 		<p class="m-0">Using the ArrowUp to move up the paddle.</p>
 		<p class="m-0">Using the ArrowDown to move down the paddle.</p>
-		<p class="m-0">Win the game by reaching 10 points first!</p>
 	</span>
 </div>
 
@@ -53,5 +53,14 @@
 	</div>
 	<div class="d-flex justify-content-center align-items-center">
 		<button id="button-start-game" class="btn btn-success text-white">Start Game</button>
+	</div>
+</div>
+
+<div id="waiting-opponent" class="z-index-1 w-100 h-100 absolut d-flex justify-content-center align-items-center d-none">
+	<h1 class="text-uppercase light pb-3 text-center">Waiting for an opponent...</h1>
+	<div class="d-flex justify-content-center align-items-center">
+		<div class="spinner-border text-primary" role="status">
+			<span class="visually-hidden">Loading...</span>
+		</div>
 	</div>
 </div>

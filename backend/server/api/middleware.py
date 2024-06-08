@@ -45,7 +45,7 @@ class JWTVerificationMiddleware:
         token = get_token(request)
         if token is None:
             return JsonResponse({
-                'message': 'JWT token required'
+                'message': 'You must be authenticated to access this resource'
             }, status=401)
 
         try :

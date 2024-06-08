@@ -7,10 +7,9 @@ def set_token(user, jwt_token, message, code = 200):
 	response = JsonResponse({
 		'message': message,
 		'data' : user.to_json()
-	}, status=200)
+	}, status=code)
 
 	secure = True if os.getenv('ENVIRONMENT', True) == 'production' else False
-	max_age = os.getenv('JWT_EXPIRATION_TIME', 14400)
 
 	response.set_cookie(
 		key='Authorization',

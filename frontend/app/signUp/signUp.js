@@ -24,6 +24,8 @@ const SignUp = () => {
         authService.signUp(email, password, username, fullname).then((response) => {
             if (response.status === 201) {
                 showSnackbar(`${response.body['message']}`, 'success');
+                initializeWebSocket();
+                localStorage.setItem('user', response.body['data']['id']);
                 setTimeout(() =>{
                     window.navigateTo('/');
                 }, 500)

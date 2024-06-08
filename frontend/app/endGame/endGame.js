@@ -1,6 +1,7 @@
 import { tournamentService } from "../../services/tournament-service.js";
 import { defineOpponentTournament } from "../../utils/utils.js";
 import { initializeTournamentGameSocket } from "../../websocket/Game.js";
+import { showSnackbar } from "../../utils/snackbar.js";
 import { APP_ENV } from "../../enviroments.js";
 
 const EndGame = () => {
@@ -72,13 +73,11 @@ async function tournamentNextMatch() {
     const matches = JSON.parse(localStorage.getItem('matches'));
     const tournament = JSON.parse(localStorage.getItem('tournament'));
 
-    console.log('Next match:', currentMatchIndex);
-    console.log('Matches:', matches.length);
     if (currentMatchIndex >= matches.length) {
         let res = await tournamentService.nextRound(tournament.id);
 
         if (res.status !== 200) {
-            console.log(res);
+            showSnackbar('Error while trying to start next round', 'error');
             return;
         }
 

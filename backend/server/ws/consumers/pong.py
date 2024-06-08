@@ -152,7 +152,7 @@ class Pong(AsyncWebsocketConsumer, Message, GameBase):
 	async def disconnect(self, code=1000):
 
 		logger.info(f"Client {self.client_id} disconnected with code {code}")
-		if (code == 4001 or self.match_id is None or self.isAi or code == 1001):
+		if (code == 4001 or self.match_id is None or self.isAi):
 			return
 
 		if self.match_manager.player_in_list(self.client_id, self.match_id):

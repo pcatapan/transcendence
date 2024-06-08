@@ -64,11 +64,12 @@ function handler_foundOpponent(res) {
 
 function handler_WaitingForOpponent(res) {
 	console.log('Waiting for opponent:', res.content)
-	
-	// Dovrei frizzare la schermata e far apprire alert fisso finche non torna l'opponente o la paritta viene chiusa
+
+	document.getElementById('waiting-opponent').classList.remove('d-none')
 }
 
 function handler_updateGame(res) {
+	document.getElementById('waiting-opponent').classList.add('d-none')
 	const { canvas, left_score, right_score, elapsed_time } = res.content;
 
 	// Aggiorna i punteggi
@@ -140,7 +141,6 @@ function handler_startBall(res) {
 }
 
 function handler_IAOpponentFound(res) {
-	console.log('IA Opponent found:', res.content)
 
 	// Salvo i dati della partita
 	window.game.match_id = res.content.match_id
@@ -155,7 +155,6 @@ function handler_IAOpponentFound(res) {
 }
 
 function handler_finishMatch(res) {
-	console.log('Match finished:', res.content)
 
 	if (window.game.mode === gameMode.tournament) {
 		// Salvo i dati di chi ha vinto

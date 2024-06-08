@@ -8,11 +8,8 @@ export function generateRandomAvatar() {
 }
 
 export async function defineOpponentTournament() {
-	console.log('caricio le info del mio user')
 	let res = await userService.userProfile(localStorage.getItem('user'));
-	console.log(res)
 	if (res.status !== 200) {
-		console.log(res)
 		showSnackbar(res.body.message, 'error');
 		return;
 	}
