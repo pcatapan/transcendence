@@ -55,7 +55,10 @@ function handler_foundOpponent(res) {
 
 	// Salvo i dati della partita
 	window.game.match_id = res.content.match_id
-	window.game.opponent = res.content.opponent
+	window.game.opponent = {
+		name : res.content.opponent.username,
+		avatar : res.content.opponent.avatar
+	}
 
 	setTimeout(() => {
 		window.navigateTo('/game');

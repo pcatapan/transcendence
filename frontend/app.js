@@ -20,7 +20,7 @@ if (APP_ENV === 'development' && false) {
     window.game.mode = 'online';
     window.game.match_id = 27;
     window.game.opponent = {
-        username: 'Opponent',
+        name: 'Opponent',
         avatar: generateRandomAvatar()
     };
 }
