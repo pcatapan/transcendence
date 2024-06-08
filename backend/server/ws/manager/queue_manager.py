@@ -90,19 +90,15 @@ class QueueManager():
 		message_user = {
 			'match_id': match_id,
 			'palyer_1': user_id,
-			#'player_1_elo': consumer.user.ELO,
 			'player_2': opponent['id'],
 			'opponent': consumer.user_manager.get_user(str(opponent['id'])),
-			#'player_2_elo': opponent['elo'],
 		}
 
 		message_opponent = {
 			'match_id': match_id,
 			'palyer_1': user_id,
-			#'player_1_elo': opponent['elo'],
 			'player_2': opponent['id'],
 			'opponent': consumer.user_manager.get_user(str(user_id)),
-			#'player_2_elo': consumer.user.ELO,
 		}
 
 		await consumer.channel_layer.send(user_channel_name, {
