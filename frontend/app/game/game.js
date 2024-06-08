@@ -91,7 +91,7 @@ function animationFoundOpponent() {
     // Countdown
     let countdown = 5;
     if (APP_ENV === 'development') {
-        countdown = 1;
+        //countdown = 1;
     }
 
     let countdownElement = document.getElementById('countdown');
