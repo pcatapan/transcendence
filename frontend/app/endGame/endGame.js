@@ -9,6 +9,11 @@ const EndGame = () => {
 
 	let endGameInfo = window.game && window.game.endGame;
 
+    // close socket
+    if (window.ws_game) {
+        window.ws_game.close();
+    }
+
 	if (APP_ENV === 'development' && false) {
 		window.game = {
 			endGame : {
