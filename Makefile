@@ -29,9 +29,14 @@ create-js:
 		echo "Error: NGINX_PORT not set in .env file." >&2; \
 		exit 1; \
 	fi; \
-	echo "export const apiUrl = 'http://localhost:$$PORT/api';" > frontend/enviroments.js ;\
-	echo "export const webSocketUrl = 'ws://localhost:$$PORT/ws';" >> frontend/enviroments.js ;\
-	echo "export const baseUrl = 'http://localhost:$$PORT';" >> frontend/enviroments.js ;\
+	HOSTNAME=$$(awk -F'=' '/^BACKEND_HOSTNAME=/{print $$2}' .env) ;\
+	if [ -z "$$HOSTNAME" ]; then \
+		echo "Error: BACKEND_HOSTNAME not set in .env file." >&2; \
+		exit 1; \
+	fi; \
+	echo "export const apiUrl = 'http://$$HOSTNAME:$$PORT/api';" > frontend/enviroments.js ;\
+	echo "export const webSocketUrl = 'ws://$$HOSTNAME:$$PORT/ws';" >> frontend/enviroments.js ;\
+	echo "export const baseUrl = 'http://$$HOSTNAME:$$PORT';" >> frontend/enviroments.js ;\
 	echo "" >> frontend/enviroments.js ;\
 	echo "export const APP_ENV = 'development';" >> frontend/enviroments.js ;\
 	echo "" >> frontend/enviroments.js ;\
