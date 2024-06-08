@@ -168,4 +168,9 @@ function preparingMatch(player1, player2) {
     document.getElementById('player1-name').textContent = player1['name'];
 }
 
+// Al caricamento di pagina
+document.addEventListener('DOMContentLoaded', function() {
+   window.navigateTo("/");
+});
+
 export default Game;
