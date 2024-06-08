@@ -89,7 +89,7 @@ class QueueManager():
 		
 		opponent_id = user_id 
 
-		message = {
+		message_user = {
 			'match_id': match_id,
 			'palyer_1': user_id,
 			#'player_1_elo': consumer.user.ELO,
@@ -98,26 +98,33 @@ class QueueManager():
 			#'player_2_elo': opponent['elo'],
 		}
 
+		message_opponent = {
+			'match_id': match_id,
+			'palyer_1': opponent['id'],
+			#'player_1_elo': opponent['elo'],
+			'player_2': user_id,
+			'opponent': consumer.user_manager.get_user(str(user_id)),
+			#'player_2_elo': consumer.user.ELO,
+		}
+
 		await consumer.channel_layer.send(user_channel_name, {
 			'status': 200,
 			'type': "unicast",
 			'command': constants.FOUND_OPPONENT,
 			'next_command': 'confirm_match',
-			'content': message,
+			'content': message_user,
 			'meta': {
 				"channel": "lobby",
 				"priority": 'normal',
 			}
 		})
 
-		message.opponent = consumer.user_manager.get_user(str(user_id))
-
 		await consumer.channel_layer.send(opponent_channel_name, {
 			'status': 200,
 			'type': "unicast",
 			'command': constants.FOUND_OPPONENT,
 			'next_command': 'confirm_match',
-			'content': message,
+			'content': message_opponent,
 			'meta': {
 				"channel": "lobby",
 				"priority": 'normal',
