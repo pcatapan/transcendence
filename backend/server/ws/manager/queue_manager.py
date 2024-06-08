@@ -86,8 +86,6 @@ class QueueManager():
 
 		opponent_channel_name = consumer.user_manager.get_user_channel(str(opponent['id']))
 		user_channel_name = consumer.user_manager.get_user_channel(str(user_id))
-		
-		opponent_id = user_id 
 
 		message_user = {
 			'match_id': match_id,
@@ -100,9 +98,9 @@ class QueueManager():
 
 		message_opponent = {
 			'match_id': match_id,
-			'palyer_1': opponent['id'],
+			'palyer_1': user_id,
 			#'player_1_elo': opponent['elo'],
-			'player_2': user_id,
+			'player_2': opponent['id'],
 			'opponent': consumer.user_manager.get_user(str(user_id)),
 			#'player_2_elo': consumer.user.ELO,
 		}
