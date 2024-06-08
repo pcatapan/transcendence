@@ -32,6 +32,9 @@ class MatchManager():
 
 	def get_list_of_players_rtr(self, match_id):
 		try :
+			if not isinstance(self.list_of_players, dict):
+				self.list_of_players = {}
+			
 			return list(self.list_of_players[match_id].keys()),
 		except Exception as e:
 			logger.error(f"Error in get_list_of_players_rtr: {e}")
@@ -96,6 +99,9 @@ class MatchManager():
 	
 	def player_in_list(self, player_id, match_id):
 		try :
+			if not isinstance(self.list_of_players, dict):
+				self.list_of_players = {}
+
 			if len(self.list_of_players) == 0:
 				return False
 
