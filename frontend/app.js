@@ -137,6 +137,4 @@ const router = async () => {
     }
 };
 
-
-
 window.addEventListener("popstate", router);
