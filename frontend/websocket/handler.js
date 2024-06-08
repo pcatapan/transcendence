@@ -57,7 +57,9 @@ function handler_foundOpponent(res) {
 	window.game.match_id = res.content.match_id
 	window.game.opponent = {
 		name : res.content.opponent.username,
-		avatar : res.content.opponent.avatar
+		avatar : res.content.opponent.avatar,
+		id : res.content.opponent.id === res.content.palyer_1 ? res.content.player_1 : res.content.player_2,
+		player_number : res.content.opponent.id === res.content.palyer_1 ? '1' : '2'
 	}
 
 	setTimeout(() => {

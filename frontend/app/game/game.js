@@ -107,10 +107,20 @@ function animationFoundOpponent() {
 
             setTimeout(() => {
                 countdownElement.style.opacity = 0;
-                preparingMatch({
-                    name: user.username,
-                    avatar: user.avatar
-                }, opponent);
+
+                let iAmPlayer1 =  opponent['player_number'] === '2';
+
+                if (iAmPlayer1) {
+                    preparingMatch({
+                        name: user.username,
+                        avatar: user.avatar
+                    }, opponent);
+                } else {
+                    preparingMatch(opponent, {
+                        name: user.username,
+                        avatar: user.avatar
+                    });
+                }
 
             }, 500);
         }
