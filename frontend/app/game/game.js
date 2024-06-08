@@ -90,7 +90,7 @@ function animationFoundOpponent() {
 
     // Countdown
     let countdown = 5;
-    if (APP_ENV === 'development') {
+    if (APP_ENV === 'development' && false) {
         countdown = 1;
     }
 
