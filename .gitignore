@@ -4,6 +4,7 @@ __pycache__/
 
 # Ignore environment-specific settings
 .env
+frontend/enviroments.js
 
 # Ignore Django-related files and directories
 *.log
@@ -36,5 +37,3 @@ secret_key.txt  # file containing secret key
 
 # PyCharm IDE
 .idea/
-
-frontend/enviroments.js
