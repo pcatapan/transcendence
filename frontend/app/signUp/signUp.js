@@ -1,5 +1,6 @@
 import { showSnackbar } from '../../utils/snackbar.js';
 import { authService } from '../../services/auth.js';
+import { initializeWebSocket } from '../../websocket/Lobby.js'; 
 
 const SignUp = () => {
 
