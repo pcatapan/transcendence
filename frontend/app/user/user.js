@@ -278,7 +278,7 @@ const User = () => {
             }
 
             const matchHistoryTable = document.getElementById("match-history");
-            const matchHistoryBody = matchHistoryTable.getElementsByTagName('tbody')[0];
+            //const matchHistoryBody = matchHistoryTable.getElementsByTagName('tbody')[0];
             const matchHistoryHead = matchHistoryTable.getElementsByTagName('thead')[0];
             const matchHistoryContainer = document.getElementById("match-history-container");
 
