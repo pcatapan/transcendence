@@ -87,6 +87,8 @@ class QueueManager():
 		opponent_channel_name = consumer.user_manager.get_user_channel(str(opponent['id']))
 		user_channel_name = consumer.user_manager.get_user_channel(str(user_id))
 		
+		opponent_id = user_id 
+
 		message = {
 			'match_id': match_id,
 			'palyer_1': user_id,
@@ -95,6 +97,20 @@ class QueueManager():
 			'opponent': consumer.user_manager.get_user(str(opponent['id'])),
 			#'player_2_elo': opponent['elo'],
 		}
+
+		await consumer.channel_layer.send(user_channel_name, {
+			'status': 200,
+			'type': "unicast",
+			'command': constants.FOUND_OPPONENT,
+			'next_command': 'confirm_match',
+			'content': message,
+			'meta': {
+				"channel": "lobby",
+				"priority": 'normal',
+			}
+		})
+
+		message.opponent = consumer.user_manager.get_user(str(user_id))
 
 		await consumer.channel_layer.send(opponent_channel_name, {
 			'status': 200,
@@ -108,17 +124,7 @@ class QueueManager():
 			}
 		})
 
-		await consumer.channel_layer.send(user_channel_name, {
-			'status': 200,
-			'type': "unicast",
-			'command': constants.FOUND_OPPONENT,
-			'next_command': 'confirm_match',
-			'content': message,
-			'meta': {
-				"channel": "lobby",
-				"priority": 'normal',
-			}
-		})
+		
 
 		try:
 			self.queues[queue_name].remove({'id': user_id, 'elo': consumer.user.ELO})
